@@ -214,7 +214,7 @@ export default function AdminGradesPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v: number | undefined) => v != null ? `${v} student${v !== 1 ? "s" : ""}` : "—"} />
+                  <Tooltip formatter={(v) => typeof v === 'number' ? `${v} student${v !== 1 ? "s" : ""}` : "—"} />
                   <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
