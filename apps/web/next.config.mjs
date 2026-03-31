@@ -1,13 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/api/:path*`,
-      },
-    ];
-  },
+  // API calls are handled directly via NEXT_PUBLIC_API_URL in the API client
 };
 
 export default nextConfig;
