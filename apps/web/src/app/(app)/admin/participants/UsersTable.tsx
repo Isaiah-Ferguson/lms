@@ -26,20 +26,29 @@ function fmtDate(iso: string | null) {
 function CourseChips({ enrollments, courses }: { enrollments: string[]; courses: CourseOption[] }) {
   if (enrollments.length === 0)
     return <span className="text-xs text-gray-300">None</span>;
+  
+  // Define level hierarchy (highest to lowest)
+  const levelOrder = ["level-4", "level-3", "level-2", "level-1", "combine"];
+  
+  // Find the highest level enrolled
+  const highestLevel = levelOrder.find((level) => enrollments.includes(level));
+  
+  if (!highestLevel) {
+    // If no standard levels found, show first enrollment
+    const firstId = enrollments[0];
+    const label = courses.find((c) => c.id === firstId)?.label ?? firstId;
+    return (
+      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+        {label}
+      </span>
+    );
+  }
+  
+  const label = courses.find((c) => c.id === highestLevel)?.label ?? highestLevel;
   return (
-    <div className="flex flex-wrap gap-1">
-      {enrollments.map((id) => {
-        const label = courses.find((c) => c.id === id)?.label ?? id;
-        return (
-          <span
-            key={id}
-            className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700"
-          >
-            {label}
-          </span>
-        );
-      })}
-    </div>
+    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+      {label}
+    </span>
   );
 }
 

@@ -15,10 +15,10 @@ export function Footer() {
               alt="CodeStack Academy"
               height={40}
               width={160}
-              className="h-10 w-auto object-contain brightness-200"
+              className="h-12 w-auto object-contain "
             />
             <p className="text-sm leading-relaxed text-gray-400">
-              Code Stack Academy is developed by CEDR Systems, a department of
+              Code Stack Academy is developed by CodeStack, a department of
               the San Joaquin County Office of Education.
             </p>
           </div>
@@ -57,7 +57,7 @@ export function Footer() {
             <div className="flex gap-4">
               {/* Facebook */}
               <a
-                href="https://www.facebook.com/codestackacademy"
+                href="https://www.facebook.com/codestackstockton"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -83,7 +83,7 @@ export function Footer() {
 
               {/* YouTube */}
               <a
-                href="https://www.youtube.com/@codestackacademy"
+                href="https://www.youtube.com/@CodeStackSJ"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
