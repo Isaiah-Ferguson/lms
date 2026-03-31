@@ -1,0 +1,34 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "YOUR_AZURE_SQL_CONNECTION_STRING"
+  },
+  "AzureStorage": {
+    "ConnectionString": "YOUR_AZURE_STORAGE_CONNECTION_STRING",
+    "SubmissionsContainer": "codestacklms"
+  },
+  "Jwt": {
+    "Secret": "YOUR_JWT_SECRET_KEY_MIN_32_CHARACTERS",
+    "Issuer": "codestack-lms",
+    "Audience": "codestack-lms"
+  },
+  "Frontend": {
+    "Url": "http://localhost:3000"
+  },
+  "Email": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "UseSsl": true,
+    "Username": "YOUR_EMAIL@gmail.com",
+    "Password": "YOUR_APP_PASSWORD",
+    "FromEmail": "YOUR_EMAIL@gmail.com",
+    "FromName": "CodeStack LMS"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}

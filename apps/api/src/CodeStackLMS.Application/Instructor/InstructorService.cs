@@ -1,0 +1,672 @@
+using CodeStackLMS.Application.Common.Exceptions;
+using CodeStackLMS.Application.Common.Interfaces;
+using CodeStackLMS.Application.Instructor.DTOs;
+using CodeStackLMS.Domain.Entities;
+using CodeStackLMS.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Course = CodeStackLMS.Domain.Entities.Course;
+
+namespace CodeStackLMS.Application.Instructor;
+
+public class InstructorService : IInstructorService
+{
+    private readonly IApplicationDbContext _db;
+    private readonly IBlobStorageService _blob;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IEmailService _emailService;
+    private readonly IConfiguration _config;
+    private readonly ILogger<InstructorService> _logger;
+
+    public InstructorService(
+        IApplicationDbContext db,
+        IBlobStorageService blob,
+        ICurrentUserService currentUser,
+        IEmailService emailService,
+        IConfiguration configuration,
+        ILogger<InstructorService> logger)
+    {
+        _db = db;
+        _blob = blob;
+        _currentUser = currentUser;
+        _emailService = emailService;
+        _config = configuration;
+        _logger = logger;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/instructor/submissions/{submissionId}
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<SubmissionDetailDto> GetSubmissionDetailAsync(
+        Guid submissionId,
+        CancellationToken cancellationToken = default)
+    {
+        var submission = await _db.Submissions
+            .Include(s => s.Student)
+            .Include(s => s.Assignment)
+            .Include(s => s.Artifacts)
+            .Include(s => s.GitHubInfo)
+            .Include(s => s.Grade)
+            .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Submission), submissionId);
+
+        // Build artifact list with short-lived read SAS URLs
+        IReadOnlyList<ArtifactDto>? artifacts = null;
+        if (submission.Type == SubmissionType.Upload && submission.Artifacts.Count > 0)
+        {
+            var readExpiry = TimeSpan.FromMinutes(30);
+            var artifactList = new List<ArtifactDto>();
+
+            foreach (var a in submission.Artifacts)
+            {
+                var readUrl = await _blob.GenerateReadSasAsync(
+                    a.BlobPath, readExpiry, cancellationToken);
+
+                artifactList.Add(new ArtifactDto(
+                    a.Id,
+                    a.FileName,
+                    a.ContentType,
+                    a.Size,
+                    readUrl));
+            }
+
+            artifacts = artifactList;
+        }
+
+        GitHubInfoDto? gitHubInfo = null;
+        if (submission.Type == SubmissionType.GitHub && submission.GitHubInfo is not null)
+        {
+            gitHubInfo = new GitHubInfoDto(
+                submission.GitHubInfo.RepoUrl,
+                submission.GitHubInfo.Branch,
+                string.IsNullOrEmpty(submission.GitHubInfo.CommitHash)
+                    ? null
+                    : submission.GitHubInfo.CommitHash);
+        }
+
+        ExistingGradeDto? existingGrade = null;
+        if (submission.Grade is not null)
+        {
+            existingGrade = new ExistingGradeDto(
+                submission.Grade.Id,
+                submission.Grade.TotalScore,
+                submission.Grade.RubricBreakdownJson,
+                submission.Grade.OverallComment,
+                submission.Grade.GradedAt,
+                submission.Grade.InstructorId);
+        }
+
+        return new SubmissionDetailDto(
+            submission.Id,
+            submission.AttemptNumber,
+            submission.Type,
+            submission.Status,
+            submission.CreatedAt,
+            submission.FigmaUrl,
+            submission.GitHubRepoUrl,
+            submission.HostedUrl,
+            submission.Note,
+            new StudentInfoDto(
+                submission.Student.Id,
+                submission.Student.Name,
+                submission.Student.Email),
+            new AssignmentInfoDto(
+                submission.Assignment.Id,
+                submission.Assignment.Title,
+                submission.Assignment.Instructions,
+                submission.Assignment.RubricJson,
+                MaxScoreFromRubric(submission.Assignment.RubricJson)),
+            artifacts,
+            gitHubInfo,
+            existingGrade);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /api/instructor/submissions/{submissionId}/grade
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<ExistingGradeDto> GradeSubmissionAsync(
+        Guid submissionId,
+        GradeSubmissionDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var instructorId = _currentUser.UserId;
+
+        var submission = await _db.Submissions
+            .Include(s => s.Grade)
+            .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Submission), submissionId);
+
+        // Submission must be in a gradeable state
+        // Allow most states since background job transitions may not be running
+        // Only reject Draft state (submission not yet started)
+        if (submission.Status is SubmissionStatus.Draft)
+            throw new ValidationException(
+                $"Submission is in '{submission.Status}' state and cannot be graded.");
+
+        if (dto.TotalScore < 0)
+            throw new ValidationException("Score cannot be negative.");
+
+        var now = DateTime.UtcNow;
+
+        if (submission.Grade is null)
+        {
+            // Create new grade
+            var grade = new Grade
+            {
+                Id = Guid.NewGuid(),
+                SubmissionId = submissionId,
+                InstructorId = instructorId,
+                TotalScore = dto.TotalScore,
+                RubricBreakdownJson = dto.RubricBreakdownJson ?? "{}",
+                OverallComment = dto.OverallComment ?? string.Empty,
+                GradedAt = now
+            };
+
+            _db.Grades.Add(grade);
+            submission.Grade = grade;
+        }
+        else
+        {
+            // Update existing grade (re-grade)
+            submission.Grade.TotalScore = dto.TotalScore;
+            submission.Grade.RubricBreakdownJson = dto.RubricBreakdownJson ?? "{}";
+            submission.Grade.OverallComment = dto.OverallComment ?? string.Empty;
+            submission.Grade.GradedAt = now;
+            submission.Grade.InstructorId = instructorId;
+        }
+
+        submission.Status = SubmissionStatus.Graded;
+        submission.UpdatedAt = now;
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        // Send email notification if user has enabled email notifications
+        await SendGradeNotificationEmailAsync(submission, cancellationToken);
+
+        return new ExistingGradeDto(
+            submission.Grade!.Id,
+            submission.Grade.TotalScore,
+            submission.Grade.RubricBreakdownJson,
+            submission.Grade.OverallComment,
+            submission.Grade.GradedAt,
+            submission.Grade.InstructorId);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/instructor/submissions  (queue)
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<SubmissionQueuePageDto> GetSubmissionQueueAsync(
+        string? courseId,
+        string? status,
+        int page = 1,
+        int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        pageSize = Math.Clamp(pageSize, 1, 200);
+        page = Math.Max(1, page);
+        var query = _db.Submissions
+            .AsNoTracking()
+            .Include(s => s.Student)
+            .Include(s => s.Assignment)
+                .ThenInclude(a => a.Module)
+                    .ThenInclude(m => m.Course)
+            .Include(s => s.Grade)
+            .AsQueryable();
+
+        // Filter by course (GUID or slug)
+        if (!string.IsNullOrWhiteSpace(courseId))
+        {
+            if (Guid.TryParse(courseId, out var parsedCourseId))
+                query = query.Where(s => s.Assignment.Module.CourseId == parsedCourseId);
+            else
+            {
+                var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
+                if (resolvedTitle != null)
+                    query = query.Where(s => s.Assignment.Module.Course.Title == resolvedTitle);
+            }
+        }
+
+        // Filter by status
+        if (!string.IsNullOrWhiteSpace(status) &&
+            Enum.TryParse<SubmissionStatus>(status, ignoreCase: true, out var parsedStatus))
+        {
+            query = query.Where(s => s.Status == parsedStatus);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var submissions = await query
+            .OrderByDescending(s => s.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = submissions.Select(s => new SubmissionQueueItemDto(
+            s.Id,
+            s.Student.Name,
+            s.Student.Email,
+            s.Assignment.Title,
+            s.Assignment.Module.Course.Title,
+            s.Type,
+            s.Status,
+            s.CreatedAt,
+            s.Grade?.GradedAt,
+            s.Grade?.TotalScore,
+            MaxScoreFromRubric(s.Assignment.RubricJson))).ToList();
+
+        return new SubmissionQueuePageDto(items, totalCount, page, pageSize);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/grades/my
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<StudentGradesDto> GetMyGradesAsync(
+        string courseId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.UserId;
+
+        // Resolve course - prefer courses with modules to avoid empty duplicates
+        Course? course = null;
+        if (Guid.TryParse(courseId, out var pid))
+            course = await _db.Courses.AsNoTracking()
+                .Include(c => c.Modules)
+                .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+        else
+        {
+            var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
+            if (resolvedTitle != null)
+            {
+                var courses = await _db.Courses.AsNoTracking()
+                    .Where(c => c.Title == resolvedTitle)
+                    .Include(c => c.Modules)
+                    .ToListAsync(cancellationToken);
+                course = courses.FirstOrDefault(c => c.Modules.Any())
+                         ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
+            }
+        }
+
+        if (course == null)
+            return new StudentGradesDto(courseId, courseId, []);
+
+        // Get all assignments in this course
+        var assignments = await _db.Assignments
+            .AsNoTracking()
+            .Include(a => a.Module)
+            .Where(a => a.Module.CourseId == course.Id)
+            .OrderBy(a => a.Module.Order)
+            .ThenBy(a => a.DueDate)
+            .ToListAsync(cancellationToken);
+
+        // Get latest submission per assignment for this student
+        var assignmentIds = assignments.Select(a => a.Id).ToList();
+        var submissions = await _db.Submissions
+            .AsNoTracking()
+            .Include(s => s.Grade)
+                .ThenInclude(g => g!.Instructor)
+            .Where(s => s.StudentId == userId && assignmentIds.Contains(s.AssignmentId))
+            .ToListAsync(cancellationToken);
+
+        var latestByAssignment = submissions
+            .GroupBy(s => s.AssignmentId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.AttemptNumber).First());
+
+        var rows = assignments.Select(a =>
+        {
+            latestByAssignment.TryGetValue(a.Id, out var sub);
+            var maxScore = MaxScoreFromRubric(a.RubricJson);
+            var status = sub == null ? "Missing"
+                : sub.Status == SubmissionStatus.Graded ? "Graded"
+                : "Pending";
+
+            return new StudentGradeRowDto(
+                sub?.Id ?? Guid.Empty,
+                a.Id,
+                a.Title,
+                "Assignment",
+                maxScore,
+                sub?.Grade?.TotalScore,
+                status,
+                sub?.Grade?.GradedAt,
+                sub?.Grade?.OverallComment,
+                sub?.Grade?.Instructor?.Name);
+        }).ToList();
+
+        return new StudentGradesDto(course.Id.ToString(), course.Title, rows);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/grades/admin
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<AdminGradesDto> GetAdminGradesAsync(
+        string courseId,
+        CancellationToken cancellationToken = default)
+    {
+        if (_currentUser.Role is not ("Admin" or "Instructor"))
+            throw new ForbiddenException();
+
+        // Resolve course - prefer courses with modules to avoid empty duplicates
+        Course? course = null;
+        if (Guid.TryParse(courseId, out var pid))
+            course = await _db.Courses.AsNoTracking()
+                .Include(c => c.Modules)
+                .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+        else
+        {
+            var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
+            if (resolvedTitle != null)
+            {
+                var courses = await _db.Courses.AsNoTracking()
+                    .Where(c => c.Title == resolvedTitle)
+                    .Include(c => c.Modules)
+                    .ToListAsync(cancellationToken);
+                course = courses.FirstOrDefault(c => c.Modules.Any())
+                         ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
+            }
+        }
+
+        if (course == null)
+            return new AdminGradesDto(courseId, courseId, []);
+
+        // Assignments
+        var assignments = await _db.Assignments
+            .AsNoTracking()
+            .Include(a => a.Module)
+            .Where(a => a.Module.CourseId == course.Id)
+            .OrderBy(a => a.Module.Order)
+            .ToListAsync(cancellationToken);
+
+        var assignmentIds = assignments.Select(a => a.Id).ToList();
+
+        // All enrolled students
+        var enrolledStudents = await _db.UserCourseEnrollments
+            .AsNoTracking()
+            .Include(e => e.User)
+            .Where(e => e.CourseId == course.Id && e.User.Role == UserRole.Student)
+            .Select(e => e.User)
+            .Distinct()
+            .OrderBy(u => u.Name)
+            .ToListAsync(cancellationToken);
+
+        // All submissions for this course
+        var allSubmissions = await _db.Submissions
+            .AsNoTracking()
+            .Include(s => s.Grade)
+                .ThenInclude(g => g!.Instructor)
+            .Where(s => assignmentIds.Contains(s.AssignmentId))
+            .ToListAsync(cancellationToken);
+
+        var subsByStudentAndAssignment = allSubmissions
+            .GroupBy(s => (s.StudentId, s.AssignmentId))
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.AttemptNumber).First());
+
+        var studentDtos = enrolledStudents.Select(student =>
+        {
+            var rows = assignments.Select(a =>
+            {
+                subsByStudentAndAssignment.TryGetValue((student.Id, a.Id), out var sub);
+                var maxScore = MaxScoreFromRubric(a.RubricJson);
+                var status = sub == null ? "Missing"
+                    : sub.Status == SubmissionStatus.Graded ? "Graded"
+                    : "Pending";
+
+                return new StudentGradeRowDto(
+                    sub?.Id ?? Guid.Empty,
+                    a.Id,
+                    a.Title,
+                    "Assignment",
+                    maxScore,
+                    sub?.Grade?.TotalScore,
+                    status,
+                    sub?.Grade?.GradedAt,
+                    sub?.Grade?.OverallComment,
+                    sub?.Grade?.Instructor?.Name);
+            }).ToList();
+
+            return new AdminStudentGradeDto(student.Id, student.Name, student.Email, rows);
+        }).ToList();
+
+        return new AdminGradesDto(course.Id.ToString(), course.Title, studentDtos);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private static decimal MaxScoreFromRubric(string rubricJson)
+    {
+        // Rubric JSON is expected to be an array of criteria with "points" fields.
+        // e.g. [{"criterion":"Correctness","points":50},{"criterion":"Style","points":20}]
+        // Sum all "points" values. Fall back to 100 if parsing fails.
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(rubricJson);
+            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                decimal total = 0;
+                foreach (var item in doc.RootElement.EnumerateArray())
+                {
+                    if (item.TryGetProperty("points", out var pts))
+                        total += pts.GetDecimal();
+                }
+                return total > 0 ? total : 100;
+            }
+        }
+        catch
+        {
+            // ignore parse errors
+        }
+
+        return 100;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/instructor/assignments/{assignmentId}/submissions-roster
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<AssignmentSubmissionsRosterDto> GetAssignmentSubmissionsRosterAsync(
+        Guid assignmentId,
+        CancellationToken cancellationToken = default)
+    {
+        if (_currentUser.Role is not ("Admin" or "Instructor"))
+            throw new ForbiddenException();
+
+        var assignment = await _db.Assignments
+            .AsNoTracking()
+            .Include(a => a.Module)
+                .ThenInclude(m => m.Course)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Assignment), assignmentId);
+
+        // Get all students enrolled in this course
+        var enrolledStudents = await _db.UserCourseEnrollments
+            .AsNoTracking()
+            .Include(e => e.User)
+            .Where(e => e.CourseId == assignment.Module.CourseId && e.User.Role == UserRole.Student)
+            .Select(e => e.User)
+            .Distinct()
+            .OrderBy(u => u.Name)
+            .ToListAsync(cancellationToken);
+
+        // Get all submissions for this assignment
+        var submissions = await _db.Submissions
+            .AsNoTracking()
+            .Include(s => s.Grade)
+                .ThenInclude(g => g!.Instructor)
+            .Where(s => s.AssignmentId == assignmentId)
+            .ToListAsync(cancellationToken);
+
+        var latestSubmissionByStudent = submissions
+            .GroupBy(s => s.StudentId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.AttemptNumber).First());
+
+        var rows = enrolledStudents.Select(student =>
+        {
+            latestSubmissionByStudent.TryGetValue(student.Id, out var submission);
+
+            string status;
+            if (submission == null)
+                status = "NotSubmitted";
+            else if (submission.Status == SubmissionStatus.Graded)
+                status = "Graded";
+            else if (submission.Status == SubmissionStatus.ReadyToGrade || submission.Status == SubmissionStatus.Grading)
+                status = "NeedsGrading";
+            else
+                status = "Submitted";
+
+            string? grade = null;
+            if (submission?.Grade != null)
+            {
+                var maxScore = MaxScoreFromRubric(assignment.RubricJson);
+                grade = maxScore > 0 
+                    ? $"{submission.Grade.TotalScore} / {maxScore}"
+                    : $"{submission.Grade.TotalScore}%";
+            }
+
+            return new AssignmentSubmissionRosterRowDto(
+                student.Id,
+                student.Name,
+                student.Email,
+                status,
+                submission?.Id,
+                submission?.CreatedAt,
+                grade,
+                submission?.Grade?.GradedAt,
+                submission?.Grade?.Instructor?.Name);
+        }).ToList();
+
+        return new AssignmentSubmissionsRosterDto(
+            assignment.Id,
+            assignment.Title,
+            assignment.DueDate,
+            rows);
+    }
+
+    private async Task SendGradeNotificationEmailAsync(Submission submission, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Load student with email notification preference
+            var student = await _db.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == submission.StudentId, cancellationToken);
+
+            if (student == null || !student.EmailNotificationsEnabled)
+                return;
+
+            // Load assignment details
+            var assignment = await _db.Assignments
+                .AsNoTracking()
+                .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
+                .FirstOrDefaultAsync(a => a.Id == submission.AssignmentId, cancellationToken);
+
+            if (assignment == null)
+                return;
+
+            var subject = $"Your assignment has been graded: {assignment.Title}";
+            var frontendUrl = _config["Frontend:Url"] ?? "http://localhost:3000";
+            var maxScore = MaxScoreFromRubric(assignment.RubricJson);
+            var percentScore = maxScore > 0
+                ? Math.Round(submission.Grade!.TotalScore / maxScore * 100, 1)
+                : submission.Grade!.TotalScore;
+            var htmlBody = BuildGradeNotificationEmailBody(
+                student.Name,
+                assignment.Title,
+                assignment.Module.Course.Title,
+                percentScore,
+                submission.Grade.OverallComment,
+                frontendUrl);
+
+            await _emailService.SendAsync(student.Email, subject, htmlBody, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the grading operation
+            _logger.LogError(ex, "Failed to send grade notification email for submission {SubmissionId}", submission.Id);
+        }
+    }
+
+    private static string BuildGradeNotificationEmailBody(
+        string studentName,
+        string assignmentTitle,
+        string courseTitle,
+        decimal score,
+        string comment,
+        string frontendUrl)
+    {
+        var letterGrade = score switch
+        {
+            >= 90 => "A",
+            >= 80 => "B",
+            >= 70 => "C",
+            >= 60 => "D",
+            _ => "F"
+        };
+
+        var safeName = System.Net.WebUtility.HtmlEncode(studentName);
+        var safeTitle = System.Net.WebUtility.HtmlEncode(assignmentTitle);
+        var safeCourse = System.Net.WebUtility.HtmlEncode(courseTitle);
+        var safeComment = System.Net.WebUtility.HtmlEncode(comment);
+
+        return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #0ea5e9; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .grade-box {{ background-color: white; padding: 20px; margin: 20px 0; border-left: 4px solid #0ea5e9; border-radius: 4px; }}
+        .score {{ font-size: 36px; font-weight: bold; color: #0ea5e9; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Assignment Graded</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {safeName},</p>
+            <p>Your assignment <strong>{safeTitle}</strong> for <strong>{safeCourse}</strong> has been graded.</p>
+            
+            <div class=""grade-box"">
+                <div class=""score"">{score}% ({letterGrade})</div>
+                {(string.IsNullOrWhiteSpace(comment) ? "" : $@"
+                <h3>Instructor Feedback:</h3>
+                <p>{safeComment}</p>
+                ")}
+            </div>
+
+            <p>You can view your full grade breakdown and rubric details in the LMS.</p>
+            
+            <p style=""margin-top: 30px;"">
+                <a href=""{frontendUrl}/grades"" style=""background-color: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;"">View My Grades</a>
+            </p>
+        </div>
+        <div class=""footer"">
+            <p>CodeStack LMS - Learn. Build. Ship.</p>
+            <p style=""font-size: 12px; margin-top: 10px;"">
+                You received this email because you have email notifications enabled. 
+                You can change your notification preferences in your profile settings.
+            </p>
+        </div>
+    </div>
+</body>
+</html>";
+    }
+
+    private async Task<string?> ResolveCourseTitleFromSlugAsync(string slug, CancellationToken ct)
+    {
+        var normalized = slug.Trim().ToLowerInvariant();
+        var titles = await _db.Courses
+            .AsNoTracking()
+            .Select(c => c.Title)
+            .ToListAsync(ct);
+
+        return titles.FirstOrDefault(t =>
+            t.Trim().ToLowerInvariant().Replace(" ", "-") == normalized);
+    }
+}

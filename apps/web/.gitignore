@@ -1,0 +1,18 @@
+# Node / Next
+**/node_modules/
+**/.next/
+
+# Build
+**/dist/
+**/build/
+
+# .NET
+**/bin/
+**/obj/
+
+# Env
+.env
+.env.local
+
+# Mac
+.DS_Store
