@@ -27,27 +27,28 @@ function CourseChips({ enrollments, courses }: { enrollments: string[]; courses:
   if (enrollments.length === 0)
     return <span className="text-xs text-gray-300">None</span>;
   
-  // Define level hierarchy (highest to lowest)
-  const levelOrder = ["level-4", "level-3", "level-2", "level-1", "combine"];
+  // Get the labels for enrolled courses
+  const enrolledLabels = enrollments
+    .map((id) => courses.find((c) => c.id === id)?.label)
+    .filter((label): label is string => !!label);
   
-  // Find the highest level enrolled
-  const highestLevel = levelOrder.find((level) => enrollments.includes(level));
-  
-  if (!highestLevel) {
-    // If no standard levels found, show first enrollment
-    const firstId = enrollments[0];
-    const label = courses.find((c) => c.id === firstId)?.label ?? firstId;
-    return (
-      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-        {label}
-      </span>
-    );
+  if (enrolledLabels.length === 0) {
+    return <span className="text-xs text-gray-300">None</span>;
   }
   
-  const label = courses.find((c) => c.id === highestLevel)?.label ?? highestLevel;
+  // Define level hierarchy by label (highest to lowest)
+  const levelOrder = ["Level 4", "Level 3", "Level 2", "Level 1", "Combine"];
+  
+  // Find the highest level enrolled by checking labels
+  const highestLabel = levelOrder.find((level) => 
+    enrolledLabels.some((enrolled) => enrolled.toLowerCase().includes(level.toLowerCase()))
+  );
+  
+  const displayLabel = highestLabel || enrolledLabels[0];
+  
   return (
     <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-      {label}
+      {displayLabel}
     </span>
   );
 }
