@@ -466,6 +466,16 @@ export const adminParticipantsApi = {
     );
   },
 
+  toggleUserActive(userId: string, token: string): Promise<void> {
+    return apiFetch<void>(
+      `/api/admin/participants/${userId}/toggle-active`,
+      {
+        method: "PATCH",
+      },
+      token
+    );
+  },
+
   saveAdminNote(userId: string, text: string, token: string): Promise<void> {
     return apiFetch<void>(
       `/api/profile/admin/participants/${userId}/notes`,

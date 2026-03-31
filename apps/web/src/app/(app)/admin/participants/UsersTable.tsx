@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Pencil, UserPlus, ShieldCheck, ShieldOff, UserCog } from "lucide-react";
+import { Check, Pencil, UserPlus, ShieldCheck, ShieldOff, UserCog, Ban, CheckCircle } from "lucide-react";
 import { clsx } from "clsx";
 import type { ParticipantUser, CourseOption } from "@/lib/admin-participants-data";
 
@@ -13,6 +13,7 @@ interface Props {
   onToggleSelectAll: () => void;
   onEnroll: (user: ParticipantUser) => void;
   onToggleAdmin: (user: ParticipantUser) => void;
+  onToggleActive: (user: ParticipantUser) => void;
   onImpersonate: (user: ParticipantUser) => void;
 }
 
@@ -56,7 +57,7 @@ function CourseChips({ enrollments, courses }: { enrollments: string[]; courses:
 export function UsersTable({
   users, courses, selectedIds,
   onToggleSelect, onToggleSelectAll,
-  onEnroll, onToggleAdmin, onImpersonate,
+  onEnroll, onToggleAdmin, onToggleActive, onImpersonate,
 }: Props) {
   const allSelected = users.length > 0 && selectedIds.length === users.length;
   const someSelected = selectedIds.length > 0 && !allSelected;
@@ -214,6 +215,16 @@ export function UsersTable({
                         label={u.role === "Admin" ? "Remove admin" : "Make admin"}
                         onClick={() => onToggleAdmin(u)}
                         className={u.role === "Admin" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : ""}
+                      />
+                      <ActionBtn
+                        icon={
+                          u.status === "Active"
+                            ? <Ban className="h-3.5 w-3.5" />
+                            : <CheckCircle className="h-3.5 w-3.5" />
+                        }
+                        label={u.status === "Active" ? "Deactivate account" : "Activate account"}
+                        onClick={() => onToggleActive(u)}
+                        className={u.status === "Active" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : "text-green-500 hover:text-green-700 hover:bg-green-50"}
                       />
                       <ActionBtn
                         icon={<UserCog className="h-3.5 w-3.5" />}

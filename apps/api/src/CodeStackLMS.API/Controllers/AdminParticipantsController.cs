@@ -39,6 +39,19 @@ public class AdminParticipantsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPatch("{userId}/toggle-active")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleUserActive(
+        [FromRoute] string userId,
+        CancellationToken cancellationToken)
+    {
+        await _adminParticipantsService.ToggleUserActiveAsync(userId, cancellationToken);
+        return NoContent();
+    }
+
     [HttpPost("{userId}/notes/export-docx")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

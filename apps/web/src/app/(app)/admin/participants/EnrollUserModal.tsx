@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, Check } from "lucide-react";
 import { Modal } from "./Modal";
 import { Button } from "@/components/ui/Button";
@@ -27,6 +27,18 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Pre-populate selected courses when user is selected
+  useEffect(() => {
+    if (selectedUserId) {
+      const user = users.find((u) => u.id === selectedUserId);
+      if (user) {
+        setSelectedCourses(user.enrollments);
+      }
+    } else {
+      setSelectedCourses([]);
+    }
+  }, [selectedUserId, users]);
 
   const filtered = useMemo(() =>
     users.filter((u) => {

@@ -132,6 +132,17 @@ public class AdminParticipantsService : IAdminParticipantsService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ToggleUserActiveAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var userGuid = ParseGuid(userId);
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == userGuid, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userGuid);
+
+        user.IsActive = !user.IsActive;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     private static Guid ParseGuid(string raw)
     {
         if (!Guid.TryParse(raw, out var parsed))

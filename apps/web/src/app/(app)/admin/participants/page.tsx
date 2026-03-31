@@ -159,6 +159,28 @@ export default function ParticipantsPage() {
     showToast(msg);
   }
 
+  async function handleToggleActive(user: ParticipantUser) {
+    const token = getToken();
+    if (!token) {
+      showToast("Session expired. Please sign in again.");
+      return;
+    }
+
+    try {
+      await adminParticipantsApi.toggleUserActive(user.id, token);
+      const newStatus = user.status === "Active" ? "Disabled" : "Active";
+      const msg = newStatus === "Active"
+        ? `${user.firstName} ${user.lastName}'s account has been activated.`
+        : `${user.firstName} ${user.lastName}'s account has been deactivated.`;
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+      );
+      showToast(msg);
+    } catch (error) {
+      showToast("Failed to update account status.");
+    }
+  }
+
   function handleImpersonateConfirm(userId: string) {
     const user = users.find((u) => u.id === userId) ?? null;
     setImpersonating(user);
@@ -300,6 +322,7 @@ export default function ParticipantsPage() {
         onToggleSelectAll={toggleSelectAll}
         onEnroll={(u) => setModal({ type: "enroll", userId: u.id })}
         onToggleAdmin={handleToggleAdmin}
+        onToggleActive={handleToggleActive}
         onImpersonate={(u) => setModal({ type: "impersonate", user: u })}
       />
 
