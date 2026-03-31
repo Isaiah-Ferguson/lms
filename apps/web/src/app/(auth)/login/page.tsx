@@ -33,10 +33,15 @@ export default function LoginPage() {
 
   // Load saved email on mount if remember me was checked
   useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
-      setValue('email', savedEmail);
-      setRememberMe(true);
+    try {
+      const savedEmail = localStorage.getItem('rememberedEmail');
+      if (savedEmail) {
+        setValue('email', savedEmail);
+        setRememberMe(true);
+      }
+    } catch (error) {
+      // localStorage may be disabled in private browsing or due to security settings
+      console.warn('localStorage is not available:', error);
     }
   }, [setValue]);
 
@@ -47,10 +52,15 @@ export default function LoginPage() {
       setToken(tokens.accessToken, tokens.expiresIn);
       
       // Save or clear email based on remember me checkbox
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', data.email);
-      } else {
-        localStorage.removeItem('rememberedEmail');
+      try {
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', data.email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+      } catch (error) {
+        // localStorage may be disabled - continue without saving preference
+        console.warn('Could not save Remember Me preference:', error);
       }
       
       // Force a hard reload to clear any cached data from previous sessions
@@ -88,9 +98,9 @@ export default function LoginPage() {
               <Image
                 src={codestackLogo}
                 alt="CodeStack Academy"
-                height={50}
-                width={200}
-                className="h-12 w-auto object-contain brightness-0 invert"
+                height={100}
+                width={400}
+                className="h-24 w-auto object-contain"
               />
             </div>
 
