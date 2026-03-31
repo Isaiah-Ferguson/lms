@@ -83,9 +83,18 @@ public class AuthService : IAuthService
             true,
             cancellationToken);
 
-        var subject = "Your CodeStack LMS account is ready";
-        var htmlBody = BuildWelcomeEmailBody(dto.Name, dto.Email, temporaryPassword);
-        await _emailService.SendAsync(dto.Email.Trim(), subject, htmlBody, cancellationToken);
+        // Attempt to send welcome email, but don't fail user creation if email fails
+        try
+        {
+            var subject = "Your CodeStack LMS account is ready";
+            var htmlBody = BuildWelcomeEmailBody(dto.Name, dto.Email, temporaryPassword);
+            await _emailService.SendAsync(dto.Email.Trim(), subject, htmlBody, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't throw - user was created successfully
+            _logger.LogError(ex, "Failed to send welcome email to {Email}", dto.Email);
+        }
     }
 
     public async Task ChangePasswordAsync(
