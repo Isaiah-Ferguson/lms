@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -20,20 +20,39 @@ import csaLargeLogo from "@/assets/CSALargeLOGO.png";
 export default function LoginPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Load saved email on mount if remember me was checked
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setValue('email', savedEmail);
+      setRememberMe(true);
+    }
+  }, [setValue]);
 
   async function onSubmit(data: LoginFormData) {
     setServerError(null);
     try {
       const tokens = await authApi.login(data);
       setToken(tokens.accessToken, tokens.expiresIn);
+      
+      // Save or clear email based on remember me checkbox
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', data.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+      
       // Force a hard reload to clear any cached data from previous sessions
       const destination = tokens.mustChangePassword ? "/change-password" : "/home";
       window.location.href = destination;
@@ -147,13 +166,15 @@ export default function LoginPage() {
           >
             {/* Mobile logo */}
             <div className="lg:hidden mb-8 flex justify-center">
-              <Image
-                src={csaLargeLogo}
-                alt="CodeStack Academy"
-                height={60}
-                width={240}
-                className="h-16 w-auto object-contain"
-              />
+              <div className="bg-gradient-to-br from-brand-600 via-brand-500 to-sky-500 rounded-2xl p-6">
+                <Image
+                  src={csaLargeLogo}
+                  alt="CodeStack Academy"
+                  height={60}
+                  width={240}
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
             </div>
 
             <div className="mb-8">
@@ -190,7 +211,9 @@ export default function LoginPage() {
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   Remember me
                 </label>

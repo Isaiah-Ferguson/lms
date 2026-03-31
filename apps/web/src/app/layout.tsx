@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "CodeStack LMS",
   description: "Learn. Build. Ship.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.jpg",
   },
 };
 
