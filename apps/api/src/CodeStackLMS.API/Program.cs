@@ -49,7 +49,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        var configuredOrigin = builder.Configuration["Frontend:Url"] ?? "http://localhost:3000";
+        var configuredOrigins = builder.Configuration["Frontend:Url"] ?? "http://localhost:3000";
+        var origins = configuredOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         if (builder.Environment.IsDevelopment())
         {
@@ -62,7 +63,8 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins(configuredOrigin)
+            // Support multiple origins (e.g., "http://localhost:3000,https://app.vercel.app")
+            policy.WithOrigins(origins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
