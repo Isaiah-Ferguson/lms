@@ -9,6 +9,7 @@ using CodeStackLMS.Domain.Entities;
 using CodeStackLMS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CodeStackLMS.Application.Auth;
@@ -20,12 +21,14 @@ public class AuthService : IAuthService
     private readonly IApplicationDbContext _db;
     private readonly IConfiguration _config;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(IApplicationDbContext db, IConfiguration config, IEmailService emailService)
+    public AuthService(IApplicationDbContext db, IConfiguration config, IEmailService emailService, ILogger<AuthService> logger)
     {
         _db = db;
         _config = config;
         _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<AuthTokenDto> LoginAsync(
