@@ -186,7 +186,9 @@ public class AuthService : IAuthService
 
     private string BuildWelcomeEmailBody(string name, string email, string temporaryPassword)
     {
-        var appUrl = _config["Frontend:Url"] ?? "http://localhost:3000";
+        var configuredUrls = _config["Frontend:Url"] ?? "http://localhost:3000";
+        // Use the last URL (production) if multiple URLs are configured
+        var appUrl = configuredUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Last();
         var safeName = System.Net.WebUtility.HtmlEncode(name.Trim());
         var safeEmail = System.Net.WebUtility.HtmlEncode(email.Trim());
         var safePassword = System.Net.WebUtility.HtmlEncode(temporaryPassword);
