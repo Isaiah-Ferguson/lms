@@ -16,7 +16,7 @@ function mapResponse(courseId: string, data: CourseDetailResponse): LevelData {
     title: w.title,
     dateRange: w.dateRange,
     zoomUrl: w.zoomUrl || data.zoomUrl,
-    topics: w.topics.map((t) => ({ label: t })),
+    topics: w.topics,
     detailsHref: `/courses/${courseId}/weeks/${w.weekNumber}`,
   }));
 
@@ -96,7 +96,7 @@ export function CourseDashboardLoader({ courseId }: Props) {
         title: week.title,
         dateRange: week.dateRange,
         zoomUrl: week.zoomUrl,
-        topics: week.topics.map((t) => t.label),
+        topics: week.topics,
       },
       token
     );
@@ -107,7 +107,7 @@ export function CourseDashboardLoader({ courseId }: Props) {
       title: updated.title,
       dateRange: updated.dateRange,
       zoomUrl: updated.zoomUrl || data!.zoomUrl,
-      topics: updated.topics.map((t) => ({ label: t })),
+      topics: updated.topics,
       detailsHref: `/courses/${courseId}/weeks/${updated.weekNumber}`,
     };
   }
@@ -156,7 +156,7 @@ export function CourseDashboardLoader({ courseId }: Props) {
         title: week.title,
         dateRange: week.dateRange,
         zoomUrl: week.zoomUrl,
-        topics: week.topics.map((t) => t.label),
+        topics: week.topics,
       },
       token
     );
@@ -167,7 +167,7 @@ export function CourseDashboardLoader({ courseId }: Props) {
       title: created.title,
       dateRange: created.dateRange,
       zoomUrl: created.zoomUrl || data!.zoomUrl,
-      topics: created.topics.map((t) => ({ label: t })),
+      topics: created.topics,
       detailsHref: `/courses/${courseId}/weeks/${created.weekNumber}`,
     };
   }

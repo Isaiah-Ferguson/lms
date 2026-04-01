@@ -14,14 +14,12 @@ import { Input } from "@/components/ui/Input";
 
 // ─── Shared types (used by both Level 1 and Level 2) ─────────────────────────
 
-export interface WeekTopic  { label: string; }
-
 export interface LevelWeek {
   id?: string;
   weekNumber: number;
   title: string;
   dateRange: string;
-  topics: WeekTopic[];
+  topics: string[];
   zoomUrl: string;
   detailsHref: string;
 }
@@ -382,8 +380,7 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
     const topics = form.topicsRaw
       .split("\n")
       .map((l) => l.trim())
-      .filter(Boolean)
-      .map((label) => ({ label }));
+      .filter(Boolean);
     if (topics.length === 0) { setError("Add at least one topic"); return; }
     
     onSave({
@@ -463,7 +460,7 @@ function WeekEditModal({ week, onClose, onSave }: {
   const [form, setForm] = useState<WeekEditForm>({
     title: week.title,
     dateRange: week.dateRange,
-    topicsRaw: week.topics.map((t) => t.label).join("\n"),
+    topicsRaw: week.topics.join("\n"),
   });
   const [error, setError] = useState("");
 
@@ -474,8 +471,7 @@ function WeekEditModal({ week, onClose, onSave }: {
     const topics = form.topicsRaw
       .split("\n")
       .map((l) => l.trim())
-      .filter(Boolean)
-      .map((label) => ({ label }));
+      .filter(Boolean);
     if (topics.length === 0) { setError("Add at least one topic"); return; }
     onSave({ ...week, title: form.title.trim(), dateRange: form.dateRange.trim(), topics });
   }
@@ -577,14 +573,14 @@ function WeekCard({ week, canEdit, onEdit }: {
 
       {/* Topics / Content Covered */}
       <div className="px-4 py-3 border-b border-gray-100">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500">
           Topics / Content Covered
         </p>
         <ul className="space-y-1.5">
           {week.topics.map((topic, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
-              {topic.label}
+              {topic}
             </li>
           ))}
         </ul>
@@ -592,11 +588,11 @@ function WeekCard({ week, canEdit, onEdit }: {
 
       {/* Videos */}
       <div className="flex-1 px-4 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500">
           Videos
         </p>
         {loadingVideos ? (
-          <p className="text-xs text-gray-400">Loading videos...</p>
+          <p className="text-sm text-gray-400">Loading videos...</p>
         ) : videos.length > 0 ? (
           <ul className="space-y-1.5">
             {videos.map((video, i) => (
