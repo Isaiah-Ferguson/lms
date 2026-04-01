@@ -16,7 +16,8 @@ public record ParticipantUserDto(
     string Status,
     IReadOnlyList<string> Enrollments,
     string? LastLoginAt,
-    string AvatarInitials);
+    string AvatarInitials,
+    string? AvatarUrl);
 
 public record CourseOptionDto(string Id, string Label, string YearId, string YearLabel);
 

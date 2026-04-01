@@ -64,7 +64,8 @@ public class AdminParticipantsService : IAdminParticipantsService
                 user.IsActive ? "Active" : "Disabled",
                 enrollments.TryGetValue(user.Id, out var courseIds) ? courseIds : Array.Empty<string>(),
                 user.LastLoginAt?.ToString("O"),
-                initials);
+                initials,
+                user.AvatarUrl);
         }).ToList();
 
         return new AdminParticipantsDataDto(

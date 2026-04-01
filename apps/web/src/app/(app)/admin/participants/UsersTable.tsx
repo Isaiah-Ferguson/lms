@@ -130,9 +130,17 @@ export function UsersTable({
                   {/* Name */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                        {u.avatarInitials}
-                      </div>
+                      {u.avatarUrl ? (
+                        <img
+                          src={u.avatarUrl}
+                          alt={`${u.firstName} ${u.lastName}`}
+                          className="h-8 w-8 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                          {u.avatarInitials}
+                        </div>
+                      )}
                       <div>
                         <Link
                           href={`/admin/participants/${u.id}`}

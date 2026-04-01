@@ -15,6 +15,7 @@ export interface ParticipantUser {
   enrollments: string[]; // course ids
   lastLoginAt: string | null; // ISO
   avatarInitials: string;
+  avatarUrl: string | null;
 }
 
 export interface CourseOption {
@@ -61,6 +62,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["combine", "level-1"],
         lastLoginAt: "2026-02-21T10:30:00Z",
         avatarInitials: "IF",
+        avatarUrl: null,
       },
       {
         id: "u-2",
@@ -74,6 +76,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["level-1"],
         lastLoginAt: "2026-02-20T14:15:00Z",
         avatarInitials: "AB",
+        avatarUrl: null,
       },
       {
         id: "u-3",
@@ -87,6 +90,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["level-1", "level-2"],
         lastLoginAt: "2026-02-19T09:00:00Z",
         avatarInitials: "MT",
+        avatarUrl: null,
       },
       {
         id: "u-4",
@@ -100,6 +104,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["combine"],
         lastLoginAt: "2026-02-18T16:45:00Z",
         avatarInitials: "PN",
+        avatarUrl: null,
       },
       {
         id: "u-5",
@@ -113,6 +118,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: [],
         lastLoginAt: "2026-01-10T11:00:00Z",
         avatarInitials: "JW",
+        avatarUrl: null,
       },
       {
         id: "u-6",
@@ -126,6 +132,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["level-1", "level-2", "level-3"],
         lastLoginAt: "2026-02-21T08:00:00Z",
         avatarInitials: "SM",
+        avatarUrl: null,
       },
       {
         id: "u-7",
@@ -139,6 +146,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["level-2"],
         lastLoginAt: null,
         avatarInitials: "DC",
+        avatarUrl: null,
       },
       {
         id: "u-8",
@@ -152,6 +160,7 @@ export function getAdminParticipantsData(): AdminParticipantsData {
         enrollments: ["combine", "level-1", "level-2", "level-3", "level-4"],
         lastLoginAt: "2026-02-20T17:30:00Z",
         avatarInitials: "NO",
+        avatarUrl: null,
       },
     ],
   };
