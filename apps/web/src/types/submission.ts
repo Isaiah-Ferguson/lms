@@ -51,3 +51,19 @@ export interface SubmissionResponse {
   githubRepoUrl?: string | null;
   hostedUrl?: string | null;
 }
+
+export interface ArtifactItem {
+  artifactId: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  checksum: string;
+  downloadUrl: string;
+  urlExpiresAt: string;
+}
+
+export interface ArtifactListResponse {
+  submissionId: string;
+  urlsExpireAt: string;
+  artifacts: ArtifactItem[];
+}

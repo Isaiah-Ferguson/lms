@@ -11,6 +11,8 @@ import type {
   UploadUrlResponse,
   CompletedFile,
   SubmissionResponse,
+  ArtifactItem,
+  ArtifactListResponse,
   StudentInfo,
   AssignmentInfo,
   ArtifactInfo,
@@ -58,6 +60,8 @@ export type {
   UploadUrlResponse,
   CompletedFile,
   SubmissionResponse,
+  ArtifactItem,
+  ArtifactListResponse,
   StudentInfo,
   AssignmentInfo,
   ArtifactInfo,
@@ -227,6 +231,14 @@ export const submissionsApi = {
   getStatus(submissionId: string, token: string): Promise<SubmissionResponse> {
     return apiFetch<SubmissionResponse>(
       `/api/submissions/${submissionId}/status`,
+      {},
+      token
+    );
+  },
+
+  getArtifacts(submissionId: string, token: string): Promise<ArtifactListResponse> {
+    return apiFetch<ArtifactListResponse>(
+      `/api/submissions/${submissionId}/artifacts`,
       {},
       token
     );

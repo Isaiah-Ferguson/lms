@@ -10,7 +10,7 @@ import { CodeLinksPanel } from "./components/CodeLinksPanel";
 import { AdminUploadPanel } from "./components/AdminUploadPanel";
 import { AssignmentManager } from "@/components/assignments/AssignmentManager";
 import { courseApi, lessonsApi } from "@/lib/api-client";
-import { getToken } from "@/lib/auth";
+import { getToken, getUserRole } from "@/lib/auth";
 
 interface WeekDetailsPageProps {
   params: {
@@ -21,6 +21,8 @@ interface WeekDetailsPageProps {
 
 export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
   const parsedWeekNumber = Number.parseInt(params.weekNumber, 10);
+  const role = getUserRole();
+  const isAdminOrInstructor = role === "Admin" || role === "Instructor";
 
   const [videos, setVideos] = useState<WeekVideo[]>([]);
   const [selectedVideoId, setSelectedVideoId] = useState<string>("");
@@ -207,18 +209,20 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
               videos={videos}
               selectedVideoId={selectedVideo.id}
               onSelect={setSelectedVideoId}
-              canEdit={true}
+              canEdit={isAdminOrInstructor}
               onEdit={handleEditVideo}
               onDelete={handleDeleteVideo}
             />
             <CodeLinksPanel video={selectedVideo} />
           </section>
 
-          <AdminUploadPanel 
-            weekNumber={parsedWeekNumber} 
-            moduleId={realModuleId}
-            onAttach={handleAttachVideo} 
-          />
+          {isAdminOrInstructor && (
+            <AdminUploadPanel 
+              weekNumber={parsedWeekNumber} 
+              moduleId={realModuleId}
+              onAttach={handleAttachVideo} 
+            />
+          )}
 
           {/* Assignments Section */}
           {realCourseId && (
@@ -228,7 +232,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                 courseId={realCourseId}
                 moduleId={realModuleId ?? undefined}
                 moduleTitle={realModuleTitle ?? `Week ${parsedWeekNumber}`}
-                canEdit={true}
+                canEdit={isAdminOrInstructor}
               />
             </section>
           )}

@@ -11,7 +11,7 @@ export interface SubmissionState {
   submittedAt: string | null;
   fileName: string | null;
   fileSize: number | null;
-  downloadUrl?: string | null;
+  submissionId?: string | null;
 }
 
 interface SubmissionCardProps {
@@ -88,6 +88,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
   const [githubRepoUrl, setGithubRepoUrl] = useState("");
   const [hostedUrl, setHostedUrl] = useState("");
   const [note, setNote] = useState("");
+  const [downloading, setDownloading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -114,7 +115,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
     setProgress(0);
     setFileError(null);
     try {
-      await uploadZip(
+      const result = await uploadZip(
         courseAssignmentId,
         selectedFile,
         figmaUrl || null,
@@ -128,7 +129,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
         submittedAt: new Date().toISOString(),
         fileName: selectedFile.name,
         fileSize: selectedFile.size,
-        downloadUrl: null,
+        submissionId: result.submissionId,
       });
       setShowUploader(false);
       setSelectedFile(null);
@@ -142,6 +143,45 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
     } finally {
       setUploading(false);
       setProgress(0);
+    }
+  }
+
+  async function handleDownload() {
+    if (!state.submissionId) {
+      setFileError("No submission ID found");
+      return;
+    }
+    
+    setDownloading(true);
+    try {
+      const token = getToken();
+      if (!token) throw new Error("Session expired");
+
+      // Get artifacts with download URLs
+      const artifactList = await submissionsApi.getArtifacts(state.submissionId, token);
+      
+      if (!artifactList.artifacts || artifactList.artifacts.length === 0) {
+        throw new Error("No files available for download");
+      }
+
+      // Download the first artifact (ZIP file)
+      const artifact = artifactList.artifacts[0];
+      const response = await fetch(artifact.downloadUrl);
+      if (!response.ok) throw new Error("Download failed");
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = artifact.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      setFileError("Failed to download: " + (err instanceof Error ? err.message : "Unknown error"));
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -188,15 +228,15 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               <> ({formatBytes(state.fileSize)})</>
             )}
           </p>
-          {/* Download placeholder — swap href to real Blob URL later */}
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
-            className="inline-flex items-center gap-1 text-xs font-medium text-green-900 underline underline-offset-2 hover:text-green-700"
+          {/* Download submitted ZIP */}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="inline-flex items-center gap-1 text-xs font-medium text-green-900 underline underline-offset-2 hover:text-green-700 disabled:opacity-50"
           >
             <Download className="h-3 w-3" />
-            Download submitted ZIP
-          </a>
+            {downloading ? "Downloading..." : "Download submitted ZIP"}
+          </button>
         </div>
       )}
 
