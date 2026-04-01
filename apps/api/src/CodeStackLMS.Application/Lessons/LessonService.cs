@@ -326,19 +326,32 @@ public class LessonService : ILessonService
         foreach (var lesson in lessons)
         {
             var artifactDtos = new List<LessonArtifactDto>();
-            foreach (var artifact in lesson.Artifacts)
+            
+            if (lesson.Artifacts != null && lesson.Artifacts.Any())
             {
-                var downloadUrl = await _blob.GenerateReadSasAsync(
-                    artifact.BlobPath,
-                    TimeSpan.FromHours(1),
-                    cancellationToken);
+                foreach (var artifact in lesson.Artifacts)
+                {
+                    try
+                    {
+                        var downloadUrl = await _blob.GenerateReadSasAsync(
+                            artifact.BlobPath,
+                            TimeSpan.FromHours(1),
+                            cancellationToken);
 
-                artifactDtos.Add(new LessonArtifactDto(
-                    artifact.Id,
-                    artifact.FileName,
-                    artifact.ContentType,
-                    artifact.SizeBytes,
-                    downloadUrl));
+                        artifactDtos.Add(new LessonArtifactDto(
+                            artifact.Id,
+                            artifact.FileName,
+                            artifact.ContentType,
+                            artifact.SizeBytes,
+                            downloadUrl));
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue processing other artifacts
+                        // This prevents one bad artifact from breaking the entire lesson list
+                        System.Diagnostics.Debug.WriteLine($"Failed to generate SAS for artifact {artifact.Id}: {ex.Message}");
+                    }
+                }
             }
 
             result.Add(new LessonDto(
