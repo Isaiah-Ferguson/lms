@@ -10,6 +10,7 @@ export interface AdminParticipantUser {
   enrollments: string[];
   lastLoginAt: string | null;
   avatarInitials: string;
+  avatarUrl: string | null;
 }
 
 export interface AdminParticipantsResponse {

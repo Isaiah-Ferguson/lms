@@ -219,10 +219,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
           {/* External URL fields */}
           <div className="space-y-2">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="FigmaUrl" className="block text-xs font-medium text-gray-700 mb-1">
                 Figma URL (optional)
               </label>
               <input
+                id="FigmaUrl"
                 type="url"
                 value={figmaUrl}
                 onChange={(e) => setFigmaUrl(e.target.value)}
@@ -231,10 +232,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="GithubURL" className="block text-xs font-medium text-gray-700 mb-1">
                 GitHub Repo URL (optional)
               </label>
               <input
+                id="GithubURL"
                 type="url"
                 value={githubRepoUrl}
                 onChange={(e) => setGithubRepoUrl(e.target.value)}
@@ -243,10 +245,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="HostedURL" className="block text-xs font-medium text-gray-700 mb-1">
                 Hosted URL (optional)
               </label>
               <input
+              id="HostedURL"
                 type="url"
                 value={hostedUrl}
                 onChange={(e) => setHostedUrl(e.target.value)}
@@ -255,10 +258,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="CommentField" className="block text-xs font-medium text-gray-700 mb-1">
                 Note / Comment (optional)
               </label>
               <textarea
+              id="CommentField"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes or comments about your submission..."

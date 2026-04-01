@@ -264,14 +264,14 @@ function AnnouncementsCard({
         </div>
         <ul className="flex-1 divide-y divide-gray-100 overflow-y-auto">
           {announcements.length === 0 && (
-            <li className="px-4 py-6 text-center text-xs text-gray-400">No announcements yet.</li>
+            <li className="px-4 py-6 text-center text-xs text-gray-600">No announcements yet.</li>
           )}
           {announcements.map((ann) => {
             const tag = ann.tag ? TAG_STYLES[ann.tag] : TAG_STYLES.Info;
             return (
               <li key={ann.id} className="group px-4 py-3">
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <span className="text-xs font-semibold leading-snug text-gray-800">{ann.title}</span>
+                  <span className="text-md font-semibold leading-snug text-gray-800">{ann.title}</span>
                   <div className="flex shrink-0 items-center gap-1">
                     {ann.tag && (
                       <span className={clsx(
@@ -302,8 +302,8 @@ function AnnouncementsCard({
                     )}
                   </div>
                 </div>
-                <p className="text-xs leading-relaxed text-gray-500">{ann.body}</p>
-                <p className="mt-1 text-[10px] text-gray-400">{fmtDate(ann.date)}</p>
+                <p className="text-sm leading-relaxed text-gray-600">{ann.body}</p>
+                <p className="mt-1 text-[12px] text-gray-500">{fmtDate(ann.date)}</p>
               </li>
             );
           })}
@@ -495,11 +495,12 @@ function WeekEditModal({ week, onClose, onSave }: {
           onChange={(e) => { setForm((f) => ({ ...f, dateRange: e.target.value })); setError(""); }}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label htmlFor="WeekText" className="text-sm font-medium text-gray-700">
             Topics
             <span className="ml-1.5 text-xs font-normal text-gray-400">one per line</span>
           </label>
           <textarea
+          id="WeekText"
             rows={6}
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
@@ -538,7 +539,7 @@ function WeekCard({ week, canEdit, onEdit }: {
             </h3>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="text-[11px] font-medium text-gray-400">{week.dateRange}</span>
+            <span className="text-[11px] font-medium text-gray-600">{week.dateRange}</span>
             {canEdit && (
               <button
                 onClick={() => onEdit(week)}
@@ -554,7 +555,7 @@ function WeekCard({ week, canEdit, onEdit }: {
 
       {/* Topics */}
       <div className="flex-1 px-4 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
           What we&apos;re covering
         </p>
         <ul className="space-y-1.5">
@@ -699,7 +700,6 @@ function AssignmentsSection({
     <section className="space-y-4">
       <div>
         <h2 className="text-lg font-bold text-gray-900">Assignments</h2>
-        <p className="text-xs text-gray-400">Mini Challenges · Challenges · Projects</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -711,7 +711,7 @@ function AssignmentsSection({
             </div>
             <ul className="divide-y divide-gray-100">
               {assignments[key].length === 0 && (
-                <li className="px-4 py-4 text-center text-xs text-gray-400">No assignments yet.</li>
+                <li className="px-4 py-4 text-center text-xs text-gray-700">No assignments yet.</li>
               )}
               {assignments[key].map((a) => (
                 <li key={a.id ?? a.title} className="flex items-center gap-2 px-4 py-2.5">
@@ -792,11 +792,11 @@ export function LevelDashboardClient({
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className={clsx("h-2 w-full", data.accentColor)} />
         <div className="px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-600">
             CodeStack Academy
           </p>
           <h1 className="mt-0.5 text-2xl font-bold text-gray-900">{data.courseTitle}</h1>
-          <p className="mt-1 text-sm text-gray-500">{data.courseMeta}</p>
+          <p className="mt-1 text-sm text-gray-600">{data.courseMeta}</p>
         </div>
       </div>
 

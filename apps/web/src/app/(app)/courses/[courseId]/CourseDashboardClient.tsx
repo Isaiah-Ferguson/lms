@@ -305,7 +305,7 @@ function AssignmentsGrid({
             {/* Assignment list */}
             <ul className="divide-y divide-gray-100">
               {assignments[key].length === 0 && (
-                <li className="px-4 py-4 text-center text-xs text-gray-400">
+                <li className="px-4 py-4 text-center text-xs text-gray-900">
                   No assignments yet.
                 </li>
               )}

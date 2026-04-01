@@ -256,10 +256,11 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
 
               <form onSubmit={handleSaveDueDate} className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-600">
+                  <label htmlFor="AssignmentType" className="mb-1 block text-xs font-medium text-gray-600">
                     Type
                   </label>
                   <select
+                    id="AssignmentType"
                     value={editAssignmentType}
                     onChange={(e) => setEditAssignmentType(e.target.value)}
                     className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"
@@ -270,10 +271,11 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-600">
+                  <label htmlFor="DueDate" className="mb-1 block text-xs font-medium text-gray-600">
                     Due Date
                   </label>
                   <input
+                  id="DueDate"
                     type="datetime-local"
                     value={editDueDate}
                     onChange={(e) => setEditDueDate(e.target.value)}

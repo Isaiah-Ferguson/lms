@@ -55,8 +55,8 @@ function AnnouncementsCard({ announcements }: { announcements: Level1Announcemen
                   </span>
                 )}
               </div>
-              <p className="text-xs leading-relaxed text-gray-500">{ann.body}</p>
-              <p className="mt-1 text-[10px] text-gray-400">{fmtDate(ann.date)}</p>
+              <p className="text-xs leading-relaxed text-gray-700">{ann.body}</p>
+              <p className="mt-1 text-[12px] text-gray-600">{fmtDate(ann.date)}</p>
             </li>
           );
         })}
@@ -110,7 +110,7 @@ function WeekCard({ week }: { week: Level1Week }) {
         </p>
         <ul className="space-y-1.5">
           {week.topics.map((topic, i) => (
-            <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+            <li key={i} className="flex items-center gap-2 text-ml text-gray-700">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
               {topic.label}
             </li>
@@ -366,7 +366,7 @@ export function Level1DashboardClient({ data }: { data: Level1Data }) {
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="h-2 w-full bg-blue-500" />
         <div className="px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-800">
             CodeStack Academy
           </p>
           <h1 className="mt-0.5 text-2xl font-bold text-gray-900">Level 1 — Web Foundations</h1>

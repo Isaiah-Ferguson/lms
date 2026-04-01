@@ -239,10 +239,11 @@ export default function CalendarPage() {
 
       <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <label htmlFor="Courses" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
             Course
           </label>
           <select
+            id="Courses"
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
