@@ -35,7 +35,7 @@ public class CourseDetailService : ICourseDetailService
                 m.WeekNumber!.Value,
                 m.Title,
                 m.DateRange ?? "",
-                m.ZoomUrl ?? "",
+                m.ZoomUrl ?? "https://codestack.zoom.us/j/93949618291?pwd=dVQ5VkVmZ0JTOWlYR09ub3lLdURvZz09#success",
                 ParseTopics(m.Topics),
                 $"/courses/{courseId}/weeks/{m.WeekNumber}"))
             .ToList();
@@ -44,7 +44,7 @@ public class CourseDetailService : ICourseDetailService
             .Where(m => m.ZoomUrl != null)
             .OrderBy(m => m.Order)
             .Select(m => m.ZoomUrl!)
-            .FirstOrDefault() ?? "";
+            .FirstOrDefault() ?? "https://codestack.zoom.us/j/93949618291?pwd=dVQ5VkVmZ0JTOWlYR09ub3lLdURvZz09#success";
 
         var announcements = course.Announcements
             .Select(a => new CourseAnnouncementDto(

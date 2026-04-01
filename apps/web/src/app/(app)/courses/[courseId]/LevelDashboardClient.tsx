@@ -63,10 +63,10 @@ export interface LevelData {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const TAG_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  DayOff:   { bg: "bg-red-50",    text: "text-red-700",    icon: <X className="h-3 w-3" /> },
-  Event:    { bg: "bg-blue-50",   text: "text-blue-700",   icon: <Calendar className="h-3 w-3" /> },
+  DayOff: { bg: "bg-red-50", text: "text-red-700", icon: <X className="h-3 w-3" /> },
+  Event: { bg: "bg-blue-50", text: "text-blue-700", icon: <Calendar className="h-3 w-3" /> },
   Reminder: { bg: "bg-yellow-50", text: "text-yellow-700", icon: <AlertCircle className="h-3 w-3" /> },
-  Info:     { bg: "bg-gray-50",   text: "text-gray-500",   icon: <Info className="h-3 w-3" /> },
+  Info: { bg: "bg-gray-50", text: "text-gray-500", icon: <Info className="h-3 w-3" /> },
 };
 
 function fmtDate(iso: string) {
@@ -117,24 +117,24 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
 }) {
   const [form, setForm] = useState<AnnForm>({
     title: initial?.title ?? "",
-    body:  initial?.body  ?? "",
-    date:  initial?.date  ? initial.date.slice(0, 10) : new Date().toISOString().slice(0, 10),
-    tag:   initial?.tag   ?? "Info",
+    body: initial?.body ?? "",
+    date: initial?.date ? initial.date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+    tag: initial?.tag ?? "Info",
   });
   const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) { setError("Title is required"); return; }
-    if (!form.body.trim())  { setError("Body is required");  return; }
-    if (!form.date)         { setError("Date is required");  return; }
+    if (!form.body.trim()) { setError("Body is required"); return; }
+    if (!form.date) { setError("Date is required"); return; }
     if (isNaN(new Date(form.date + "T00:00:00").getTime())) { setError("Invalid date"); return; }
     onSave({
-      id:    initial?.id ?? `ann-${Date.now()}`,
+      id: initial?.id ?? `ann-${Date.now()}`,
       title: form.title.trim(),
-      body:  form.body.trim(),
-      date:  form.date,
-      tag:   form.tag,
+      body: form.body.trim(),
+      date: form.date,
+      tag: form.tag,
     });
   }
 
@@ -375,14 +375,14 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim())     { setError("Title is required");      return; }
+    if (!form.title.trim()) { setError("Title is required"); return; }
     if (!form.dateRange.trim()) { setError("Date range is required"); return; }
     const topics = form.topicsRaw
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
     if (topics.length === 0) { setError("Add at least one topic"); return; }
-    
+
     onSave({
       weekNumber: form.weekNumber,
       title: form.title.trim(),
@@ -466,7 +466,7 @@ function WeekEditModal({ week, onClose, onSave }: {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim())     { setError("Title is required");      return; }
+    if (!form.title.trim()) { setError("Title is required"); return; }
     if (!form.dateRange.trim()) { setError("Date range is required"); return; }
     const topics = form.topicsRaw
       .split("\n")
@@ -497,7 +497,7 @@ function WeekEditModal({ week, onClose, onSave }: {
             <span className="ml-1.5 text-xs font-normal text-gray-400">one per line (not video titles)</span>
           </label>
           <textarea
-          id="WeekText"
+            id="WeekText"
             rows={6}
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
@@ -697,10 +697,10 @@ const COL_META: {
   accent: string;
   badge: string;
 }[] = [
-  { key: "miniChallenges", label: "Mini Challenges", accent: "bg-violet-500", badge: "bg-violet-100 text-violet-700" },
-  { key: "challenges",     label: "Challenges",      accent: "bg-blue-500",   badge: "bg-blue-100 text-blue-700"     },
-  { key: "projects",       label: "Projects",        accent: "bg-emerald-500",badge: "bg-emerald-100 text-emerald-700" },
-];
+    { key: "miniChallenges", label: "Mini Challenges", accent: "bg-violet-500", badge: "bg-violet-100 text-violet-700" },
+    { key: "challenges", label: "Challenges", accent: "bg-blue-500", badge: "bg-blue-100 text-blue-700" },
+    { key: "projects", label: "Projects", accent: "bg-emerald-500", badge: "bg-emerald-100 text-emerald-700" },
+  ];
 
 function AssignmentsSection({
   courseId,
@@ -720,8 +720,8 @@ function AssignmentsSection({
         for (const a of items) {
           const key =
             a.assignmentType === "MiniChallenge" ? "miniChallenges" :
-            a.assignmentType === "Project"       ? "projects"        :
-                                                   "challenges";
+              a.assignmentType === "Project" ? "projects" :
+                "challenges";
           result[key].push({
             id: a.id,
             title: a.title,
@@ -732,13 +732,13 @@ function AssignmentsSection({
         }
         setAssignments(result);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [courseId]);
 
   return (
     <section className="space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-gray-900">Assignments</h2>
+        <h2 className="text-[30px] font-bold text-gray-900">Assignments</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -746,24 +746,42 @@ function AssignmentsSection({
           <div key={key} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div className={clsx("h-1 w-full", accent)} />
             <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</h3>
+              <h3 className="text-lg font-semibold uppercase tracking-wide text-gray-500">{label}</h3>
             </div>
             <ul className="divide-y divide-gray-100">
               {assignments[key].length === 0 && (
                 <li className="px-4 py-4 text-center text-xs text-gray-700">No assignments yet.</li>
               )}
               {assignments[key].map((a) => (
-                <li key={a.id ?? a.title} className="flex items-center gap-2 px-4 py-2.5">
+                <li
+                  key={a.id ?? a.title}
+                  className="px-4 py-2.5"
+                >
                   <Link
                     href={a.href}
-                    className="flex-1 text-sm text-gray-700 hover:text-blue-600 hover:underline"
+                    className="group flex items-center justify-between rounded-md px-3 py-2 text-md font-medium 
+             bg-blue-50 text-blue-700 transition-all duration-150 
+             hover:bg-blue-100 hover:text-blue-800 active:bg-blue-200"
                   >
-                    {a.title}
-                    {a.weekNumber && (
-                      <span className={clsx("ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold", badge)}>
-                        W{a.weekNumber}
-                      </span>
-                    )}
+                    <span className="flex items-center gap-2">
+                      {a.title}
+
+                      {a.weekNumber && (
+                        <span
+                          className={clsx(
+                            "ml-1.5 rounded-full px-1.5 py-0.5 text-[13px] font-semibold bg-blue-200 text-blue-800",
+                            badge
+                          )}
+                        >
+                          W{a.weekNumber}
+                        </span>
+                      )}
+                    </span>
+
+                    {/* arrow */}
+                    <span className="opacity-0 translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0">
+                      →
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -834,7 +852,7 @@ export function LevelDashboardClient({
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-600">
             CodeStack Academy
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900">{data.courseTitle}</h1>
+          <h1 className="mt-0.5 text-3xl font-bold text-gray-900">{data.courseTitle}</h1>
           <p className="mt-1 text-sm text-gray-600">{data.courseMeta}</p>
         </div>
       </div>

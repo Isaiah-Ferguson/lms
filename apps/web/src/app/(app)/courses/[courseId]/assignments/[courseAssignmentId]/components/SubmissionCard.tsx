@@ -89,6 +89,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
   const [hostedUrl, setHostedUrl] = useState("");
   const [note, setNote] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -148,11 +149,12 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
 
   async function handleDownload() {
     if (!state.submissionId) {
-      setFileError("No submission ID found");
+      setDownloadError("No submission ID found");
       return;
     }
     
     setDownloading(true);
+    setDownloadError(null);
     try {
       const token = getToken();
       if (!token) throw new Error("Session expired");
@@ -179,7 +181,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      setFileError("Failed to download: " + (err instanceof Error ? err.message : "Unknown error"));
+      setDownloadError("Failed to download: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setDownloading(false);
     }
@@ -237,6 +239,9 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
             <Download className="h-3 w-3" />
             {downloading ? "Downloading..." : "Download submitted ZIP"}
           </button>
+          {downloadError && (
+            <p className="text-xs text-red-600">{downloadError}</p>
+          )}
         </div>
       )}
 
