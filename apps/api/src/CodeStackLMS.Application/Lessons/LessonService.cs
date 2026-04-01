@@ -317,20 +317,40 @@ public class LessonService : ILessonService
     {
         var lessons = await _db.Lessons
             .AsNoTracking()
+            .Include(l => l.Artifacts)
             .Where(l => l.ModuleId == moduleId)
             .OrderBy(l => l.Order)
             .ToListAsync(cancellationToken);
 
-        var result = lessons.Select(lesson => new LessonDto(
-            lesson.Id,
-            lesson.ModuleId,
-            lesson.Title,
-            lesson.Order,
-            lesson.Type.ToString(),
-            lesson.VideoUrl,
-            lesson.CreatedAt,
-            new List<LessonArtifactDto>() // Empty artifacts list since table doesn't exist
-        )).ToList();
+        var result = new List<LessonDto>();
+        foreach (var lesson in lessons)
+        {
+            var artifactDtos = new List<LessonArtifactDto>();
+            foreach (var artifact in lesson.Artifacts)
+            {
+                var downloadUrl = await _blob.GenerateReadSasAsync(
+                    artifact.BlobPath,
+                    TimeSpan.FromHours(1),
+                    cancellationToken);
+
+                artifactDtos.Add(new LessonArtifactDto(
+                    artifact.Id,
+                    artifact.FileName,
+                    artifact.ContentType,
+                    artifact.SizeBytes,
+                    downloadUrl));
+            }
+
+            result.Add(new LessonDto(
+                lesson.Id,
+                lesson.ModuleId,
+                lesson.Title,
+                lesson.Order,
+                lesson.Type.ToString(),
+                lesson.VideoUrl,
+                lesson.CreatedAt,
+                artifactDtos));
+        }
 
         return result;
     }
