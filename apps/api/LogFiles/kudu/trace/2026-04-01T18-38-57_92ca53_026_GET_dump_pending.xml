@@ -1,0 +1,3 @@
+<step title="Incoming Request" date="2026-04-01T18:38:57.919" instance="92ca53" url="/dump" method="GET" type="request" pid="2644,2,77" Accept-Encoding="identity" Authorization="Bea..." Host="csalms.scm.azurewebsites.net" User-Agent="AZURECLI/2.84.0 (HOMEBREW)" x-ms-client-request-id="0a0bbd6c-2dfa-11f1-b84a-aefa96986822" X-ARR-LOG-ID="0a0bbd6c-2dfa-11f1-b84a-aefa96986822" CLIENT-IP="204.129.223.75:42874" X-SITE-DEPLOYMENT-ID="CSALMS" WAS-DEFAULT-HOSTNAME="csalms.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/dump" >
+  <step title="Cleanup Xml Logs" date="2026-04-01T18:38:57.919" /><!-- duration: 16ms -->
+  <step title="ZipStreamContent.OnZip" date="2026-04-01T18:38:57.950" 

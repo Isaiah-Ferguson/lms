@@ -1892,4 +1892,1019 @@ ClientConnectionId:f0a904c2-4eac-40d0-8577-291bd9bed3df
 Error Number:208,State:1,Class:16
 ClientConnectionId before routing:4b60f23f-dcca-42c9-bc4a-aeac2286e932
 Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1012</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:25:02Z"/><EventRecordID>895757609</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' was recycled after detecting app_offline.htm.</Data><Data>Process Id: 6484.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1033</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:25:02Z"/><EventRecordID>895757671</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'MACHINE/WEBROOT/APPHOST/CSALMS' has shutdown.</Data><Data>Process Id: 6484.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1032</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:24Z"/><EventRecordID>895839546</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' started successfully.</Data><Data>Process Id: 10252.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>2</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:25Z"/><EventRecordID>895839921</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 20504
+SpanId: f5c5dd537743ef91
+TraceId: 77d5228cf3312c0b08768a223e67ec7b
+ParentId: 0000000000000000
+RequestId: 400053ee-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/courses/b368c95f-1d29-4eac-8b1f-8ed1417e1fb6
+ActionId: 10829f74-50b4-499e-85e7-f91713ac8d90
+ActionName: CodeStackLMS.API.Controllers.CourseController.GetCourseDetail (CodeStackLMS.API)
+
+Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847843</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: aeac392bc703c130
+TraceId: 9ba040532c163f2d4212376f63252724
+ParentId: 0000000000000000
+RequestId: 400053f3-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (18ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847875</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: aeac392bc703c130
+TraceId: 9ba040532c163f2d4212376f63252724
+ParentId: 0000000000000000
+RequestId: 400053f3-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847890</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: aeac392bc703c130
+TraceId: 9ba040532c163f2d4212376f63252724
+ParentId: 0000000000000000
+RequestId: 400053f3-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847968</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: 31fb2481dc073fa2
+TraceId: 45781b7777d710c9d6c5862c617d0188
+ParentId: 0000000000000000
+RequestId: 400000c5-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (17ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847984</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: 31fb2481dc073fa2
+TraceId: 45781b7777d710c9d6c5862c617d0188
+ParentId: 0000000000000000
+RequestId: 400000c5-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:33Z"/><EventRecordID>895847984</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: 31fb2481dc073fa2
+TraceId: 45781b7777d710c9d6c5862c617d0188
+ParentId: 0000000000000000
+RequestId: 400000c5-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866265</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: 3f088fb1c1cf87b1
+TraceId: 37fd5047dda2061a54b3457411103daa
+ParentId: 0000000000000000
+RequestId: 400000cf-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (16ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866296</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: 3f088fb1c1cf87b1
+TraceId: 37fd5047dda2061a54b3457411103daa
+ParentId: 0000000000000000
+RequestId: 400000cf-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866296</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: 3f088fb1c1cf87b1
+TraceId: 37fd5047dda2061a54b3457411103daa
+ParentId: 0000000000000000
+RequestId: 400000cf-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866343</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: 25aede417a12545c
+TraceId: 25711c998422d76f52cac8c7f8f86ad6
+ParentId: 0000000000000000
+RequestId: 400053fc-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (16ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866437</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: 25aede417a12545c
+TraceId: 25711c998422d76f52cac8c7f8f86ad6
+ParentId: 0000000000000000
+RequestId: 400053fc-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:26:51Z"/><EventRecordID>895866453</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: 25aede417a12545c
+TraceId: 25711c998422d76f52cac8c7f8f86ad6
+ParentId: 0000000000000000
+RequestId: 400053fc-0000-fd00-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937296</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: a49b10b3e257b360
+TraceId: 0add7c5cee1ba9d2da6a868b44716bfb
+ParentId: 0000000000000000
+RequestId: 400000da-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (17ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937296</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: a49b10b3e257b360
+TraceId: 0add7c5cee1ba9d2da6a868b44716bfb
+ParentId: 0000000000000000
+RequestId: 400000da-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937312</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: a49b10b3e257b360
+TraceId: 0add7c5cee1ba9d2da6a868b44716bfb
+ParentId: 0000000000000000
+RequestId: 400000da-0006-f500-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937359</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: fa4fe948f93e49d7
+TraceId: c00af5a37f48ad2fc9a11daffa6fc836
+ParentId: 0000000000000000
+RequestId: 4000010e-0006-f000-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (16ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937375</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: fa4fe948f93e49d7
+TraceId: c00af5a37f48ad2fc9a11daffa6fc836
+ParentId: 0000000000000000
+RequestId: 4000010e-0006-f000-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 64d8ef1e-1b61-4e34-91e5-acb07614ac94
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:28:02Z"/><EventRecordID>895937375</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: fa4fe948f93e49d7
+TraceId: c00af5a37f48ad2fc9a11daffa6fc836
+ParentId: 0000000000000000
+RequestId: 4000010e-0006-f000-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at System.Runtime.ExceptionServices.InternalCalls.&lt;RhpSfiNext&gt;g____PInvoke|1_0(StackFrameIterator* __pThis_native, UInt32* __uExCollideClauseIdx_native, Boolean* __fUnwoundReversePInvoke_native, Boolean* __fIsExceptionIntercepted_native)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:4740bc31-5989-4641-994d-71bfb9a3e3ff
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:e407acc1-cfaa-48f6-8d45-738b4129f621
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1012</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:31:34Z"/><EventRecordID>896149250</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' was recycled after detecting app_offline.htm.</Data><Data>Process Id: 10252.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1033</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:31:34Z"/><EventRecordID>896149359</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'MACHINE/WEBROOT/APPHOST/CSALMS' has shutdown.</Data><Data>Process Id: 10252.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1032</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:02Z"/><EventRecordID>896237109</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' started successfully.</Data><Data>Process Id: 10984.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>2</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:02Z"/><EventRecordID>896237421</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 20504
+SpanId: 915b3e45ab30a5f1
+TraceId: 07e4acad069760c502573de09dc392f8
+ParentId: 0000000000000000
+RequestId: 400005af-0004-f100-b63f-84710c7967bb
+RequestPath: /api/courses/71a4833c-c177-43f6-8b1d-267ff7b0adbc
+ActionId: 83edb7ae-0268-46c6-a467-0484308137a6
+ActionName: CodeStackLMS.API.Controllers.CourseController.GetCourseDetail (CodeStackLMS.API)
+
+Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242046</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: ba5f61cda566b698
+TraceId: 66df83efe4a3e0c9bd5ba4f831acca48
+ParentId: 0000000000000000
+RequestId: 400003ab-0001-f200-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 43aa0f26-1b0c-499b-a8d4-9b8872fa218f
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (18ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242093</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: ba5f61cda566b698
+TraceId: 66df83efe4a3e0c9bd5ba4f831acca48
+ParentId: 0000000000000000
+RequestId: 400003ab-0001-f200-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 43aa0f26-1b0c-499b-a8d4-9b8872fa218f
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242109</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: ba5f61cda566b698
+TraceId: 66df83efe4a3e0c9bd5ba4f831acca48
+ParentId: 0000000000000000
+RequestId: 400003ab-0001-f200-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242187</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Database.Command
+EventId: 20102
+SpanId: c38428d5d1a4808b
+TraceId: 5519996c6c988b8c463063319d848a5a
+ParentId: 0000000000000000
+RequestId: 400005b5-0004-f100-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 43aa0f26-1b0c-499b-a8d4-9b8872fa218f
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+Failed executing DbCommand (19ms) [Parameters=[@__moduleId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[DurationSeconds], [l].[LinkDescription], [l].[LinkUrl], [l].[ModuleId], [l].[Order], [l].[TextContent], [l].[Title], [l].[Type], [l].[UpdatedAt], [l].[VideoBlobPath], [l].[VideoMimeType], [l].[VideoSource], [l].[VideoUrl], [l0].[Id], [l0].[BlobPath], [l0].[ContentType], [l0].[CreatedAt], [l0].[FileName], [l0].[LessonId], [l0].[SizeBytes]
+FROM [Lessons] AS [l]
+LEFT JOIN [LessonArtifacts] AS [l0] ON [l].[Id] = [l0].[LessonId]
+WHERE [l].[ModuleId] = @__moduleId_0
+ORDER BY [l].[Order], [l].[Id]
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242203</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 10100
+SpanId: c38428d5d1a4808b
+TraceId: 5519996c6c988b8c463063319d848a5a
+ParentId: 0000000000000000
+RequestId: 400005b5-0004-f100-b63f-84710c7967bb
+RequestPath: /api/lessons
+ActionId: 43aa0f26-1b0c-499b-a8d4-9b8872fa218f
+ActionName: CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons (CodeStackLMS.API)
+
+An exception occurred while iterating over the results of a query for context type 'CodeStackLMS.Infrastructure.Persistence.ApplicationDbContext'.
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>1</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:33:07Z"/><EventRecordID>896242203</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware
+EventId: 0
+SpanId: c38428d5d1a4808b
+TraceId: 5519996c6c988b8c463063319d848a5a
+ParentId: 0000000000000000
+RequestId: 400005b5-0004-f100-b63f-84710c7967bb
+RequestPath: /api/lessons
+
+Unhandled exception
+
+Exception: 
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'LessonArtifacts'.
+   at Microsoft.Data.SqlClient.SqlCommand.&lt;&gt;c.&lt;ExecuteDbDataReaderAsync&gt;b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;.cctor&gt;b__288_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task&amp; currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.&lt;&gt;c__DisplayClass30_0`2.&lt;&lt;ExecuteAsync&gt;b__0&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CodeStackLMS.Application.Lessons.LessonService.GetModuleLessonsAsync(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.Application/Lessons/LessonService.cs:line 318
+   at CodeStackLMS.API.Controllers.LessonsController.GetModuleLessons(Guid moduleId, CancellationToken cancellationToken) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Controllers/LessonsController.cs:line 188
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at CodeStackLMS.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in /Users/isaiahkeithferguson/Downloads/lms/apps/api/src/CodeStackLMS.API/Middleware/ExceptionHandlingMiddleware.cs:line 24
+ClientConnectionId:9dffc7ac-1157-4bc1-9c74-7485ae359a02
+Error Number:208,State:1,Class:16
+ClientConnectionId before routing:22ad84e5-5598-4db0-916d-7dba90746b7f
+Routing Destination:a12153f43a31.tr16067.westus1-a.worker.database.windows.net,11054
+</Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1012</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:36:35Z"/><EventRecordID>896449734</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' was recycled after detecting app_offline.htm.</Data><Data>Process Id: 10984.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1033</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:36:35Z"/><EventRecordID>896449843</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'MACHINE/WEBROOT/APPHOST/CSALMS' has shutdown.</Data><Data>Process Id: 10984.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name="IIS AspNetCore Module V2"/><EventID>1032</EventID><Level>4</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:37:11Z"/><EventRecordID>896485953</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Application 'C:\home\site\wwwroot\' started successfully.</Data><Data>Process Id: 10608.</Data><Data>File Version: 20.0.26025.3. Description: IIS ASP.NET Core Module V2 Request Handler. Commit: </Data></EventData></Event><Event><System><Provider Name=".NET Runtime"/><EventID>1000</EventID><Level>2</Level><Task>0</Task><Keywords>Keywords</Keywords><TimeCreated SystemTime="2026-04-01T18:37:11Z"/><EventRecordID>896486296</EventRecordID><Channel>Application</Channel><Computer>WEBWK000000</Computer><Security/></System><EventData><Data>Category: Microsoft.EntityFrameworkCore.Query
+EventId: 20504
+SpanId: 98ffd0e8346540b7
+TraceId: 3c18b73da182856156e03d22690ba6a8
+ParentId: 0000000000000000
+RequestId: 4000037a-0007-f200-b63f-84710c7967bb
+RequestPath: /api/courses/71a4833c-c177-43f6-8b1d-267ff7b0adbc
+ActionId: 7669f1bb-7f4c-47a2-8340-1d333a2cfc5b
+ActionName: CodeStackLMS.API.Controllers.CourseController.GetCourseDetail (CodeStackLMS.API)
+
+Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
 </Data></EventData></Event></Events>
