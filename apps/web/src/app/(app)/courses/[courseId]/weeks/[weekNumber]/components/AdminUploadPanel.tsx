@@ -154,7 +154,7 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
                 setError("");
               }}
               placeholder="https://codestackcdnwest.blob.core.windows.net/..."
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -168,7 +168,7 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
                 setCodeFile(e.target.files?.[0] ?? null);
                 setError("");
               }}
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-gray-600"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-1 text-xs text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-gray-600"
             />
           </div>
         </div>
