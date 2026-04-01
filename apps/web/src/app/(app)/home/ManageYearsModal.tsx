@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { ApiError, homeApi } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
@@ -35,18 +36,27 @@ export function ManageYearsModal({
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [activatingYearId, setActivatingYearId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const canCreate = useMemo(
     () => label.trim().length > 0 && startDate.length > 0 && endDate.length > 0,
     [label, startDate, endDate]
   );
 
-  if (!isOpen) {
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+    } else {
+      setMounted(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) {
     return null;
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45 px-4 py-6">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/45 px-4 py-6">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <div>
@@ -64,7 +74,7 @@ export function ManageYearsModal({
 
         <div className="space-y-8 px-6 py-5">
           <section>
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Years</h3>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-700">Years</h3>
             <div className="space-y-3">
               {years.map((year) => (
                 <div
@@ -198,4 +208,6 @@ export function ManageYearsModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

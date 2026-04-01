@@ -121,6 +121,39 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ForgotPasswordAsync(
+        ForgotPasswordDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var emailLower = dto.Email.Trim().ToLower();
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Email == emailLower && u.IsActive, cancellationToken);
+
+        if (user == null)
+            throw new ValidationException("Email not in our system. Please contact Admin.");
+
+        // Generate temporary password
+        var temporaryPassword = GenerateTemporaryPassword();
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
+        user.MustChangePassword = true;
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        // Send password reset email
+        try
+        {
+            var subject = "Password Reset - CodeStack LMS";
+            var htmlBody = BuildPasswordResetEmailBody(user.Name, user.Email, temporaryPassword);
+            await _emailService.SendAsync(user.Email, subject, htmlBody, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+            throw new ValidationException("Failed to send password reset email. Please try again later.");
+        }
+    }
+
     private async Task CreateUserInternalAsync(
         string name,
         string email,
@@ -201,6 +234,27 @@ public class AuthService : IAuthService
             <strong>Temporary password:</strong> {safePassword}</p>
             <p>Sign in at <a href=\"{appUrl}/login\">{appUrl}/login</a>.</p>
             <p>Please change your password after your first login.</p>
+            """;
+    }
+
+    private string BuildPasswordResetEmailBody(string name, string email, string temporaryPassword)
+    {
+        var configuredUrls = _config["Frontend:Url"] ?? "http://localhost:3000";
+        // Use the last URL (production) if multiple URLs are configured
+        var appUrl = configuredUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).LastOrDefault() 
+                     ?? "http://localhost:3000";
+        var safeName = System.Net.WebUtility.HtmlEncode(name.Trim());
+        var safeEmail = System.Net.WebUtility.HtmlEncode(email.Trim());
+        var safePassword = System.Net.WebUtility.HtmlEncode(temporaryPassword);
+
+        return $"""
+            <p>Hello {safeName},</p>
+            <p>We received a request to reset your password for your CodeStack LMS account.</p>
+            <p><strong>Email:</strong> {safeEmail}<br/>
+            <strong>Temporary password:</strong> {safePassword}</p>
+            <p>Sign in at <a href=\"{appUrl}/login\">{appUrl}/login</a> using this temporary password.</p>
+            <p><strong>Important:</strong> You will be required to change your password after logging in.</p>
+            <p>If you did not request this password reset, please contact support immediately.</p>
             """;
     }
 

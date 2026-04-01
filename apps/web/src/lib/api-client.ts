@@ -171,6 +171,13 @@ export const authApi = {
       body: JSON.stringify(body),
     }, token);
   },
+
+  forgotPassword(email: string): Promise<{ message: string }> {
+    return apiFetch<{ message: string }>("/api/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
 };
 
 // ─── Submissions API ──────────────────────────────────────────────────────────

@@ -101,7 +101,7 @@ export function LevelCardGrid({
               {/* Content */}
               <div className="flex flex-1 flex-col gap-3 p-6">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{yearLabel}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{yearLabel}</p>
                   <h2 className="mt-1 text-xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
                     {level.title}
                   </h2>
@@ -109,7 +109,7 @@ export function LevelCardGrid({
                 <p className="flex-1 text-sm leading-relaxed text-gray-600">{level.description}</p>
                 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-sm font-semibold text-brand-600 transition-all group-hover:gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-brand-800 transition-all group-hover:gap-3">
                   <span>Explore course</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>

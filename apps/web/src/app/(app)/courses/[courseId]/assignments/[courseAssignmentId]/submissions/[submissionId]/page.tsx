@@ -196,7 +196,7 @@ export default function SubmissionGradingPage({ params }: SubmissionGradingPageP
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
         <Card className="space-y-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-400">Student</p>
+            <p className="text-xs uppercase tracking-wide text-gray-600">Student</p>
             <p className="text-sm font-semibold text-gray-900">
               {data.student.name}
             </p>
@@ -204,17 +204,17 @@ export default function SubmissionGradingPage({ params }: SubmissionGradingPageP
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-400">Assignment</p>
+            <p className="text-xs uppercase tracking-wide text-gray-600">Assignment</p>
             <p className="text-sm font-medium text-gray-800">{data.assignment.title}</p>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-400">Submitted At</p>
+            <p className="text-xs uppercase tracking-wide text-gray-600">Submitted At</p>
             <p className="text-sm text-gray-700">{new Date(data.createdAt).toLocaleString()}</p>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">Submission Files</p>
+            <p className="text-xs uppercase tracking-wide text-gray-600 mb-2">Submission Files</p>
             {data.artifacts && data.artifacts.length > 0 ? (
               <div className="space-y-2">
                 {data.artifacts.map((artifact) => (

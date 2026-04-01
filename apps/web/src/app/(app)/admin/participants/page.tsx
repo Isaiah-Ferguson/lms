@@ -15,15 +15,13 @@ import { ImpersonationBanner } from "./ImpersonationBanner";
 import { CreateUserModal }     from "./CreateUserModal";
 import { EnrollUserModal }     from "./EnrollUserModal";
 import { BulkActionsModal }    from "./BulkActionsModal";
-import { ImpersonateModal }    from "./ImpersonateModal";
 
 // ─── Modal discriminated union ────────────────────────────────────────────────
 
 type ActiveModal =
   | { type: "create" }
   | { type: "enroll"; userId?: string }
-  | { type: "bulk" }
-  | { type: "impersonate"; user: ParticipantUser };
+  | { type: "bulk" };
 
 // ─── Confirmation toast ───────────────────────────────────────────────────────
 
@@ -179,12 +177,6 @@ export default function ParticipantsPage() {
     }
   }
 
-  function handleImpersonateConfirm(userId: string) {
-    const user = users.find((u) => u.id === userId) ?? null;
-    setImpersonating(user);
-    setModal(null);
-    showToast(`Now impersonating ${user?.firstName} ${user?.lastName}.`);
-  }
 
   // ── Stats ──────────────────────────────────────────────────────────────────
   const activeCount  = users.filter((u) => u.status === "Active").length;
@@ -293,7 +285,7 @@ export default function ParticipantsPage() {
           { label: "Admins",      value: adminCount,    color: "text-violet-600" },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs font-medium text-gray-400">{label}</p>
+            <p className="text-xs font-medium text-gray-600">{label}</p>
             <p className={clsx("mt-0.5 text-2xl font-bold", color)}>{value}</p>
           </div>
         ))}
@@ -321,7 +313,6 @@ export default function ParticipantsPage() {
         onEnroll={(u) => setModal({ type: "enroll", userId: u.id })}
         onToggleAdmin={handleToggleAdmin}
         onToggleActive={handleToggleActive}
-        onImpersonate={(u) => setModal({ type: "impersonate", user: u })}
       />
 
       {/* ── Modals ──────────────────────────────────────────────────────────── */}
@@ -353,13 +344,6 @@ export default function ParticipantsPage() {
         />
       )}
 
-      {modal?.type === "impersonate" && (
-        <ImpersonateModal
-          user={modal.user}
-          onClose={() => setModal(null)}
-          onConfirm={handleImpersonateConfirm}
-        />
-      )}
 
       {/* Toast */}
       {toast && <Toast message={toast} />}

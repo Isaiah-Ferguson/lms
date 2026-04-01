@@ -98,7 +98,7 @@ export function Footer() {
         </div>
 
         {/* Copyright bar */}
-        <div className="mt-10 border-t border-gray-700 pt-6 text-center text-xs text-gray-500">
+        <div className="mt-10 border-t border-gray-700 pt-6 text-center text-xs text-gray-100">
           Copyright &copy; {new Date().getFullYear()} Code Stack Academy. All rights reserved.
         </div>
       </div>

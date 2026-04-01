@@ -216,7 +216,7 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
         {/* Summary stat pills */}
         <div className="mt-4 flex flex-wrap gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
-            <Users className="h-4 w-4 text-gray-400" />
+            <Users className="h-4 w-4 text-gray-500" />
             <span className="font-semibold text-gray-800">{counts.All}</span>
             <span className="text-gray-500">participants</span>
           </div>

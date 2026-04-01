@@ -144,8 +144,9 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
 
         <div className="grid gap-3 md:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Video URL</label>
+            <label htmlFor="video-url-input" className="text-sm font-medium text-gray-700">Video URL</label>
             <input
+              id="video-url-input"
               type="url"
               value={videoUrl}
               onChange={(e) => {
@@ -158,8 +159,9 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Upload Code</label>
+            <label htmlFor="code-file-input" className="text-sm font-medium text-gray-700">Upload Code</label>
             <input
+              id="code-file-input"
               type="file"
               accept=".zip,.pdf,.txt,.md,.ts,.tsx,.js,.cs"
               onChange={(e) => {

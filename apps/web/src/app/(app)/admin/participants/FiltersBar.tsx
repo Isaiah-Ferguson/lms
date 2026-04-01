@@ -24,8 +24,10 @@ export function FiltersBar({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Search */}
       <div className="relative flex-1 max-w-sm">
+        <label htmlFor="participant-search" className="sr-only">Search participants</label>
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input
+          id="participant-search"
           type="text"
           placeholder="Search name, username, email…"
           value={search}
@@ -36,7 +38,9 @@ export function FiltersBar({
 
       <div className="flex items-center gap-2">
         {/* Role filter */}
+        <label htmlFor="role-filter" className="sr-only">Filter by role</label>
         <select
+          id="role-filter"
           value={roleFilter}
           onChange={(e) => onRoleChange(e.target.value as UserRole | "All")}
           className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -48,7 +52,9 @@ export function FiltersBar({
         </select>
 
         {/* Status filter */}
+        <label htmlFor="status-filter" className="sr-only">Filter by status</label>
         <select
+          id="status-filter"
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value as UserStatus | "All")}
           className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -59,7 +65,7 @@ export function FiltersBar({
         </select>
 
         {/* Count */}
-        <span className="whitespace-nowrap text-xs text-gray-400">
+        <span className="whitespace-nowrap text-xs text-gray-600">
           {filteredCount} / {totalCount}
         </span>
       </div>

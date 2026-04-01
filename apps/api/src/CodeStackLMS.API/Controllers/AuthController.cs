@@ -71,4 +71,17 @@ public class AuthController : ControllerBase
         await _authService.ChangePasswordAsync(_currentUser.UserId, dto, cancellationToken);
         return Ok(new { message = "Password changed successfully." });
     }
+
+    // POST /api/auth/forgot-password
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ForgotPasswordAsync(dto, cancellationToken);
+        return Ok(new { message = "If an account exists with that email, a temporary password has been sent." });
+    }
 }

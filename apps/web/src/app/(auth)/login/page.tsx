@@ -229,7 +229,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+                  className="text-sm font-semibold text-brand-700 hover:text-brand-900 transition-colors"
                 >
                   Forgot password?
                 </Link>

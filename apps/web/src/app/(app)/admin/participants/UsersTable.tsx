@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Pencil, UserPlus, ShieldCheck, ShieldOff, UserCog, Ban, CheckCircle } from "lucide-react";
+import { Check, Pencil, UserPlus, ShieldCheck, ShieldOff, Ban, CheckCircle } from "lucide-react";
 import { clsx } from "clsx";
 import type { ParticipantUser, CourseOption } from "@/lib/admin-participants-data";
 
@@ -14,11 +14,10 @@ interface Props {
   onEnroll: (user: ParticipantUser) => void;
   onToggleAdmin: (user: ParticipantUser) => void;
   onToggleActive: (user: ParticipantUser) => void;
-  onImpersonate: (user: ParticipantUser) => void;
 }
 
 function fmtDate(iso: string | null) {
-  if (!iso) return <span className="text-gray-300">Never</span>;
+  if (!iso) return <span className="text-gray-500">Never</span>;
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric", month: "short", year: "numeric",
   });
@@ -26,7 +25,7 @@ function fmtDate(iso: string | null) {
 
 function CourseChips({ enrollments, courses }: { enrollments: string[]; courses: CourseOption[] }) {
   if (enrollments.length === 0)
-    return <span className="text-xs text-gray-300">None</span>;
+    return <span className="text-xs text-gray-500">None</span>;
   
   // Get the labels for enrolled courses
   const enrolledLabels = enrollments
@@ -34,7 +33,7 @@ function CourseChips({ enrollments, courses }: { enrollments: string[]; courses:
     .filter((label): label is string => !!label);
   
   if (enrolledLabels.length === 0) {
-    return <span className="text-xs text-gray-300">None</span>;
+    return <span className="text-xs text-gray-500">None</span>;
   }
   
   // Define level hierarchy by label (highest to lowest)
@@ -57,7 +56,7 @@ function CourseChips({ enrollments, courses }: { enrollments: string[]; courses:
 export function UsersTable({
   users, courses, selectedIds,
   onToggleSelect, onToggleSelectAll,
-  onEnroll, onToggleAdmin, onToggleActive, onImpersonate,
+  onEnroll, onToggleAdmin, onToggleActive,
 }: Props) {
   const allSelected = users.length > 0 && selectedIds.length === users.length;
   const someSelected = selectedIds.length > 0 && !allSelected;
@@ -70,8 +69,10 @@ export function UsersTable({
             <tr className="border-b border-gray-100 bg-gray-50">
               {/* Checkbox */}
               <th className="w-10 px-4 py-3">
+                <span className="sr-only">Select</span>
                 <button
                   onClick={onToggleSelectAll}
+                  aria-label="Select all users"
                   className={clsx(
                     "flex h-4 w-4 items-center justify-center rounded border",
                     allSelected
@@ -93,13 +94,13 @@ export function UsersTable({
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Enrollments</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Last login</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {users.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-400">
+                <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-600">
                   No users match your filters.
                 </td>
               </tr>
@@ -118,6 +119,7 @@ export function UsersTable({
                   <td className="px-4 py-3">
                     <button
                       onClick={() => onToggleSelect(u.id)}
+                      aria-label={`Select ${u.firstName} ${u.lastName}`}
                       className={clsx(
                         "flex h-4 w-4 items-center justify-center rounded border",
                         selected ? "border-blue-500 bg-blue-500" : "border-gray-300 bg-white"
@@ -148,7 +150,7 @@ export function UsersTable({
                         >
                           {u.firstName} {u.lastName}
                         </Link>
-                        <p className="text-xs text-gray-400">{u.town}</p>
+                        <p className="text-xs text-gray-500">{u.town}</p>
                       </div>
                     </div>
                   </td>
@@ -201,7 +203,7 @@ export function UsersTable({
 
                   {/* Actions */}
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center gap-1">
                       <Link
                         href={`/admin/participants/${u.id}`}
                         title="Edit"
@@ -233,12 +235,6 @@ export function UsersTable({
                         label={u.status === "Active" ? "Deactivate account" : "Activate account"}
                         onClick={() => onToggleActive(u)}
                         className={u.status === "Active" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : "text-green-500 hover:text-green-700 hover:bg-green-50"}
-                      />
-                      <ActionBtn
-                        icon={<UserCog className="h-3.5 w-3.5" />}
-                        label="Impersonate"
-                        onClick={() => onImpersonate(u)}
-                        className="text-yellow-500 hover:text-yellow-700 hover:bg-yellow-50"
                       />
                     </div>
                   </td>

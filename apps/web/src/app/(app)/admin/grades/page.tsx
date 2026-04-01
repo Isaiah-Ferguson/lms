@@ -79,7 +79,7 @@ function deriveStats(rows: StudentGradeRow[]) {
 type SortKey = "name" | "overallPct" | "gradedCount" | "letterGrade";
 
 function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: "asc" | "desc" }) {
-  if (col !== active) return <ChevronUp className="h-3 w-3 text-gray-300" />;
+  if (col !== active) return <ChevronUp className="h-3 w-3 text-gray-400" />;
   return dir === "asc"
     ? <ChevronUp className="h-3 w-3 text-blue-500" />
     : <ChevronDown className="h-3 w-3 text-blue-500" />;
@@ -158,7 +158,7 @@ export default function AdminGradesPage() {
   function Th({ col, children }: { col: SortKey; children: React.ReactNode }) {
     return (
       <th
-        className="cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-600"
+        className="cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 hover:text-gray-800"
         onClick={() => handleSort(col)}
       >
         <span className="inline-flex items-center gap-1">
@@ -222,8 +222,10 @@ export default function AdminGradesPage() {
 
             {/* Search */}
             <div className="relative max-w-xs">
+              <label htmlFor="grades-search" className="sr-only">Search students</label>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
+                id="grades-search"
                 type="text"
                 placeholder="Search student or email…"
                 value={search}
@@ -240,7 +242,7 @@ export default function AdminGradesPage() {
             {/* Roster table */}
             <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               {sorted.length === 0 && !loading ? (
-                <div className="px-4 py-12 text-center text-sm text-gray-400">
+                <div className="px-4 py-12 text-center text-sm text-gray-600">
                   {studentsWithStats.length === 0 ? "No enrolled students found for this course." : "No students match your search."}
                 </div>
               ) : (
@@ -248,11 +250,11 @@ export default function AdminGradesPage() {
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50">
                       <Th col="name">Student</Th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Email</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Score</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Score</th>
                       <Th col="overallPct">Grade</Th>
                       <Th col="gradedCount">Graded</Th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Last Graded</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Last Graded</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -271,7 +273,7 @@ export default function AdminGradesPage() {
                           <GradeCell pct={s.overallPct} grade={s.letterGrade} />
                         </td>
                         <td className="px-4 py-3 text-gray-600">
-                          {s.gradedCount} <span className="text-gray-400">/ {s.totalCount}</span>
+                          {s.gradedCount} <span className="text-gray-500">/ {s.totalCount}</span>
                         </td>
                         <td className="px-4 py-3 text-gray-500 text-xs">{s.lastGraded}</td>
                       </tr>
