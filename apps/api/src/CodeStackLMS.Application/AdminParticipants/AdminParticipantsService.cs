@@ -9,10 +9,12 @@ namespace CodeStackLMS.Application.AdminParticipants;
 public class AdminParticipantsService : IAdminParticipantsService
 {
     private readonly IApplicationDbContext _db;
+    private readonly IBlobStorageService _blobStorage;
 
-    public AdminParticipantsService(IApplicationDbContext db)
+    public AdminParticipantsService(IApplicationDbContext db, IBlobStorageService blobStorage)
     {
         _db = db;
+        _blobStorage = blobStorage;
     }
 
     public async Task<AdminParticipantsDataDto> GetParticipantsAsync(CancellationToken cancellationToken = default)
@@ -47,13 +49,15 @@ public class AdminParticipantsService : IAdminParticipantsService
             .GroupBy(e => e.UserId)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<string>)g.Select(e => e.CourseId.ToString()).ToList());
 
-        var userDtos = users.Select(user =>
+        var userDtos = new List<ParticipantUserDto>();
+        foreach (var user in users)
         {
             var (firstName, lastName) = SplitName(user.Name);
             var initials = BuildInitials(firstName, lastName);
             var username = BuildUsername(user.Email);
+            var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
 
-            return new ParticipantUserDto(
+            userDtos.Add(new ParticipantUserDto(
                 user.Id.ToString(),
                 firstName,
                 lastName,
@@ -65,8 +69,8 @@ public class AdminParticipantsService : IAdminParticipantsService
                 enrollments.TryGetValue(user.Id, out var courseIds) ? courseIds : Array.Empty<string>(),
                 user.LastLoginAt?.ToString("O"),
                 initials,
-                user.AvatarUrl);
-        }).ToList();
+                avatarUrl));
+        }
 
         return new AdminParticipantsDataDto(
             userDtos,
@@ -175,5 +179,20 @@ public class AdminParticipantsService : IAdminParticipantsService
     {
         var atIndex = email.IndexOf('@');
         return atIndex > 0 ? email[..atIndex] : email;
+    }
+
+    private async Task<string?> ResolveAvatarUrlAsync(string? avatarBlobPath, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(avatarBlobPath))
+            return null;
+
+        var exists = await _blobStorage.BlobExistsAsync(avatarBlobPath, cancellationToken);
+        if (!exists)
+            return null;
+
+        return await _blobStorage.GenerateReadSasAsync(
+            avatarBlobPath,
+            TimeSpan.FromDays(1),
+            cancellationToken);
     }
 }
