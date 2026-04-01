@@ -130,8 +130,9 @@ public class AuthService : IAuthService
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == emailLower && u.IsActive, cancellationToken);
 
+        // Silently return if email doesn't exist to prevent email enumeration attacks
         if (user == null)
-            throw new ValidationException("Email not in our system. Please contact Admin.");
+            return;
 
         // Generate temporary password
         var temporaryPassword = GenerateTemporaryPassword();
