@@ -141,7 +141,7 @@ public class AuthService : IAuthService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        // Send password reset email
+        // Send password reset email - don't throw if email fails to prevent enumeration
         try
         {
             var subject = "Password Reset - CodeStack LMS";
@@ -150,8 +150,8 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
+            // Log the error but don't throw - password was reset successfully
             _logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
-            throw new ValidationException("Failed to send password reset email. Please try again later.");
         }
     }
 
