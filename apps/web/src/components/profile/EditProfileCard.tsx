@@ -143,13 +143,18 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
                 {initials(name || user.name)}
               </div>
             )}
+            <label htmlFor="avatar-upload" className="sr-only">
+              Upload profile avatar image
+            </label>
             <input
+              id="avatar-upload"
               ref={fileRef}
               type="file"
               accept="image/*"
               className="hidden"
               onChange={handleAvatarChange}
               disabled={!canEditProfile}
+              aria-label="Upload profile avatar image"
             />
             <button
               type="button"
@@ -160,7 +165,7 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
               <Camera className="h-3.5 w-3.5" />
               Upload avatar
             </button>
-            <p className="text-xs text-gray-400 text-center">Max 2MB</p>
+            <p className="text-xs text-gray-700 text-center">Max 2MB</p>
             {uploadError && (
               <p className="text-xs text-red-600 text-center max-w-[120px]">{uploadError}</p>
             )}

@@ -10,6 +10,7 @@ public class Module : BaseEntity, IAuditableEntity
     public int? WeekNumber { get; set; }
     public string? DateRange { get; set; }
     public string? ZoomUrl { get; set; }
+    public string? Topics { get; set; } // JSON array of topic strings
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 

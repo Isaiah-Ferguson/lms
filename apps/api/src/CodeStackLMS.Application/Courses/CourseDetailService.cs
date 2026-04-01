@@ -3,6 +3,7 @@ using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Courses.DTOs;
 using CodeStackLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CodeStackLMS.Application.Courses;
 
@@ -35,7 +36,7 @@ public class CourseDetailService : ICourseDetailService
                 m.Title,
                 m.DateRange ?? "",
                 m.ZoomUrl ?? "",
-                m.Lessons.Select(l => l.Title).ToList(),
+                ParseTopics(m.Topics),
                 $"/courses/{courseId}/weeks/{m.WeekNumber}"))
             .ToList();
 
@@ -105,27 +106,15 @@ public class CourseDetailService : ICourseDetailService
             CreatedAt = DateTime.UtcNow,
         };
 
-        _db.Modules.Add(module);
-
-        // Add topics as lessons
+        // Store topics as JSON in the Topics column
         var topicLabels = dto.Topics
             .Select(t => t.Trim())
             .Where(t => !string.IsNullOrEmpty(t))
             .ToList();
+        
+        module.Topics = JsonSerializer.Serialize(topicLabels);
 
-        for (var i = 0; i < topicLabels.Count; i++)
-        {
-            _db.Lessons.Add(new Lesson
-            {
-                Id = Guid.NewGuid(),
-                ModuleId = module.Id,
-                Title = topicLabels[i],
-                Order = i + 1,
-                Type = Domain.Enums.LessonType.Text,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
-
+        _db.Modules.Add(module);
         await _db.SaveChangesAsync(cancellationToken);
 
         return new CourseWeekDto(
@@ -154,7 +143,6 @@ public class CourseDetailService : ICourseDetailService
             throw new NotFoundException("Week", weekId);
 
         var module = await _db.Modules
-            .Include(m => m.Lessons.OrderBy(l => l.Order))
             .FirstOrDefaultAsync(
                 m => m.Id == parsedWeekId && m.CourseId == parsedCourseId,
                 cancellationToken)
@@ -164,38 +152,13 @@ public class CourseDetailService : ICourseDetailService
         module.DateRange = dto.DateRange.Trim();
         module.ZoomUrl = dto.ZoomUrl.Trim();
 
-        // Topics are stored as Lesson titles — sync them
-        var existingLessons = module.Lessons.ToList();
+        // Store topics as JSON - DO NOT touch lessons
         var topicLabels = dto.Topics
             .Select(t => t.Trim())
             .Where(t => !string.IsNullOrEmpty(t))
             .ToList();
-
-        // Remove lessons no longer in topics list
-        var toRemove = existingLessons.Skip(topicLabels.Count).ToList();
-        _db.Lessons.RemoveRange(toRemove);
-
-        // Update/add lessons
-        for (var i = 0; i < topicLabels.Count; i++)
-        {
-            if (i < existingLessons.Count)
-            {
-                existingLessons[i].Title = topicLabels[i];
-                existingLessons[i].Order = i + 1;
-            }
-            else
-            {
-                _db.Lessons.Add(new Lesson
-                {
-                    Id = Guid.NewGuid(),
-                    ModuleId = module.Id,
-                    Title = topicLabels[i],
-                    Order = i + 1,
-                    Type = Domain.Enums.LessonType.Text,
-                    CreatedAt = DateTime.UtcNow,
-                });
-            }
-        }
+        
+        module.Topics = JsonSerializer.Serialize(topicLabels);
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -306,6 +269,21 @@ public class CourseDetailService : ICourseDetailService
 
         _db.Announcements.Remove(announcement);
         await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static List<string> ParseTopics(string? topicsJson)
+    {
+        if (string.IsNullOrWhiteSpace(topicsJson))
+            return new List<string>();
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(topicsJson) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
     }
 
     private async Task<Domain.Entities.Course?> ResolveCourseAsync(string courseId, CancellationToken cancellationToken)

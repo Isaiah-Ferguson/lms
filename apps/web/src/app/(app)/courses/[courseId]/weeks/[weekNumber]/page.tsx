@@ -33,6 +33,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
   const [editTitle, setEditTitle] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingArtifact, setUploadingArtifact] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -240,17 +241,18 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
 
       {/* Edit Video Modal */}
       {editingVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl">
             <div className="border-b border-gray-100 px-6 py-4">
               <h2 className="text-base font-semibold text-gray-900">Edit Video</h2>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label htmlFor="VideoTitle" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Title
                 </label>
                 <input
+                  id="VideoTitle"
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
@@ -258,16 +260,107 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label htmlFor="VideoURL" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Video URL
                 </label>
                 <input
+                  id="VideoURL"
                   type="url"
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   placeholder="https://..."
                   className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Code Artifacts
+                </label>
+                <div className="space-y-2">
+                  {editingVideo.codeArtifacts.length > 0 ? (
+                    editingVideo.codeArtifacts.map((artifact) => (
+                      <div key={artifact.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                        <span className="text-sm text-gray-700">{artifact.label}</span>
+                        <button
+                          onClick={async () => {
+                            const token = getToken();
+                            if (!token || !realModuleId) return;
+                            try {
+                              await lessonsApi.deleteArtifact(artifact.id, token);
+                              // Refresh lessons
+                              const lessons = await lessonsApi.getModuleLessons(realModuleId, token);
+                              const mappedVideos: WeekVideo[] = lessons.map((lesson, index) => ({
+                                id: lesson.id,
+                                title: lesson.title,
+                                videoWatchUrl: lesson.videoUrl || "",
+                                order: index + 1,
+                                codeArtifacts: lesson.artifacts.map(a => ({
+                                  id: a.id,
+                                  label: a.fileName,
+                                  downloadUrl: a.downloadUrl,
+                                })),
+                              }));
+                              setVideos(mappedVideos);
+                              const updated = mappedVideos.find(v => v.id === editingVideo.id);
+                              if (updated) setEditingVideo(updated);
+                            } catch (err) {
+                              console.error('Failed to delete artifact:', err);
+                            }
+                          }}
+                          className="text-xs text-red-600 hover:text-red-700 font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No code artifacts attached yet.</p>
+                  )}
+                  <div className="mt-2">
+                    <input
+                      type="file"
+                      id="artifact-upload"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !realModuleId) return;
+                        const token = getToken();
+                        if (!token) return;
+                        setUploadingArtifact(true);
+                        try {
+                          await lessonsApi.uploadArtifact(editingVideo.id, file, token);
+                          // Refresh lessons
+                          const lessons = await lessonsApi.getModuleLessons(realModuleId, token);
+                          const mappedVideos: WeekVideo[] = lessons.map((lesson, index) => ({
+                            id: lesson.id,
+                            title: lesson.title,
+                            videoWatchUrl: lesson.videoUrl || "",
+                            order: index + 1,
+                            codeArtifacts: lesson.artifacts.map(a => ({
+                              id: a.id,
+                              label: a.fileName,
+                              downloadUrl: a.downloadUrl,
+                            })),
+                          }));
+                          setVideos(mappedVideos);
+                          const updated = mappedVideos.find(v => v.id === editingVideo.id);
+                          if (updated) setEditingVideo(updated);
+                        } catch (err) {
+                          console.error('Failed to upload artifact:', err);
+                        } finally {
+                          setUploadingArtifact(false);
+                          e.target.value = '';
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="artifact-upload"
+                      className="inline-flex cursor-pointer items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      {uploadingArtifact ? 'Uploading...' : '+ Add Code File'}
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">

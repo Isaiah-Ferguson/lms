@@ -67,11 +67,14 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
             <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
               <div>
                 <p className="text-sm font-medium text-gray-800">Email notifications</p>
-                <p className="text-xs text-gray-400">Receive updates about assignments and grades</p>
+                <p className="text-xs text-gray-500">Receive updates about assignments and grades</p>
               </div>
               <button
                 onClick={() => handleToggle("email", !emailNotifications)}
                 disabled={saving}
+                aria-label={`Toggle email notifications ${emailNotifications ? 'off' : 'on'}`}
+                role="switch"
+                aria-checked={emailNotifications}
                 className={`relative h-5 w-9 rounded-full transition-colors ${
                   emailNotifications ? "bg-blue-500" : "bg-gray-200"
                 } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -87,11 +90,14 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
             <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
               <div>
                 <p className="text-sm font-medium text-gray-800">Dark mode</p>
-                <p className="text-xs text-gray-400">Switch to a darker colour scheme</p>
+                <p className="text-xs text-gray-500">Switch to a darker colour scheme</p>
               </div>
               <button
                 onClick={() => handleToggle("darkMode", !darkMode)}
                 disabled={saving}
+                aria-label={`Toggle dark mode ${darkMode ? 'off' : 'on'}`}
+                role="switch"
+                aria-checked={darkMode}
                 className={`relative h-5 w-9 rounded-full transition-colors ${
                   darkMode ? "bg-blue-500" : "bg-gray-200"
                 } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}

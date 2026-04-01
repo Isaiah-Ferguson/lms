@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { assignmentsApi, type AssignmentListItem } from "@/lib/api-client";
+import { assignmentsApi, lessonsApi, type AssignmentListItem } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import Link from "next/link";
 import {
@@ -425,16 +425,17 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
         />
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700">
-            Topics
-            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line</span>
+            Topics / Content Covered
+            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line (not video titles)</span>
           </label>
           <textarea
             rows={6}
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
-            placeholder={"Controllers & Routes\nServices & Dependency Injection\n..."}
+            placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
             className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
+          <p className="text-xs text-gray-500">Note: Video titles are managed separately in the week details page.</p>
         </div>
         {(error || saveError) && <p className="text-xs text-red-600">{error || saveError}</p>}
         <div className="flex justify-end gap-2 pt-1">
@@ -496,17 +497,18 @@ function WeekEditModal({ week, onClose, onSave }: {
         />
         <div className="flex flex-col gap-1.5">
           <label htmlFor="WeekText" className="text-sm font-medium text-gray-700">
-            Topics
-            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line</span>
+            Topics / Content Covered
+            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line (not video titles)</span>
           </label>
           <textarea
           id="WeekText"
             rows={6}
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
-            placeholder={"Controllers & Routes\nServices & Dependency Injection\n..."}
+            placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
             className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
+          <p className="text-xs text-gray-500">Note: Video titles are managed separately in the week details page.</p>
         </div>
         {error && <p className="text-xs text-red-600">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">
@@ -525,6 +527,26 @@ function WeekCard({ week, canEdit, onEdit }: {
   canEdit: boolean;
   onEdit: (w: LevelWeek) => void;
 }) {
+  const [videos, setVideos] = useState<Array<{ id: string; title: string }>>([]);
+  const [loadingVideos, setLoadingVideos] = useState(true);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !week.id) {
+      setLoadingVideos(false);
+      return;
+    }
+
+    lessonsApi.getModuleLessons(week.id, token)
+      .then((lessons) => {
+        setVideos(lessons.map(l => ({ id: l.id, title: l.title })));
+        setLoadingVideos(false);
+      })
+      .catch(() => {
+        setLoadingVideos(false);
+      });
+  }, [week.id]);
+
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       {/* Header */}
@@ -553,10 +575,10 @@ function WeekCard({ week, canEdit, onEdit }: {
         </div>
       </div>
 
-      {/* Topics */}
-      <div className="flex-1 px-4 py-3">
+      {/* Topics / Content Covered */}
+      <div className="px-4 py-3 border-b border-gray-100">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
-          What we&apos;re covering
+          Topics / Content Covered
         </p>
         <ul className="space-y-1.5">
           {week.topics.map((topic, i) => (
@@ -566,6 +588,27 @@ function WeekCard({ week, canEdit, onEdit }: {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Videos */}
+      <div className="flex-1 px-4 py-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+          Videos
+        </p>
+        {loadingVideos ? (
+          <p className="text-xs text-gray-400">Loading videos...</p>
+        ) : videos.length > 0 ? (
+          <ul className="space-y-1.5">
+            {videos.map((video, i) => (
+              <li key={video.id} className="flex items-start gap-2 text-sm text-gray-700">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-400" />
+                {video.title}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-gray-400">No videos yet</p>
+        )}
       </div>
 
       {/* Footer */}
