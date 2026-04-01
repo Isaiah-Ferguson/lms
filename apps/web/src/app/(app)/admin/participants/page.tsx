@@ -168,13 +168,11 @@ export default function ParticipantsPage() {
 
     try {
       await adminParticipantsApi.toggleUserActive(user.id, token);
+      await loadParticipants();
       const newStatus = user.status === "Active" ? "Disabled" : "Active";
       const msg = newStatus === "Active"
         ? `${user.firstName} ${user.lastName}'s account has been activated.`
         : `${user.firstName} ${user.lastName}'s account has been deactivated.`;
-      setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
-      );
       showToast(msg);
     } catch (error) {
       showToast("Failed to update account status.");

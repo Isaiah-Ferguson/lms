@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
@@ -14,17 +15,24 @@ const widths = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-lg" };
 
 export function Modal({ title, onClose, children, width = "md" }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      setMounted(false);
+    };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  const modalContent = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
       onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div className={`w-full ${widths[width]} flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl`}>
@@ -41,4 +49,6 @@ export function Modal({ title, onClose, children, width = "md" }: ModalProps) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
