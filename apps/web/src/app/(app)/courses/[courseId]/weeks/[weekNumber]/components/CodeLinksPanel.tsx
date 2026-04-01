@@ -15,7 +15,7 @@ export function CodeLinksPanel({ video }: CodeLinksPanelProps) {
 
       <ul className="divide-y divide-gray-100">
         {video.codeArtifacts.length === 0 && (
-          <li className="px-4 py-6 text-xs text-gray-400">No code artifacts attached yet.</li>
+          <li className="px-4 py-6 text-xs text-gray-600">No code artifacts attached yet.</li>
         )}
         {video.codeArtifacts.map((artifact) => (
           <li key={artifact.id} className="flex items-center justify-between gap-3 px-4 py-3">

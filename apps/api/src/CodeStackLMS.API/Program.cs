@@ -8,6 +8,12 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Kestrel Configuration ─────────────────────────────────────────────────────
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
+});
+
 // ── MVC / API ─────────────────────────────────────────────────────────────────
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
