@@ -8,7 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { CheckCircle2, Clock, AlertCircle, TrendingUp, BookOpen, Calendar, Download } from "lucide-react";
-import { gradesApi, profileApi, ApiError, type StudentGrades, type StudentGradeRow, type Enrollment } from "@/lib/api-client";
+import { gradesApi, profileApi, homeApi, ApiError, type StudentGrades, type StudentGradeRow, type Enrollment } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 
@@ -74,6 +74,23 @@ export default function GradesPage() {
   const [loading, setLoading] = useState(true);
   const [loadingEnrollments, setLoadingEnrollments] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
+
+  // Fetch active cohort on mount
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    homeApi.getDashboard(token)
+      .then((dashboard) => {
+        const activeCohort = dashboard.years.find(y => y.isActive);
+        if (activeCohort) {
+          setActiveCohortId(activeCohort.id);
+        }
+      })
+      .catch(() => {
+        // Failed to fetch active cohort, will load all grades
+      });
+  }, []);
 
   // Load user's enrolled courses
   useEffect(() => {
@@ -96,13 +113,13 @@ export default function GradesPage() {
       });
   }, [router]);
 
-  const load = useCallback(async (courseId: string) => {
+  const load = useCallback(async (courseId: string, cohortId: string | null) => {
     const token = getToken();
     if (!token) { router.replace("/login"); return; }
     setLoading(true);
     setError(null);
     try {
-      const result = await gradesApi.getMyGrades(courseId, token);
+      const result = await gradesApi.getMyGrades(courseId, token, cohortId ?? undefined);
       setData(result);
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to load grades.");
@@ -112,10 +129,10 @@ export default function GradesPage() {
   }, [router]);
 
   useEffect(() => {
-    if (activeCourseId) {
-      load(activeCourseId);
+    if (activeCourseId && activeCohortId !== null) {
+      load(activeCourseId, activeCohortId);
     }
-  }, [activeCourseId, load]);
+  }, [activeCourseId, activeCohortId, load]);
 
   const rows = data?.rows ?? [];
   const graded = rows.filter((r) => r.status === "Graded");

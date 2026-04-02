@@ -25,9 +25,10 @@ public class GradesController : ControllerBase
     [ProducesResponseType(typeof(StudentGradesDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMyGrades(
         [FromQuery] string courseId,
+        [FromQuery] string? cohortId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetMyGradesAsync(courseId, cancellationToken);
+        var result = await _instructorService.GetMyGradesAsync(courseId, cohortId, cancellationToken);
         return Ok(result);
     }
 

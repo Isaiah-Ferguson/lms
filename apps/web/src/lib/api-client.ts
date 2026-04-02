@@ -450,9 +450,11 @@ export const lessonsApi = {
 // ─── Grades API ───────────────────────────────────────────────────────────────
 
 export const gradesApi = {
-  getMyGrades(courseId: string, token: string): Promise<StudentGrades> {
+  getMyGrades(courseId: string, token: string, cohortId?: string): Promise<StudentGrades> {
+    const params = new URLSearchParams({ courseId });
+    if (cohortId) params.append('cohortId', cohortId);
     return apiFetch<StudentGrades>(
-      `/api/grades/my?courseId=${encodeURIComponent(courseId)}`,
+      `/api/grades/my?${params.toString()}`,
       {},
       token
     );

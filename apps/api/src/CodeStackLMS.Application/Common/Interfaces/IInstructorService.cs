@@ -22,6 +22,7 @@ public interface IInstructorService
 
     Task<StudentGradesDto> GetMyGradesAsync(
         string courseId,
+        string? cohortId,
         CancellationToken cancellationToken = default);
 
     Task<AdminGradesDto> GetAdminGradesAsync(

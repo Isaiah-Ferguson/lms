@@ -263,9 +263,15 @@ public class InstructorService : IInstructorService
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<StudentGradesDto> GetMyGradesAsync(
         string courseId,
+        string? cohortId,
         CancellationToken cancellationToken = default)
     {
         var userId = _currentUser.UserId;
+
+        // Resolve cohort if provided
+        Guid? parsedCohortId = null;
+        if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
+            parsedCohortId = cid;
 
         // Resolve course - prefer courses with modules to avoid empty duplicates
         Course? course = null;
@@ -289,6 +295,20 @@ public class InstructorService : IInstructorService
 
         if (course == null)
             return new StudentGradesDto(courseId, courseId, []);
+
+        // If cohortId is provided, verify the course belongs to that cohort
+        if (parsedCohortId.HasValue)
+        {
+            var courseInCohort = await _db.CohortCourses
+                .AsNoTracking()
+                .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
+
+            // If the course doesn't belong to this cohort, return empty results
+            if (!courseInCohort)
+            {
+                return new StudentGradesDto(course.Id.ToString(), course.Title, []);
+            }
+        }
 
         // Get all assignments in this course
         var assignments = await _db.Assignments
@@ -406,8 +426,8 @@ public class InstructorService : IInstructorService
         }
 
         var enrolledStudents = await enrolledStudentsQuery
-            .Select(e => e.User)
-            .Distinct()
+            .GroupBy(e => e.UserId)
+            .Select(g => g.First().User)
             .OrderBy(u => u.Name)
             .ToListAsync(cancellationToken);
 
