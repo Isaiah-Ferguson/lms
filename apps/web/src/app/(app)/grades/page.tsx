@@ -75,11 +75,15 @@ export default function GradesPage() {
   const [loadingEnrollments, setLoadingEnrollments] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
+  const [cohortLoaded, setCohortLoaded] = useState(false);
 
   // Fetch active cohort on mount
   useEffect(() => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      setCohortLoaded(true);
+      return;
+    }
     homeApi.getDashboard(token)
       .then((dashboard) => {
         const activeCohort = dashboard.years.find(y => y.isActive);
@@ -89,6 +93,9 @@ export default function GradesPage() {
       })
       .catch(() => {
         // Failed to fetch active cohort, will load all grades
+      })
+      .finally(() => {
+        setCohortLoaded(true);
       });
   }, []);
 
@@ -129,10 +136,10 @@ export default function GradesPage() {
   }, [router]);
 
   useEffect(() => {
-    if (activeCourseId && activeCohortId !== null) {
+    if (activeCourseId && cohortLoaded) {
       load(activeCourseId, activeCohortId);
     }
-  }, [activeCourseId, activeCohortId, load]);
+  }, [activeCourseId, cohortLoaded, activeCohortId, load]);
 
   const rows = data?.rows ?? [];
   const graded = rows.filter((r) => r.status === "Graded");
