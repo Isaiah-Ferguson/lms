@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, CalendarDays, BookOpen, Users } from "lucide-react";
-import { assignmentsApi, instructorApi, type Assignment } from "@/lib/api-client";
+import { assignmentsApi, instructorApi, gradesApi, type Assignment } from "@/lib/api-client";
 import { getToken, getUserRole } from "@/lib/auth";
 import { SubmissionCard } from "./components/SubmissionCard";
 import { ParticipationCard } from "./components/ParticipationCard";
@@ -49,6 +49,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     submitted: 0,
     needsGrading: 0,
   });
+  const [studentGrade, setStudentGrade] = useState<{ totalScore: number | null; maxScore: number } | null>(null);
 
   // Admin edit state
   const [editDueDate, setEditDueDate] = useState("");
@@ -80,11 +81,27 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             submittedAt: submission.submittedAt,
             fileName: submission.fileName,
             fileSize: submission.fileSize,
+            submissionId: submission.submissionId,
           });
         }
       })
       .catch(() => setError("Assignment not found."))
       .finally(() => setLoading(false));
+
+    // Fetch student's grade for this assignment
+    gradesApi.getMyGrades(params.courseId, token)
+      .then((grades) => {
+        const gradeRow = grades.rows.find(r => r.assignmentId === params.courseAssignmentId);
+        if (gradeRow) {
+          setStudentGrade({
+            totalScore: gradeRow.totalScore,
+            maxScore: gradeRow.maxScore,
+          });
+        }
+      })
+      .catch(() => {
+        // Grade not available yet
+      });
 
     // Fetch participation counts (only for instructors)
     if (isInstructor) {
@@ -174,7 +191,11 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             <h1 className="mt-1 text-2xl font-bold text-gray-900">{assignment.title}</h1>
           </div>
           <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-            {totalPoints > 0 ? `${totalPoints} pts` : "Ungraded"}
+            {studentGrade?.totalScore !== null && studentGrade?.totalScore !== undefined
+              ? `${studentGrade.totalScore} / ${studentGrade.maxScore} pts`
+              : totalPoints > 0
+              ? `${totalPoints} pts max`
+              : "Ungraded"}
           </span>
         </div>
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
@@ -244,8 +265,10 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             initial={submissionState}
           />
 
-          {/* Participation counts — shown to all */}
-          <ParticipationCard counts={participationCounts} isInstructor={isInstructor} />
+          {/* Participation counts — instructors only */}
+          {isInstructor && (
+            <ParticipationCard counts={participationCounts} isInstructor={isInstructor} />
+          )}
 
           {/* Instructor-only: manage assignment */}
           {isInstructor && (

@@ -215,32 +215,33 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
             />
             <CodeLinksPanel video={selectedVideo} />
           </section>
-
-          {isAdminOrInstructor && (
-            <AdminUploadPanel 
-              weekNumber={parsedWeekNumber} 
-              moduleId={realModuleId}
-              onAttach={handleAttachVideo} 
-            />
-          )}
-
-          {/* Assignments Section */}
-          {realCourseId && (
-            <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Week {parsedWeekNumber} Assignments</h2>
-              <AssignmentManager
-                courseId={realCourseId}
-                moduleId={realModuleId ?? undefined}
-                moduleTitle={realModuleTitle ?? `Week ${parsedWeekNumber}`}
-                canEdit={isAdminOrInstructor}
-              />
-            </section>
-          )}
         </>
       ) : (
         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
           No videos available for this week yet.
         </div>
+      )}
+
+      {/* Admin Upload Panel - always show for instructors/admins */}
+      {isAdminOrInstructor && (
+        <AdminUploadPanel 
+          weekNumber={parsedWeekNumber} 
+          moduleId={realModuleId}
+          onAttach={handleAttachVideo} 
+        />
+      )}
+
+      {/* Assignments Section - always show */}
+      {realCourseId && (
+        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Week {parsedWeekNumber} Assignments</h2>
+          <AssignmentManager
+            courseId={realCourseId}
+            moduleId={realModuleId ?? undefined}
+            moduleTitle={realModuleTitle ?? `Week ${parsedWeekNumber}`}
+            canEdit={isAdminOrInstructor}
+          />
+        </section>
       )}
 
       {/* Edit Video Modal */}

@@ -289,20 +289,36 @@ export default function AdminGradesPage() {
                 <button
                   onClick={() => {
                     if (!data) return;
+                    // Detailed export with assignment-level grader information
                     const csvRows = [
-                      ["Student", "Email", "Score", "Max Score", "Percentage", "Letter Grade", "Graded", "Total Assignments", "Last Graded"],
-                      ...sorted.map(s => [
-                        s.name,
-                        s.email,
-                        s.totalEarned,
-                        s.totalPossible.toString(),
-                        s.overallPct.toString() + "%",
-                        s.letterGrade,
-                        s.gradedCount.toString(),
-                        s.totalCount.toString(),
-                        s.lastGraded
-                      ])
+                      ["Student", "Email", "Assignment", "Assignment Type", "Score", "Max Score", "Percentage", "Status", "Graded By", "Graded At"],
                     ];
+                    
+                    // Add a row for each student's assignment
+                    sorted.forEach(student => {
+                      student.rows.forEach(row => {
+                        const percentage = row.maxScore > 0 && row.totalScore !== null
+                          ? Math.round((row.totalScore / row.maxScore) * 100) + "%"
+                          : "—";
+                        const gradedAt = row.gradedAt 
+                          ? new Date(row.gradedAt).toLocaleString()
+                          : "—";
+                        
+                        csvRows.push([
+                          student.name,
+                          student.email,
+                          row.assignmentTitle,
+                          row.assignmentType,
+                          row.totalScore?.toString() ?? "—",
+                          row.maxScore.toString(),
+                          percentage,
+                          row.status,
+                          row.gradedBy ?? "—",
+                          gradedAt
+                        ]);
+                      });
+                    });
+                    
                     const csvContent = csvRows.map(row => 
                       row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(",")
                     ).join("\n");
@@ -310,7 +326,7 @@ export default function AdminGradesPage() {
                     const link = document.createElement("a");
                     const url = URL.createObjectURL(blob);
                     link.setAttribute("href", url);
-                    link.setAttribute("download", `${data.courseName}_Admin_Grades.csv`);
+                    link.setAttribute("download", `${data.courseName}_Detailed_Grades.csv`);
                     link.style.visibility = "hidden";
                     document.body.appendChild(link);
                     link.click();

@@ -603,7 +603,7 @@ function WeekCard({ week, canEdit, onEdit }: {
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-gray-400">No videos yet</p>
+          <p className="text-xs text-gray-500">No videos yet</p>
         )}
       </div>
 

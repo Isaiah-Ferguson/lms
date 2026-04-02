@@ -236,10 +236,10 @@ public class HomeService : IHomeService
 
     private static readonly IReadOnlyList<(string Title, string Description)> DefaultLevelConfig =
     [
-        ("Combine", "Cross-level collaboration, workshops, and shared live sessions."),
+        ("Combine", "Introduction to Programing and Game Development, with C# and Unity."),
         ("Level 1", "Foundations of web development: HTML, CSS, and JavaScript basics."),
-        ("Level 2", "React, TypeScript, and modern front-end tooling."),
-        ("Level 3", "Back-end APIs, SQL, architecture, and deployment."),
+        ("Level 2", "Back-end APIs, SQL, architecture, and deployment."),
+        ("Level 3", "Next.js, TypeScript, and modern front-end design tools."),
         ("Level 4", "Capstone delivery, leadership, and career readiness."),
     ];
 
