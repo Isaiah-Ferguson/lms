@@ -68,7 +68,7 @@ const DEFAULT_LEVEL_CONFIG = [
   {
     key: "combine",
     title: "Combine",
-    description: "Cross-level collaboration, workshops, and shared live sessions.",
+    description: "Introduction to Programming and Game Development, with C# and Unity.",
   },
   {
     key: "level-1",
@@ -78,12 +78,12 @@ const DEFAULT_LEVEL_CONFIG = [
   {
     key: "level-2",
     title: "Level 2",
-    description: "React, TypeScript, and modern front-end tooling.",
+    description: "Back-end APIs, SQL, architecture, and deployment.",
   },
   {
     key: "level-3",
     title: "Level 3",
-    description: "Back-end APIs, SQL, architecture, and deployment.",
+    description: "Next.js, TypeScript, and modern front-end design tools.",
   },
   {
     key: "level-4",
