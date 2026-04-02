@@ -386,29 +386,27 @@ public class InstructorService : IInstructorService
         var assignmentIds = assignments.Select(a => a.Id).ToList();
 
         // All enrolled students - filter by cohort if provided
-        IQueryable<User> enrolledStudentsQuery = _db.UserCourseEnrollments
+        var enrolledStudentsQuery = _db.UserCourseEnrollments
             .AsNoTracking()
             .Include(e => e.User)
-            .Where(e => e.CourseId == course.Id && e.User.Role == UserRole.Student)
-            .Select(e => e.User);
+            .Where(e => e.CourseId == course.Id && e.User.Role == UserRole.Student);
 
-        // If cohortId is provided, filter to only students enrolled in that cohort's course
+        // If cohortId is provided, verify the course belongs to that cohort
         if (parsedCohortId.HasValue)
         {
-            var cohortCourseIds = await _db.CohortCourses
+            var courseInCohort = await _db.CohortCourses
                 .AsNoTracking()
-                .Where(cc => cc.CohortId == parsedCohortId.Value)
-                .Select(cc => cc.CourseId)
-                .ToListAsync(cancellationToken);
+                .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
 
-            enrolledStudentsQuery = _db.UserCourseEnrollments
-                .AsNoTracking()
-                .Include(e => e.User)
-                .Where(e => cohortCourseIds.Contains(e.CourseId) && e.User.Role == UserRole.Student)
-                .Select(e => e.User);
+            // If the course doesn't belong to this cohort, return empty results
+            if (!courseInCohort)
+            {
+                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
+            }
         }
 
         var enrolledStudents = await enrolledStudentsQuery
+            .Select(e => e.User)
             .Distinct()
             .OrderBy(u => u.Name)
             .ToListAsync(cancellationToken);
