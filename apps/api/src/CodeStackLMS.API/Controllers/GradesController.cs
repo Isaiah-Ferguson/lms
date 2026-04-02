@@ -41,9 +41,10 @@ public class GradesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetAdminGrades(
         [FromQuery] string courseId,
+        [FromQuery] string? cohortId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetAdminGradesAsync(courseId, cancellationToken);
+        var result = await _instructorService.GetAdminGradesAsync(courseId, cohortId, cancellationToken);
         return Ok(result);
     }
 }

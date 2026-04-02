@@ -247,7 +247,7 @@ function AnnouncementsCard({
         <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
           <div className="flex items-center gap-2">
             <Megaphone className="h-4 w-4 shrink-0 text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-800">Announcements</h3>
+            <h3 className="text-xl font-semibold text-gray-800">Announcements</h3>
           </div>
           {canEdit && (
             <button
@@ -549,7 +549,7 @@ function WeekCard({ week, canEdit, onEdit }: {
       <div className="border-b border-gray-100 bg-gray-50 px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-gray-900 truncate">
+            <h3 className="text-xl font-bold text-gray-900 truncate">
               Week {week.weekNumber}
               {week.title && (
                 <span className="ml-1.5 font-medium text-gray-500">— {week.title}</span>

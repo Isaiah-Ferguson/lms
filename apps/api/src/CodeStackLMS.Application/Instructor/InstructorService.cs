@@ -341,10 +341,16 @@ public class InstructorService : IInstructorService
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<AdminGradesDto> GetAdminGradesAsync(
         string courseId,
+        string? cohortId,
         CancellationToken cancellationToken = default)
     {
         if (_currentUser.Role is not ("Admin" or "Instructor"))
             throw new ForbiddenException();
+
+        // Resolve cohort if provided
+        Guid? parsedCohortId = null;
+        if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
+            parsedCohortId = cid;
 
         // Resolve course - prefer courses with modules to avoid empty duplicates
         Course? course = null;
@@ -379,12 +385,30 @@ public class InstructorService : IInstructorService
 
         var assignmentIds = assignments.Select(a => a.Id).ToList();
 
-        // All enrolled students
-        var enrolledStudents = await _db.UserCourseEnrollments
+        // All enrolled students - filter by cohort if provided
+        IQueryable<User> enrolledStudentsQuery = _db.UserCourseEnrollments
             .AsNoTracking()
             .Include(e => e.User)
             .Where(e => e.CourseId == course.Id && e.User.Role == UserRole.Student)
-            .Select(e => e.User)
+            .Select(e => e.User);
+
+        // If cohortId is provided, filter to only students enrolled in that cohort's course
+        if (parsedCohortId.HasValue)
+        {
+            var cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+
+            enrolledStudentsQuery = _db.UserCourseEnrollments
+                .AsNoTracking()
+                .Include(e => e.User)
+                .Where(e => cohortCourseIds.Contains(e.CourseId) && e.User.Role == UserRole.Student)
+                .Select(e => e.User);
+        }
+
+        var enrolledStudents = await enrolledStudentsQuery
             .Distinct()
             .OrderBy(u => u.Name)
             .ToListAsync(cancellationToken);

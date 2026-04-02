@@ -7,7 +7,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Search, X, ChevronUp, ChevronDown, Download } from "lucide-react";
-import { gradesApi, ApiError, type AdminGrades, type AdminStudentGrade, type StudentGradeRow } from "@/lib/api-client";
+import { gradesApi, homeApi, ApiError, type AdminGrades, type AdminStudentGrade, type StudentGradeRow } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 
@@ -96,14 +96,15 @@ export default function AdminGradesPage() {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
 
-  const load = useCallback(async (courseId: string) => {
+  const load = useCallback(async (courseId: string, cohortId: string | null) => {
     const token = getToken();
     if (!token) { router.replace("/login"); return; }
     setLoading(true);
     setError(null);
     try {
-      const result = await gradesApi.getAdminGrades(courseId, token);
+      const result = await gradesApi.getAdminGrades(courseId, token, cohortId ?? undefined);
       setData(result);
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to load grades.");
@@ -112,7 +113,27 @@ export default function AdminGradesPage() {
     }
   }, [router]);
 
-  useEffect(() => { load(activeCourseId); }, [activeCourseId, load]);
+  // Fetch active cohort on mount
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    homeApi.getDashboard(token)
+      .then((dashboard) => {
+        const activeCohort = dashboard.years.find(y => y.isActive);
+        if (activeCohort) {
+          setActiveCohortId(activeCohort.id);
+        }
+      })
+      .catch(() => {
+        // Failed to fetch active cohort, will load all grades
+      });
+  }, []);
+
+  useEffect(() => { 
+    if (activeCohortId !== null) {
+      load(activeCourseId, activeCohortId); 
+    }
+  }, [activeCourseId, activeCohortId, load]);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));

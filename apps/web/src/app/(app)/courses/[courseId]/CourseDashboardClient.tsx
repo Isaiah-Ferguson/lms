@@ -186,7 +186,7 @@ function AnnouncementsCard({ announcements }: { announcements: Announcement[] })
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
         <Megaphone className="h-4 w-4 text-gray-500" />
-        <h3 className="text-sm font-semibold text-gray-800">Announcements</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Announcements</h3>
       </div>
       <ul className="divide-y divide-gray-100">
         {announcements.map((ann) => {

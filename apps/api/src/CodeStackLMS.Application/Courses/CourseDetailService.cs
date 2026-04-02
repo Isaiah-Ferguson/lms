@@ -335,8 +335,8 @@ public class CourseDetailService : ICourseDetailService
         {
             var t when t.Contains("combine") => ("bg-gray-600", "Intro To Programming & Game Development"),
             var t when t.Contains("level 1") => ("bg-blue-500", "Web Foundations"),
-            var t when t.Contains("level 2") => ("bg-violet-500", "React & TypeScript"),
-            var t when t.Contains("level 3") => ("bg-amber-500", "Back-end & APIs"),
+            var t when t.Contains("level 2") => ("bg-violet-500", "Back-end & APIs"),
+            var t when t.Contains("level 3") => ("bg-amber-500", "Next.js & TypeScript"),
             var t when t.Contains("level 4") => ("bg-emerald-500", "Capstone & Career"),
             _ => ("bg-gray-400", ""),
         };

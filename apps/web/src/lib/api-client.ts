@@ -458,9 +458,11 @@ export const gradesApi = {
     );
   },
 
-  getAdminGrades(courseId: string, token: string): Promise<AdminGrades> {
+  getAdminGrades(courseId: string, token: string, cohortId?: string): Promise<AdminGrades> {
+    const params = new URLSearchParams({ courseId });
+    if (cohortId) params.append('cohortId', cohortId);
     return apiFetch<AdminGrades>(
-      `/api/grades/admin?courseId=${encodeURIComponent(courseId)}`,
+      `/api/grades/admin?${params.toString()}`,
       {},
       token
     );

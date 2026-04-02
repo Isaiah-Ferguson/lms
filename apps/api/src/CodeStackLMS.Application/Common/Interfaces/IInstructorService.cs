@@ -26,6 +26,7 @@ public interface IInstructorService
 
     Task<AdminGradesDto> GetAdminGradesAsync(
         string courseId,
+        string? cohortId,
         CancellationToken cancellationToken = default);
 
     Task<AssignmentSubmissionsRosterDto> GetAssignmentSubmissionsRosterAsync(
