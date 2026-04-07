@@ -9,8 +9,8 @@ Hangfire is now integrated into the CodeStack LMS API to handle background job p
 ### ✅ Infrastructure
 - **Hangfire.Core** v1.8.17
 - **Hangfire.AspNetCore** v1.8.17  
-- **Hangfire.PostgreSql** v1.20.11
-- PostgreSQL as job storage (uses same database as application)
+- **Hangfire.SqlServer** v1.8.17
+- SQL Server as job storage (uses same database as application)
 - 5 concurrent worker threads
 
 ### ✅ Background Jobs
@@ -52,12 +52,13 @@ return gradeDto; // User doesn't wait, email sends in background
 
 ## Database Tables
 
-Hangfire creates these tables in your PostgreSQL database:
-- `hangfire.job` - Job definitions
-- `hangfire.jobqueue` - Job queue
-- `hangfire.state` - Job state history
-- `hangfire.server` - Active servers
-- `hangfire.set`, `hangfire.hash`, `hangfire.list`, `hangfire.counter` - Supporting tables
+Hangfire creates these tables in your SQL Server database (under `HangFire` schema):
+- `HangFire.Job` - Job definitions
+- `HangFire.JobQueue` - Job queue
+- `HangFire.State` - Job state history
+- `HangFire.Server` - Active servers
+- `HangFire.Set`, `HangFire.Hash`, `HangFire.List`, `HangFire.Counter` - Supporting tables
+- `HangFire.AggregatedCounter`, `HangFire.JobParameter` - Additional metadata tables
 
 ## Usage
 
