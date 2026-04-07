@@ -69,7 +69,7 @@ export default function InstructorGradingPage() {
         submissionId,
         {
           TotalScore: totalScore,
-          RubricBreakdownJson: "{}",
+          RubricBreakdownJson: "[]",
           OverallComment: overallComment,
         },
         token

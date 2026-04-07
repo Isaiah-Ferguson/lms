@@ -59,7 +59,7 @@ public class SendGradeNotificationJob
 
             var assignment = submission.Assignment;
             var subject = $"Your assignment has been graded: {assignment.Title}";
-            var frontendUrl = _config["Frontend:Url"] ?? "http://localhost:3000";
+            var frontendUrl = (_config["Frontend:Url"] ?? "http://localhost:3000").Split(',')[0].Trim();
             var maxScore = 100m;
             var percentScore = maxScore > 0
                 ? Math.Round(submission.Grade.TotalScore / maxScore * 100, 1)
@@ -112,13 +112,22 @@ public class SendGradeNotificationJob
 <html>
 <head>
     <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background-color: #4F46E5; color: white; padding: 20px; text-align: center; }}
-        .content {{ background-color: #f9fafb; padding: 20px; }}
-        .grade-box {{ background-color: white; border-left: 4px solid #4F46E5; padding: 15px; margin: 20px 0; }}
-        .button {{ display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 20px; }}
-        .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f3f4f6; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; }}
+        .header {{ background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%); color: white; padding: 32px 24px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 24px; font-weight: 600; }}
+        .content {{ padding: 32px 24px; background-color: #ffffff; }}
+        .grade-box {{ background: linear-gradient(to right, #EEF2FF 0%, #F5F3FF 100%); border-left: 5px solid #4F46E5; padding: 24px; margin: 24px 0; border-radius: 8px; }}
+        .grade-box h3 {{ margin: 0 0 12px 0; color: #1f2937; font-size: 18px; }}
+        .grade-box p {{ margin: 8px 0; color: #4b5563; }}
+        .score {{ font-size: 32px; font-weight: bold; color: #4F46E5; margin: 16px 0; }}
+        .button {{ display: inline-block; background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%); color: #ffffff !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; margin-top: 24px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3); }}
+        .button:hover {{ background: linear-gradient(135deg, #4338CA 0%, #4F46E5 100%); }}
+        .feedback {{ background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb; }}
+        .feedback h4 {{ margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }}
+        .feedback p {{ margin: 0; color: #1f2937; line-height: 1.8; }}
+        .footer {{ text-align: center; padding: 24px; background-color: #f9fafb; color: #6b7280; font-size: 13px; border-top: 1px solid #e5e7eb; }}
+        .footer p {{ margin: 8px 0; }}
     </style>
 </head>
 <body>
@@ -127,19 +136,23 @@ public class SendGradeNotificationJob
             <h1>Assignment Graded</h1>
         </div>
         <div class='content'>
-            <p>Hi {safeName},</p>
-            <p>Your assignment has been graded!</p>
+            <p style='font-size: 16px; color: #1f2937; margin-bottom: 8px;'>Hi {safeName},</p>
+            <p style='font-size: 15px; color: #4b5563; margin-bottom: 24px;'>Great news! Your assignment has been graded.</p>
             
             <div class='grade-box'>
                 <h3>{safeTitle}</h3>
-                <p><strong>Course:</strong> {safeCourse}</p>
-                <p><strong>Score:</strong> {score}% ({letterGrade})</p>
+                <p style='margin: 4px 0;'><strong>Course:</strong> {safeCourse}</p>
+                <div class='score'>{score}% ({letterGrade})</div>
             </div>
             
-            <h4>Instructor Feedback:</h4>
-            <p>{safeComment}</p>
+            <div class='feedback'>
+                <h4>Instructor Feedback</h4>
+                <p>{safeComment}</p>
+            </div>
             
-            <a href='{frontendUrl}/grades' class='button'>View Your Grades</a>
+            <center>
+                <a href='{frontendUrl}/grades' class='button' style='color: #ffffff;'>View Your Grades</a>
+            </center>
         </div>
         <div class='footer'>
             <p>CodeStack LMS - Learning Management System</p>
