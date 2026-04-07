@@ -105,7 +105,10 @@ public class SendGradeNotificationJob
         var safeName = System.Net.WebUtility.HtmlEncode(studentName);
         var safeTitle = System.Net.WebUtility.HtmlEncode(assignmentTitle);
         var safeCourse = System.Net.WebUtility.HtmlEncode(courseTitle);
-        var safeComment = System.Net.WebUtility.HtmlEncode(comment);
+        var safeComment = string.IsNullOrWhiteSpace(comment) 
+            ? string.Empty 
+            : System.Net.WebUtility.HtmlEncode(comment);
+        var hasFeedback = !string.IsNullOrWhiteSpace(comment);
 
         return $@"
 <!DOCTYPE html>
@@ -145,11 +148,12 @@ public class SendGradeNotificationJob
                 <div class='score'>{score}% ({letterGrade})</div>
             </div>
             
+            {(hasFeedback ? $@"
             <div class='feedback'>
                 <h4>Instructor Feedback</h4>
                 <p>{safeComment}</p>
             </div>
-            
+            " : "")}
             <center>
                 <a href='{frontendUrl}/grades' class='button' style='color: #ffffff;'>View Your Grades</a>
             </center>
