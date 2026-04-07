@@ -15,8 +15,6 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
-import { RubricGrader } from "@/components/instructor/RubricGrader";
-import type { RubricScore } from "@/components/instructor/RubricGrader";
 
 export default function InstructorGradingPage() {
   const params = useParams();
@@ -28,7 +26,6 @@ export default function InstructorGradingPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Grading state
-  const [rubricScores, setRubricScores] = useState<RubricScore[]>([]);
   const [totalScore, setTotalScore] = useState(0);
   const [overallComment, setOverallComment] = useState("");
   const [saving, setSaving] = useState(false);
@@ -72,7 +69,7 @@ export default function InstructorGradingPage() {
         submissionId,
         {
           TotalScore: totalScore,
-          RubricBreakdownJson: JSON.stringify(rubricScores),
+          RubricBreakdownJson: "{}",
           OverallComment: overallComment,
         },
         token
@@ -397,43 +394,24 @@ export default function InstructorGradingPage() {
               </CardDescription>
             </CardHeader>
 
-            {/* Rubric grader */}
+            {/* Score input (100-point scale) */}
             <div className="mb-5">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-                Rubric
-              </p>
-              <RubricGrader
-                rubricJson={detail.assignment.rubricJson}
-                maxScore={maxScore}
-                initialBreakdown={savedGrade?.rubricBreakdownJson}
-                onChange={(scores, total) => {
-                  setRubricScores(scores);
-                  setTotalScore(total);
-                }}
-                disabled={false}
-              />
-            </div>
-
-            {/* Manual total override (shown when no rubric criteria) */}
-            {JSON.parse(detail.assignment.rubricJson || "[]").length === 0 && (
-              <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Total score
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={0}
-                    max={maxScore}
-                    step={0.5}
-                    value={totalScore}
-                    onChange={(e) => setTotalScore(parseFloat(e.target.value) || 0)}
-                    className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                  <span className="text-sm text-gray-400">/ {maxScore}</span>
-                </div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Score (out of {maxScore})
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={maxScore}
+                  step={0.5}
+                  value={totalScore}
+                  onChange={(e) => setTotalScore(parseFloat(e.target.value) || 0)}
+                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+                <span className="text-sm text-gray-400">/ {maxScore}</span>
               </div>
-            )}
+            </div>
 
             {/* Overall comment */}
             <div className="mb-5">
