@@ -1,0 +1,20 @@
+using CodeStackLMS.Application.BackgroundJobs;
+using Hangfire;
+
+namespace CodeStackLMS.Infrastructure.BackgroundJobs;
+
+public class HangfireBackgroundJobService : IBackgroundJobService
+{
+    public void EnqueueGradeNotification(Guid submissionId)
+    {
+        BackgroundJob.Enqueue<SendGradeNotificationJob>(job => 
+            job.ExecuteAsync(submissionId));
+    }
+
+    public void EnqueueSubmissionNotification(Guid submissionId)
+    {
+        // Placeholder for future implementation
+        // BackgroundJob.Enqueue<SendSubmissionNotificationJob>(job => 
+        //     job.ExecuteAsync(submissionId));
+    }
+}

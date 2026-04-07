@@ -4,6 +4,7 @@ using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.AdminParticipants;
 using CodeStackLMS.Application.Assignments;
 using CodeStackLMS.Application.Auth;
+using CodeStackLMS.Application.BackgroundJobs;
 using CodeStackLMS.Application.Comments;
 using CodeStackLMS.Application.Courses;
 using CodeStackLMS.Application.Home;
@@ -11,6 +12,7 @@ using CodeStackLMS.Application.Instructor;
 using CodeStackLMS.Application.Lessons;
 using CodeStackLMS.Application.Profile;
 using CodeStackLMS.Application.Submissions;
+using CodeStackLMS.Infrastructure.BackgroundJobs;
 using CodeStackLMS.Infrastructure.Email;
 using CodeStackLMS.Infrastructure.Identity;
 using CodeStackLMS.Infrastructure.Persistence;
@@ -104,6 +106,10 @@ public static class DependencyInjection
         services.AddScoped<ICourseDetailService, CourseDetailService>();
         services.AddScoped<IAssignmentService, AssignmentService>();
         services.AddScoped<ICommentService, CommentService>();
+
+        // ── Background Jobs ───────────────────────────────────────────────────
+        services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
+        services.AddScoped<SendGradeNotificationJob>();
 
         return services;
     }

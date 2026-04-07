@@ -1,3 +1,4 @@
+using CodeStackLMS.Application.BackgroundJobs;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Instructor.DTOs;
@@ -15,23 +16,20 @@ public class InstructorService : IInstructorService
     private readonly IApplicationDbContext _db;
     private readonly IBlobStorageService _blob;
     private readonly ICurrentUserService _currentUser;
-    private readonly IEmailService _emailService;
-    private readonly IConfiguration _config;
+    private readonly IBackgroundJobService _backgroundJobs;
     private readonly ILogger<InstructorService> _logger;
 
     public InstructorService(
         IApplicationDbContext db,
         IBlobStorageService blob,
         ICurrentUserService currentUser,
-        IEmailService emailService,
-        IConfiguration configuration,
+        IBackgroundJobService backgroundJobs,
         ILogger<InstructorService> logger)
     {
         _db = db;
         _blob = blob;
         _currentUser = currentUser;
-        _emailService = emailService;
-        _config = configuration;
+        _backgroundJobs = backgroundJobs;
         _logger = logger;
     }
 
@@ -180,8 +178,8 @@ public class InstructorService : IInstructorService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        // Send email notification if user has enabled email notifications
-        await SendGradeNotificationEmailAsync(submission, cancellationToken);
+        // Enqueue background job to send email notification
+        _backgroundJobs.EnqueueGradeNotification(submissionId);
 
         return new ExistingGradeDto(
             submission.Grade!.Id,
@@ -555,122 +553,6 @@ public class InstructorService : IInstructorService
             assignment.Title,
             assignment.DueDate,
             rows);
-    }
-
-    private async Task SendGradeNotificationEmailAsync(Submission submission, CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Load student with email notification preference
-            var student = await _db.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Id == submission.StudentId, cancellationToken);
-
-            if (student == null || !student.EmailNotificationsEnabled)
-                return;
-
-            // Load assignment details
-            var assignment = await _db.Assignments
-                .AsNoTracking()
-                .Include(a => a.Module)
-                    .ThenInclude(m => m.Course)
-                .FirstOrDefaultAsync(a => a.Id == submission.AssignmentId, cancellationToken);
-
-            if (assignment == null)
-                return;
-
-            var subject = $"Your assignment has been graded: {assignment.Title}";
-            var frontendUrl = _config["Frontend:Url"] ?? "http://localhost:3000";
-            var maxScore = 100m;
-            var percentScore = maxScore > 0
-                ? Math.Round(submission.Grade!.TotalScore / maxScore * 100, 1)
-                : submission.Grade!.TotalScore;
-            var htmlBody = BuildGradeNotificationEmailBody(
-                student.Name,
-                assignment.Title,
-                assignment.Module.Course.Title,
-                percentScore,
-                submission.Grade.OverallComment,
-                frontendUrl);
-
-            await _emailService.SendAsync(student.Email, subject, htmlBody, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // Log error but don't fail the grading operation
-            _logger.LogError(ex, "Failed to send grade notification email for submission {SubmissionId}", submission.Id);
-        }
-    }
-
-    private static string BuildGradeNotificationEmailBody(
-        string studentName,
-        string assignmentTitle,
-        string courseTitle,
-        decimal score,
-        string comment,
-        string frontendUrl)
-    {
-        var letterGrade = score switch
-        {
-            >= 90 => "A",
-            >= 80 => "B",
-            >= 70 => "C",
-            >= 60 => "D",
-            _ => "F"
-        };
-
-        var safeName = System.Net.WebUtility.HtmlEncode(studentName);
-        var safeTitle = System.Net.WebUtility.HtmlEncode(assignmentTitle);
-        var safeCourse = System.Net.WebUtility.HtmlEncode(courseTitle);
-        var safeComment = System.Net.WebUtility.HtmlEncode(comment);
-
-        return $@"
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background-color: #0ea5e9; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
-        .grade-box {{ background-color: white; padding: 20px; margin: 20px 0; border-left: 4px solid #0ea5e9; border-radius: 4px; }}
-        .score {{ font-size: 36px; font-weight: bold; color: #0ea5e9; }}
-        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
-    </style>
-</head>
-<body>
-    <div class=""container"">
-        <div class=""header"">
-            <h1>Assignment Graded</h1>
-        </div>
-        <div class=""content"">
-            <p>Hi {safeName},</p>
-            <p>Your assignment <strong>{safeTitle}</strong> for <strong>{safeCourse}</strong> has been graded.</p>
-            
-            <div class=""grade-box"">
-                <div class=""score"">{score}% ({letterGrade})</div>
-                {(string.IsNullOrWhiteSpace(comment) ? "" : $@"
-                <h3>Instructor Feedback:</h3>
-                <p>{safeComment}</p>
-                ")}
-            </div>
-
-            <p>You can view your full grade breakdown and rubric details in the LMS.</p>
-            
-            <p style=""margin-top: 30px;"">
-                <a href=""{frontendUrl}/grades"" style=""background-color: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;"">View My Grades</a>
-            </p>
-        </div>
-        <div class=""footer"">
-            <p>CodeStack LMS - Learn. Build. Ship.</p>
-            <p style=""font-size: 12px; margin-top: 10px;"">
-                You received this email because you have email notifications enabled. 
-                You can change your notification preferences in your profile settings.
-            </p>
-        </div>
-    </div>
-</body>
-</html>";
     }
 
     private async Task<string?> ResolveCourseTitleFromSlugAsync(string slug, CancellationToken ct)

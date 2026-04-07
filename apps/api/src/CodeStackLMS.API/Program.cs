@@ -5,6 +5,9 @@ using CodeStackLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,22 @@ builder.Services.AddSwaggerGen();
 
 // ── Infrastructure (DB, Blob, Identity, Services) ─────────────────────────────
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// ── Hangfire Background Jobs ──────────────────────────────────────────────────
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(options => 
+        options.UseNpgsqlConnection(connectionString)));
+
+builder.Services.AddHangfireServer(options =>
+{
+    options.WorkerCount = 5; // Number of concurrent jobs
+});
 
 // ── Authentication / Authorization ────────────────────────────────────────────
 var jwtSecret = builder.Configuration["Jwt:Secret"]
@@ -90,6 +109,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// ── Hangfire Dashboard ────────────────────────────────────────────────────────
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() },
+    DashboardTitle = "CodeStack LMS - Background Jobs"
+});
+
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -119,3 +145,20 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// ── Hangfire Authorization Filter ─────────────────────────────────────────────
+public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        var httpContext = context.GetHttpContext();
+        
+        // In development, allow all access
+        if (httpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+            return true;
+        
+        // In production, require authentication and Admin role
+        return httpContext.User.Identity?.IsAuthenticated == true 
+            && httpContext.User.IsInRole("Admin");
+    }
+}
