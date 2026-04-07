@@ -162,7 +162,7 @@ public class SendGradeNotificationJob
             </div>
             " : "")}
             <center>
-                <a href='{frontendUrl}/courses/{courseId}/assignments/{assignmentId}' class='button' style='color: #ffffff;'>View Assignment & Grade</a>
+                <a href='{frontendUrl}/login?returnUrl=/courses/{courseId}/assignments/{assignmentId}' class='button' style='color: #ffffff;'>View Assignment & Grade</a>
             </center>
         </div>
         <div class='footer'>

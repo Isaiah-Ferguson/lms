@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, Users, TrendingUp, ArrowRight } from "lucide-react";
@@ -17,8 +17,10 @@ import { Alert } from "@/components/ui/Alert";
 import codestackLogo from "@/assets/codestack.png";
 import csaLargeLogo from "@/assets/CSALargeLOGO.png";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -64,7 +66,9 @@ export default function LoginPage() {
       }
       
       // Force a hard reload to clear any cached data from previous sessions
-      const destination = tokens.mustChangePassword ? "/change-password" : "/home";
+      const destination = tokens.mustChangePassword 
+        ? "/change-password" 
+        : (returnUrl || "/home");
       window.location.href = destination;
     } catch (err) {
       if (err instanceof ApiError) {
@@ -255,5 +259,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
