@@ -59,7 +59,10 @@ public class SendGradeNotificationJob
 
             var assignment = submission.Assignment;
             var subject = $"Your assignment has been graded: {assignment.Title}";
-            var frontendUrl = (_config["Frontend:Url"] ?? "http://localhost:3000").Split(',')[0].Trim();
+            
+            // Get frontend URL - use last URL in comma-separated list (production) or fallback to localhost
+            var urls = (_config["Frontend:Url"] ?? "http://localhost:3000").Split(',');
+            var frontendUrl = urls[urls.Length - 1].Trim();
             var maxScore = 100m;
             var percentScore = maxScore > 0
                 ? Math.Round(submission.Grade.TotalScore / maxScore * 100, 1)
@@ -71,7 +74,9 @@ public class SendGradeNotificationJob
                 assignment.Module.Course.Title,
                 percentScore,
                 submission.Grade.OverallComment,
-                frontendUrl);
+                frontendUrl,
+                assignment.Module.CourseId,
+                assignment.Id);
 
             await _emailService.SendAsync(student.Email, subject, htmlBody, CancellationToken.None);
             
@@ -91,7 +96,9 @@ public class SendGradeNotificationJob
         string courseTitle,
         decimal score,
         string comment,
-        string frontendUrl)
+        string frontendUrl,
+        Guid courseId,
+        Guid assignmentId)
     {
         var letterGrade = score switch
         {
@@ -155,7 +162,7 @@ public class SendGradeNotificationJob
             </div>
             " : "")}
             <center>
-                <a href='{frontendUrl}/grades' class='button' style='color: #ffffff;'>View Your Grades</a>
+                <a href='{frontendUrl}/courses/{courseId}/assignments/{assignmentId}' class='button' style='color: #ffffff;'>View Assignment & Grade</a>
             </center>
         </div>
         <div class='footer'>
