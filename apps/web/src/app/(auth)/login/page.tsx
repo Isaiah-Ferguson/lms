@@ -20,7 +20,23 @@ import csaLargeLogo from "@/assets/CSALargeLOGO.png";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get('returnUrl');
+  const returnUrlParam = searchParams.get('returnUrl');
+  
+  // Validate returnUrl to prevent open redirect vulnerability
+  // Only allow relative URLs that start with / and don't start with //
+  const isValidReturnUrl = (url: string | null): boolean => {
+    if (!url) return false;
+    // Must start with / but not //
+    if (!url.startsWith('/') || url.startsWith('//')) return false;
+    // Must not contain protocol (http:, https:, etc.)
+    if (url.includes(':')) return false;
+    return true;
+  };
+  
+  const returnUrl = returnUrlParam && isValidReturnUrl(returnUrlParam) 
+    ? decodeURIComponent(returnUrlParam) 
+    : null;
+  
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -69,6 +85,8 @@ function LoginForm() {
       const destination = tokens.mustChangePassword 
         ? "/change-password" 
         : (returnUrl || "/home");
+      console.log('Login successful - redirecting to:', destination);
+      console.log('returnUrl from params:', returnUrl);
       window.location.href = destination;
     } catch (err) {
       if (err instanceof ApiError) {
