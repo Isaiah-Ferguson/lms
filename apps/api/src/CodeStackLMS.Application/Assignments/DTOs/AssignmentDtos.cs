@@ -5,7 +5,7 @@ public record CreateAssignmentDto(
     string AssignmentType,
     string Instructions,
     DateTime DueDate,
-    string RubricJson,
+    string? AttachmentUrl,
     Guid ModuleId
 );
 
@@ -14,7 +14,7 @@ public record UpdateAssignmentDto(
     string AssignmentType,
     string Instructions,
     DateTime DueDate,
-    string RubricJson
+    string? AttachmentUrl
 );
 
 public record AssignmentDto(
@@ -23,7 +23,7 @@ public record AssignmentDto(
     string AssignmentType,
     string Instructions,
     DateTime DueDate,
-    string RubricJson,
+    string? AttachmentUrl,
     string ModuleId,
     string ModuleTitle,
     string CourseId,

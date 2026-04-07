@@ -30,8 +30,8 @@ public class AssignmentConfiguration : IEntityTypeConfiguration<Assignment>
         builder.Property(a => a.DueDate)
             .IsRequired();
 
-        builder.Property(a => a.RubricJson)
-            .IsRequired();
+        builder.Property(a => a.AttachmentUrl)
+            .HasMaxLength(2048);
 
         builder.Property(a => a.CreatedAt)
             .IsRequired();

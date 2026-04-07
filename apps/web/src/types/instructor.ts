@@ -10,7 +10,6 @@ export interface AssignmentInfo {
   id: string;
   title: string;
   instructions: string;
-  rubricJson: string;
   maxScore: number;
 }
 

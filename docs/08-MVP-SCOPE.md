@@ -5,8 +5,8 @@
 Build a functional LMS that supports:
 1. **User Management**: Students, Instructors, Admins with role-based access
 2. **Course Creation**: Instructors create courses with lessons (video-based)
-3. **Assignments**: Create assignments with rubrics, accept file/GitHub submissions
-4. **Grading**: Instructors grade submissions with rubric-based feedback
+3. **Assignments**: Create assignments with optional file attachments, accept file/GitHub submissions
+4. **Grading**: Instructors grade submissions on a 100-point scale with detailed feedback
 5. **Notifications**: Email notifications for key events
 
 **Target Timeline**: 2-3 sprints (4-6 weeks)  
@@ -20,10 +20,10 @@ Build a functional LMS that supports:
 - ✅ User authentication (JWT)
 - ✅ Course CRUD with instructor ownership
 - ✅ Lesson management with video upload
-- ✅ Assignment creation with rubrics
+- ✅ Assignment creation with optional file attachments
 - ✅ File upload submissions (Azure Blob + SAS)
 - ✅ GitHub URL submissions
-- ✅ Rubric-based grading
+- ✅ 100-point scale grading with detailed feedback
 - ✅ Student/Instructor dashboards
 - ✅ Email notifications (submission, grading)
 
@@ -96,7 +96,7 @@ Build a functional LMS that supports:
 | Implement Lesson CRUD endpoints | 6h | Backend | P0 |
 | Implement video upload SAS flow | 6h | Backend | P0 |
 | Implement Assignment CRUD endpoints | 6h | Backend | P0 |
-| Implement Rubric CRUD endpoints | 5h | Backend | P0 |
+| Implement assignment file attachment support | 3h | Backend | P0 |
 | Implement Enrollment endpoints | 4h | Backend | P0 |
 | Add authorization policies (course owner) | 5h | Backend | P0 |
 | Write unit tests (courses, assignments) | 8h | Backend | P0 |
@@ -114,8 +114,8 @@ Build a functional LMS that supports:
 | Build lesson creation form with video upload | 10h | Frontend | P0 |
 | Build assignment list page | 5h | Frontend | P0 |
 | Build assignment detail page | 6h | Frontend | P0 |
-| Build assignment creation form | 8h | Frontend | P0 |
-| Build rubric editor component | 8h | Frontend | P0 |
+| Build assignment creation form with file upload | 8h | Frontend | P0 |
+| Build assignment file attachment display | 3h | Frontend | P0 |
 | Implement file upload with progress | 6h | Frontend | P0 |
 
 **Total Frontend**: ~71 hours
@@ -125,7 +125,7 @@ Build a functional LMS that supports:
 - ✅ Instructors can add lessons with videos
 - ✅ Videos uploaded to Azure Blob Storage
 - ✅ Students can view enrolled courses and lessons
-- ✅ Instructors can create assignments with rubrics
+- ✅ Instructors can create assignments with optional file attachments
 - ✅ Students can view assignments
 
 ---
@@ -156,7 +156,7 @@ Build a functional LMS that supports:
 | Build student submissions list page | 6h | Frontend | P0 |
 | Build submission detail page | 6h | Frontend | P0 |
 | Build grading interface | 10h | Frontend | P0 |
-| Build rubric grading component | 8h | Frontend | P0 |
+| Build grading form (100-point scale) | 6h | Frontend | P0 |
 | Build gradebook page (instructor) | 8h | Frontend | P0 |
 | Build student grades page | 5h | Frontend | P0 |
 | Implement file download functionality | 4h | Frontend | P0 |
@@ -169,7 +169,7 @@ Build a functional LMS that supports:
 - ✅ Students can submit assignments (file upload)
 - ✅ Students can submit GitHub repo URLs
 - ✅ Instructors receive submission notifications
-- ✅ Instructors can grade submissions with rubrics
+- ✅ Instructors can grade submissions on 100-point scale
 - ✅ Students receive grade notifications
 - ✅ Gradebook shows all student grades
 - ✅ Full E2E user flows tested
@@ -195,7 +195,7 @@ Build a functional LMS that supports:
 | **Assignments** |
 | View Assignments | ✅ | ✅ | ✅ | 2 |
 | Create Assignment | - | ✅ | ✅ | 2 |
-| Create Rubric | - | ✅ | ✅ | 2 |
+| Add Assignment Attachments | - | ✅ | ✅ | 2 |
 | **Submissions** |
 | Submit Assignment (File) | ✅ | - | - | 3 |
 | Submit Assignment (GitHub) | ✅ | - | - | 3 |

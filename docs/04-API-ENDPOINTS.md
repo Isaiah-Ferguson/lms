@@ -146,10 +146,36 @@ Status: 201 Created, body: { data: T, message?: string }
 **Response**: `AssignmentDto[]`
 **Status**: 200 OK
 
+### POST `/api/assignments`
+**Description**: Create new assignment
+**Auth**: Instructor
+**Body**:
+```json
+{
+  "title": "string",
+  "assignmentType": "Challenge | MiniChallenge | Project",
+  "instructions": "string",
+  "dueDate": "datetime",
+  "attachmentUrl": "string",  // Optional - URL to assignment files/resources
+  "moduleId": "guid"
+}
+```
+**Response**: `AssignmentDto`
+**Status**: 201 Created
+
 ### PUT `/api/assignments/{assignmentId}`
 **Description**: Update assignment
 **Auth**: Instructor
-**Body**: Assignment details
+**Body**:
+```json
+{
+  "title": "string",
+  "assignmentType": "Challenge | MiniChallenge | Project",
+  "instructions": "string",
+  "dueDate": "datetime",
+  "attachmentUrl": "string"  // Optional - URL to assignment files/resources
+}
+```
 **Response**: Updated assignment
 **Status**: 200 OK
 
@@ -298,18 +324,19 @@ Status: 201 Created, body: { data: T, message?: string }
 **Status**: 200 OK
 
 ### POST `/api/instructor/submissions/{submissionId}/grade`
-**Description**: Grade a submission
+**Description**: Grade a submission (100-point scale)
 **Auth**: Instructor
 **Body**:
 ```json
 {
-  "totalScore": number,
-  "rubricBreakdownJson": "string",
+  "totalScore": number,  // 0-100
+  "rubricBreakdownJson": "string",  // Optional detailed breakdown
   "overallComment": "string"
 }
 ```
 **Response**: `GradeDto`
 **Status**: 200 OK
+**Note**: All assignments use a fixed 100-point grading scale
 
 ### GET `/api/instructor/assignments/{assignmentId}/submissions-roster`
 **Description**: Get roster of all submissions for an assignment

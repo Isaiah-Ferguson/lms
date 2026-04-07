@@ -27,7 +27,6 @@ public record AssignmentInfoDto(
     Guid Id,
     string Title,
     string Instructions,
-    string RubricJson,
     decimal MaxScore);
 
 public record ArtifactDto(

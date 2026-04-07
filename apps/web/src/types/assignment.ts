@@ -3,7 +3,7 @@ export interface CreateAssignmentRequest {
   assignmentType: string;
   instructions: string;
   dueDate: string;
-  rubricJson: string;
+  attachmentUrl?: string;
   moduleId: string;
 }
 
@@ -12,7 +12,7 @@ export interface UpdateAssignmentRequest {
   assignmentType: string;
   instructions: string;
   dueDate: string;
-  rubricJson: string;
+  attachmentUrl?: string;
 }
 
 export interface Assignment {
@@ -21,7 +21,7 @@ export interface Assignment {
   assignmentType: string;
   instructions: string;
   dueDate: string;
-  rubricJson: string;
+  attachmentUrl?: string;
   moduleId: string;
   moduleTitle: string;
   courseId: string;

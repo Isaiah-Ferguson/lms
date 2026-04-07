@@ -9,7 +9,7 @@ public class Assignment : BaseEntity, IAuditableEntity
     public string AssignmentType { get; set; } = "Challenge";
     public string Instructions { get; set; } = string.Empty;
     public DateTime DueDate { get; set; }
-    public string RubricJson { get; set; } = string.Empty;
+    public string? AttachmentUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 

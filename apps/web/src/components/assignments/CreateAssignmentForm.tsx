@@ -26,11 +26,12 @@ export function CreateAssignmentForm({
     assignmentType: existingAssignment?.assignmentType ?? "Challenge",
     instructions: existingAssignment?.instructions ?? "",
     dueDate: existingAssignment?.dueDate ? new Date(existingAssignment.dueDate).toISOString().slice(0, 16) : "",
-    rubricJson: existingAssignment?.rubricJson ?? "[]",
+    attachmentUrl: existingAssignment?.attachmentUrl ?? "",
     moduleId: existingAssignment?.moduleId ?? moduleId,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +51,8 @@ export function CreateAssignmentForm({
       onAssignmentCreated?.(assignment, formData.assignmentType as AssignmentType);
 
       if (!existingAssignment) {
-        setFormData({ title: "", assignmentType: "Challenge", instructions: "", dueDate: "", rubricJson: "[]", moduleId });
+        setFormData({ title: "", assignmentType: "Challenge", instructions: "", dueDate: "", attachmentUrl: "", moduleId });
+        setSelectedFile(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to ${existingAssignment ? 'update' : 'create'} assignment`);
@@ -61,6 +63,19 @@ export function CreateAssignmentForm({
 
   const handleInputChange = (field: keyof CreateAssignmentRequest, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.name.endsWith('.zip')) {
+        setSelectedFile(file);
+        setError(null);
+      } else {
+        setError('Please select a .zip file');
+        e.target.value = '';
+      }
+    }
   };
 
   return (
@@ -129,17 +144,33 @@ export function CreateAssignmentForm({
         </div>
 
         <div>
-          <label htmlFor="rubricJson" className="block text-sm font-medium text-gray-700">
-            Rubric <span className="text-gray-400 font-normal">(JSON, optional)</span>
+          <label htmlFor="attachmentUrl" className="block text-sm font-medium text-gray-700">
+            Attachment URL <span className="text-gray-400 font-normal">(optional)</span>
           </label>
-          <textarea
-            id="rubricJson"
-            value={formData.rubricJson}
-            onChange={(e) => handleInputChange("rubricJson", e.target.value)}
-            rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-xs"
-            placeholder='[{"criterion": "Code quality", "points": 10, "description": "..."}]'
+          <input
+            type="url"
+            id="attachmentUrl"
+            value={formData.attachmentUrl}
+            onChange={(e) => handleInputChange("attachmentUrl", e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            placeholder="https://example.com/file.zip"
           />
+        </div>
+
+        <div>
+          <label htmlFor="file" className="block text-sm font-medium text-gray-700">
+            Or Upload Zip File <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            type="file"
+            id="file"
+            accept=".zip"
+            onChange={handleFileChange}
+            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          {selectedFile && (
+            <p className="mt-1 text-sm text-gray-600">Selected: {selectedFile.name}</p>
+          )}
         </div>
 
         <div className="flex justify-end space-x-3 pt-2">

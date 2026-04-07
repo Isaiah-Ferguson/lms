@@ -122,7 +122,7 @@ public class AssignmentService : IAssignmentService
             AssignmentType = string.IsNullOrWhiteSpace(dto.AssignmentType) ? "Challenge" : dto.AssignmentType,
             Instructions = dto.Instructions,
             DueDate = dto.DueDate,
-            RubricJson = dto.RubricJson,
+            AttachmentUrl = dto.AttachmentUrl,
             ModuleId = dto.ModuleId,
             CreatedAt = DateTime.UtcNow
         };
@@ -157,7 +157,7 @@ public class AssignmentService : IAssignmentService
         assignment.AssignmentType = string.IsNullOrWhiteSpace(dto.AssignmentType) ? assignment.AssignmentType : dto.AssignmentType;
         assignment.Instructions = dto.Instructions;
         assignment.DueDate = dto.DueDate;
-        assignment.RubricJson = dto.RubricJson;
+        assignment.AttachmentUrl = dto.AttachmentUrl;
         assignment.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -224,7 +224,7 @@ public class AssignmentService : IAssignmentService
             assignment.AssignmentType,
             assignment.Instructions,
             assignment.DueDate,
-            assignment.RubricJson,
+            assignment.AttachmentUrl,
             assignment.ModuleId.ToString(),
             assignment.Module.Title,
             assignment.Module.CourseId.ToString(),

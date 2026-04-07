@@ -55,7 +55,7 @@
 │ (Student)   │         │ - Id        │         │ - Id        │
 └─────────────┘         │ - AssignId  │         │ - ModuleId  │
       │                 │ - StudentId │         │ - Title     │
-      │                 │ - Attempt   │         │ - RubricJson│
+      │                 │ - Attempt   │         │ - AttachUrl │
       │                 │ - Type      │         │ - DueDate   │
       │                 │ - Status    │         └─────────────┘
       │                 └─────────────┘
@@ -314,9 +314,10 @@ public class Assignment : BaseEntity, IAuditableEntity
 {
     public Guid ModuleId { get; set; }
     public string Title { get; set; } = string.Empty;
+    public string AssignmentType { get; set; } = "Challenge";
     public string Instructions { get; set; } = string.Empty;
     public DateTime DueDate { get; set; }
-    public string RubricJson { get; set; } = string.Empty;
+    public string? AttachmentUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
@@ -638,11 +639,12 @@ CREATE INDEX IX_UserAdminNotes_AuthorUserId ON UserAdminNotes(AuthorUserId);
 - At least one of: VideoBlobPath (for Video), TextContent (for Text), or LinkUrl (for Link)
 
 // Assignment
-- Title: Required, MaxLength(200)
+- Title: Required, MaxLength(300)
 - ModuleId: Required, FK to Module
+- AssignmentType: Required, MaxLength(50), Default: "Challenge"
 - Instructions: Required
 - DueDate: Required
-- RubricJson: Required (JSON structure for rubric)
+- AttachmentUrl: Optional, MaxLength(2048) - URL to assignment files/resources
 
 // Submission
 - AssignmentId: Required, FK
@@ -656,8 +658,8 @@ CREATE INDEX IX_UserAdminNotes_AuthorUserId ON UserAdminNotes(AuthorUserId);
 // Grade
 - SubmissionId: Required, Unique (1:1)
 - InstructorId: Required, FK
-- TotalScore: Required, >= 0
-- RubricBreakdownJson: Required
+- TotalScore: Required, >= 0, <= 100 (fixed 100-point scale)
+- RubricBreakdownJson: Required (JSON for detailed breakdown)
 - OverallComment: Required
 
 // Cohort

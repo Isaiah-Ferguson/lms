@@ -115,8 +115,7 @@ public class InstructorService : IInstructorService
                 submission.Assignment.Id,
                 submission.Assignment.Title,
                 submission.Assignment.Instructions,
-                submission.Assignment.RubricJson,
-                MaxScoreFromRubric(submission.Assignment.RubricJson)),
+                100),
             artifacts,
             gitHubInfo,
             existingGrade);
@@ -253,7 +252,7 @@ public class InstructorService : IInstructorService
             s.CreatedAt,
             s.Grade?.GradedAt,
             s.Grade?.TotalScore,
-            MaxScoreFromRubric(s.Assignment.RubricJson))).ToList();
+            100)).ToList();
 
         return new SubmissionQueuePageDto(items, totalCount, page, pageSize);
     }
@@ -335,7 +334,7 @@ public class InstructorService : IInstructorService
         var rows = assignments.Select(a =>
         {
             latestByAssignment.TryGetValue(a.Id, out var sub);
-            var maxScore = MaxScoreFromRubric(a.RubricJson);
+            var maxScore = 100m;
             var status = sub == null ? "Missing"
                 : sub.Status == SubmissionStatus.Graded ? "Graded"
                 : "Pending";
@@ -448,7 +447,7 @@ public class InstructorService : IInstructorService
             var rows = assignments.Select(a =>
             {
                 subsByStudentAndAssignment.TryGetValue((student.Id, a.Id), out var sub);
-                var maxScore = MaxScoreFromRubric(a.RubricJson);
+                var maxScore = 100m;
                 var status = sub == null ? "Missing"
                     : sub.Status == SubmissionStatus.Graded ? "Graded"
                     : "Pending";
@@ -476,32 +475,6 @@ public class InstructorService : IInstructorService
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    private static decimal MaxScoreFromRubric(string rubricJson)
-    {
-        // Rubric JSON is expected to be an array of criteria with "points" fields.
-        // e.g. [{"criterion":"Correctness","points":50},{"criterion":"Style","points":20}]
-        // Sum all "points" values. Fall back to 100 if parsing fails.
-        try
-        {
-            using var doc = System.Text.Json.JsonDocument.Parse(rubricJson);
-            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
-            {
-                decimal total = 0;
-                foreach (var item in doc.RootElement.EnumerateArray())
-                {
-                    if (item.TryGetProperty("points", out var pts))
-                        total += pts.GetDecimal();
-                }
-                return total > 0 ? total : 100;
-            }
-        }
-        catch
-        {
-            // ignore parse errors
-        }
-
-        return 100;
-    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // GET /api/instructor/assignments/{assignmentId}/submissions-roster
@@ -559,7 +532,7 @@ public class InstructorService : IInstructorService
             string? grade = null;
             if (submission?.Grade != null)
             {
-                var maxScore = MaxScoreFromRubric(assignment.RubricJson);
+                var maxScore = 100m;
                 grade = maxScore > 0 
                     ? $"{submission.Grade.TotalScore} / {maxScore}"
                     : $"{submission.Grade.TotalScore}%";
@@ -608,7 +581,7 @@ public class InstructorService : IInstructorService
 
             var subject = $"Your assignment has been graded: {assignment.Title}";
             var frontendUrl = _config["Frontend:Url"] ?? "http://localhost:3000";
-            var maxScore = MaxScoreFromRubric(assignment.RubricJson);
+            var maxScore = 100m;
             var percentScore = maxScore > 0
                 ? Math.Round(submission.Grade!.TotalScore / maxScore * 100, 1)
                 : submission.Grade!.TotalScore;

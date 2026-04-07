@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarDays, BookOpen, Users } from "lucide-react";
+import { ArrowLeft, CalendarDays, BookOpen, Users, Download } from "lucide-react";
 import { assignmentsApi, instructorApi, gradesApi, type Assignment } from "@/lib/api-client";
 import { getToken, getUserRole } from "@/lib/auth";
 import { SubmissionCard } from "./components/SubmissionCard";
@@ -26,13 +26,6 @@ function timeRemaining(iso: string): string {
   return `${hours}h remaining`;
 }
 
-function parseRubric(json: string): { criterion: string; points: number; description: string }[] {
-  try {
-    const parsed = JSON.parse(json);
-    if (Array.isArray(parsed)) return parsed;
-  } catch { /* ignore */ }
-  return [];
-}
 
 // Stub initial submission state — swap for real API call when available
 function getStubSubmission(): SubmissionState {
@@ -134,7 +127,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
         assignmentType: editAssignmentType,
         instructions: assignment.instructions,
         dueDate: new Date(editDueDate).toISOString(),
-        rubricJson: assignment.rubricJson,
+        attachmentUrl: assignment.attachmentUrl,
       }, token);
       setAssignment(updated);
       setSaveMsg("Saved successfully.");
@@ -169,8 +162,6 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     );
   }
 
-  const rubric = parseRubric(assignment.rubricJson);
-  const totalPoints = rubric.reduce((s, r) => s + r.points, 0);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -193,9 +184,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
           <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
             {studentGrade?.totalScore !== null && studentGrade?.totalScore !== undefined
               ? `${studentGrade.totalScore} / ${studentGrade.maxScore} pts`
-              : totalPoints > 0
-              ? `${totalPoints} pts max`
-              : "Ungraded"}
+              : `${studentGrade?.maxScore ?? 100} pts max`}
           </span>
         </div>
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
@@ -226,33 +215,18 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             )}
           </div>
 
-          {rubric.length > 0 && (
+          {assignment.attachmentUrl && (
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-3 text-base font-semibold text-gray-900">Rubric</h2>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
-                    <th className="pb-2 font-medium">Criterion</th>
-                    <th className="pb-2 font-medium">Description</th>
-                    <th className="pb-2 text-right font-medium">Points</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {rubric.map((r, i) => (
-                    <tr key={i}>
-                      <td className="py-2 pr-4 font-medium text-gray-800">{r.criterion}</td>
-                      <td className="py-2 pr-4 text-gray-600">{r.description}</td>
-                      <td className="py-2 text-right text-gray-800">{r.points}</td>
-                    </tr>
-                  ))}
-                  <tr className="border-t border-gray-200">
-                    <td colSpan={2} className="pt-2 text-right text-xs font-semibold text-gray-500">
-                      Total
-                    </td>
-                    <td className="pt-2 text-right font-bold text-gray-900">{totalPoints}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <h2 className="mb-3 text-base font-semibold text-gray-900">Assignment Files</h2>
+              <a
+                href={assignment.attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Download Assignment Files
+              </a>
             </div>
           )}
         </div>
