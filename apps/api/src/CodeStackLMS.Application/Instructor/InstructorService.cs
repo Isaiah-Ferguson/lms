@@ -404,7 +404,20 @@ public class InstructorService : IInstructorService
             .Include(a => a.Module);
 
         if (!isCombined && course != null)
+        {
             assignmentsQuery = assignmentsQuery.Where(a => a.Module.CourseId == course.Id);
+        }
+        else if (isCombined && parsedCohortId.HasValue)
+        {
+            // For combined view with cohort filter, only get assignments from courses in that cohort
+            var cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+
+            assignmentsQuery = assignmentsQuery.Where(a => cohortCourseIds.Contains(a.Module.CourseId));
+        }
 
         var assignments = await assignmentsQuery
             .OrderBy(a => a.Module.Order)
@@ -423,17 +436,32 @@ public class InstructorService : IInstructorService
         if (!isCombined && course != null)
             enrolledStudentsQuery = enrolledStudentsQuery.Where(e => e.CourseId == course.Id);
 
-        // If cohortId is provided, verify the course belongs to that cohort
-        if (parsedCohortId.HasValue && !isCombined && course != null)
+        // If cohortId is provided, filter by courses in that cohort
+        if (parsedCohortId.HasValue)
         {
-            var courseInCohort = await _db.CohortCourses
-                .AsNoTracking()
-                .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
-
-            // If the course doesn't belong to this cohort, return empty results
-            if (!courseInCohort)
+            if (isCombined)
             {
-                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
+                // For combined view, filter enrollments to only courses in this cohort
+                var cohortCourseIds = await _db.CohortCourses
+                    .AsNoTracking()
+                    .Where(cc => cc.CohortId == parsedCohortId.Value)
+                    .Select(cc => cc.CourseId)
+                    .ToListAsync(cancellationToken);
+
+                enrolledStudentsQuery = enrolledStudentsQuery.Where(e => cohortCourseIds.Contains(e.CourseId));
+            }
+            else if (course != null)
+            {
+                // For single course view, verify the course belongs to that cohort
+                var courseInCohort = await _db.CohortCourses
+                    .AsNoTracking()
+                    .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
+
+                // If the course doesn't belong to this cohort, return empty results
+                if (!courseInCohort)
+                {
+                    return new AdminGradesDto(course.Id.ToString(), course.Title, []);
+                }
             }
         }
 
