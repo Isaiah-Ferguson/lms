@@ -146,15 +146,24 @@ export default function ParticipantsPage() {
     showToast(`${userIds.length} user(s) enrolled in ${courseIds.length} course(s).`);
   }
 
-  function handleToggleAdmin(user: ParticipantUser) {
-    const newRole = user.role === "Admin" ? "Student" : "Admin";
-    const msg = newRole === "Admin"
-      ? `${user.firstName} ${user.lastName} is now an Admin.`
-      : `Admin role removed from ${user.firstName} ${user.lastName}.`;
-    setUsers((prev) =>
-      prev.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
-    );
-    showToast(msg);
+  async function handleToggleAdmin(user: ParticipantUser) {
+    const token = getToken();
+    if (!token) {
+      showToast("Session expired. Please sign in again.");
+      return;
+    }
+
+    try {
+      await adminParticipantsApi.toggleUserAdmin(user.id, token);
+      await loadParticipants();
+      const newRole = user.role === "Admin" ? "Student" : "Admin";
+      const msg = newRole === "Student"
+        ? `Admin role removed from ${user.firstName} ${user.lastName}.`
+        : `${user.firstName} ${user.lastName} is now an Admin.`;
+      showToast(msg);
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.detail : "Failed to update user role.");
+    }
   }
 
   async function handleToggleActive(user: ParticipantUser) {

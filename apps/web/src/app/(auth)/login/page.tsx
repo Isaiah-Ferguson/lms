@@ -28,8 +28,11 @@ function LoginForm() {
     if (!url) return false;
     // Must start with / but not //
     if (!url.startsWith('/') || url.startsWith('//')) return false;
-    // Must not contain protocol (http:, https:, etc.)
-    if (url.includes(':')) return false;
+    // Extract the path part before any query string or hash
+    const pathPart = url.split(/[?#]/)[0];
+    // Check if the path part contains a colon (which would indicate a protocol)
+    // Colons in query strings or hashes are fine since we only check the path
+    if (pathPart.includes(':')) return false;
     return true;
   };
   

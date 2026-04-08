@@ -2,6 +2,7 @@ using CodeStackLMS.Application.AdminParticipants.DTOs;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Domain.Entities;
+using CodeStackLMS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeStackLMS.Application.AdminParticipants;
@@ -145,6 +146,18 @@ public class AdminParticipantsService : IAdminParticipantsService
             ?? throw new NotFoundException(nameof(User), userGuid);
 
         user.IsActive = !user.IsActive;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ToggleUserAdminAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var userGuid = ParseGuid(userId);
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == userGuid, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userGuid);
+
+        // Toggle between Admin and Student (preserve Instructor role)
+        user.Role = user.Role == UserRole.Admin ? UserRole.Student : UserRole.Admin;
         await _db.SaveChangesAsync(cancellationToken);
     }
 

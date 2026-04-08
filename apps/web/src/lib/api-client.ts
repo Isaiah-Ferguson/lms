@@ -499,6 +499,16 @@ export const adminParticipantsApi = {
     );
   },
 
+  toggleUserAdmin(userId: string, token: string): Promise<void> {
+    return apiFetch<void>(
+      `/api/admin/participants/${userId}/toggle-admin`,
+      {
+        method: "PATCH",
+      },
+      token
+    );
+  },
+
   saveAdminNote(userId: string, text: string, token: string): Promise<void> {
     return apiFetch<void>(
       `/api/profile/admin/participants/${userId}/notes`,

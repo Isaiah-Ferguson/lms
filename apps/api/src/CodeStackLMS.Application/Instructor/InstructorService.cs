@@ -369,34 +369,44 @@ public class InstructorService : IInstructorService
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
             parsedCohortId = cid;
 
+        // Special case: "combine" means all courses
+        bool isCombined = courseId?.Trim().Equals("combine", StringComparison.OrdinalIgnoreCase) == true;
+
         // Resolve course - prefer courses with modules to avoid empty duplicates
         Course? course = null;
-        if (Guid.TryParse(courseId, out var pid))
-            course = await _db.Courses.AsNoTracking()
-                .Include(c => c.Modules)
-                .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
-        else
+        if (!isCombined)
         {
-            var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
-            if (resolvedTitle != null)
-            {
-                var courses = await _db.Courses.AsNoTracking()
-                    .Where(c => c.Title == resolvedTitle)
+            if (Guid.TryParse(courseId, out var pid))
+                course = await _db.Courses.AsNoTracking()
                     .Include(c => c.Modules)
-                    .ToListAsync(cancellationToken);
-                course = courses.FirstOrDefault(c => c.Modules.Any())
-                         ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
+                    .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+            else
+            {
+                var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
+                if (resolvedTitle != null)
+                {
+                    var courses = await _db.Courses.AsNoTracking()
+                        .Where(c => c.Title == resolvedTitle)
+                        .Include(c => c.Modules)
+                        .ToListAsync(cancellationToken);
+                    course = courses.FirstOrDefault(c => c.Modules.Any())
+                             ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
+                }
             }
+
+            if (course == null)
+                return new AdminGradesDto(courseId, courseId, []);
         }
 
-        if (course == null)
-            return new AdminGradesDto(courseId, courseId, []);
-
-        // Assignments
-        var assignments = await _db.Assignments
+        // Assignments - either for specific course or all courses
+        IQueryable<Assignment> assignmentsQuery = _db.Assignments
             .AsNoTracking()
-            .Include(a => a.Module)
-            .Where(a => a.Module.CourseId == course.Id)
+            .Include(a => a.Module);
+
+        if (!isCombined && course != null)
+            assignmentsQuery = assignmentsQuery.Where(a => a.Module.CourseId == course.Id);
+
+        var assignments = await assignmentsQuery
             .OrderBy(a => a.Module.Order)
             .ToListAsync(cancellationToken);
 
@@ -406,10 +416,14 @@ public class InstructorService : IInstructorService
         var enrolledStudentsQuery = _db.UserCourseEnrollments
             .AsNoTracking()
             .Include(e => e.User)
-            .Where(e => e.CourseId == course.Id && e.User.Role == UserRole.Student);
+            .Where(e => e.User.Role == UserRole.Student);
+
+        // Filter by course if not combined
+        if (!isCombined && course != null)
+            enrolledStudentsQuery = enrolledStudentsQuery.Where(e => e.CourseId == course.Id);
 
         // If cohortId is provided, verify the course belongs to that cohort
-        if (parsedCohortId.HasValue)
+        if (parsedCohortId.HasValue && !isCombined && course != null)
         {
             var courseInCohort = await _db.CohortCourses
                 .AsNoTracking()
@@ -466,7 +480,9 @@ public class InstructorService : IInstructorService
             return new AdminStudentGradeDto(student.Id, student.Name, student.Email, rows);
         }).ToList();
 
-        return new AdminGradesDto(course.Id.ToString(), course.Title, studentDtos);
+        var displayId = isCombined ? "combine" : course!.Id.ToString();
+        var displayTitle = isCombined ? "All Courses Combined" : course!.Title;
+        return new AdminGradesDto(displayId, displayTitle, studentDtos);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
