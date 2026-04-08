@@ -364,6 +364,9 @@ public class InstructorService : IInstructorService
         if (_currentUser.Role is not ("Admin" or "Instructor"))
             throw new ForbiddenException();
 
+        if (string.IsNullOrWhiteSpace(courseId))
+            throw new ValidationException("courseId is required");
+
         // Resolve cohort if provided
         Guid? parsedCohortId = null;
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
@@ -377,9 +380,11 @@ public class InstructorService : IInstructorService
         if (!isCombined)
         {
             if (Guid.TryParse(courseId, out var pid))
+            {
                 course = await _db.Courses.AsNoTracking()
                     .Include(c => c.Modules)
                     .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+            }
             else
             {
                 var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
@@ -398,6 +403,23 @@ public class InstructorService : IInstructorService
                 return new AdminGradesDto(courseId, courseId, []);
         }
 
+        // Get cohort course IDs if filtering by cohort
+        List<Guid>? cohortCourseIds = null;
+        if (parsedCohortId.HasValue)
+        {
+            cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+
+            // If filtering by single course and cohort, verify course is in cohort
+            if (!isCombined && course != null && !cohortCourseIds.Contains(course.Id))
+            {
+                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
+            }
+        }
+
         // Assignments - either for specific course or all courses
         IQueryable<Assignment> assignmentsQuery = _db.Assignments
             .AsNoTracking()
@@ -407,15 +429,9 @@ public class InstructorService : IInstructorService
         {
             assignmentsQuery = assignmentsQuery.Where(a => a.Module.CourseId == course.Id);
         }
-        else if (isCombined && parsedCohortId.HasValue)
+        else if (isCombined && cohortCourseIds != null)
         {
             // For combined view with cohort filter, only get assignments from courses in that cohort
-            var cohortCourseIds = await _db.CohortCourses
-                .AsNoTracking()
-                .Where(cc => cc.CohortId == parsedCohortId.Value)
-                .Select(cc => cc.CourseId)
-                .ToListAsync(cancellationToken);
-
             assignmentsQuery = assignmentsQuery.Where(a => cohortCourseIds.Contains(a.Module.CourseId));
         }
 
@@ -434,40 +450,18 @@ public class InstructorService : IInstructorService
 
         // Filter by course if not combined
         if (!isCombined && course != null)
-            enrolledStudentsQuery = enrolledStudentsQuery.Where(e => e.CourseId == course.Id);
-
-        // If cohortId is provided, filter by courses in that cohort
-        if (parsedCohortId.HasValue)
         {
-            if (isCombined)
-            {
-                // For combined view, filter enrollments to only courses in this cohort
-                var cohortCourseIds = await _db.CohortCourses
-                    .AsNoTracking()
-                    .Where(cc => cc.CohortId == parsedCohortId.Value)
-                    .Select(cc => cc.CourseId)
-                    .ToListAsync(cancellationToken);
-
-                enrolledStudentsQuery = enrolledStudentsQuery.Where(e => cohortCourseIds.Contains(e.CourseId));
-            }
-            else if (course != null)
-            {
-                // For single course view, verify the course belongs to that cohort
-                var courseInCohort = await _db.CohortCourses
-                    .AsNoTracking()
-                    .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
-
-                // If the course doesn't belong to this cohort, return empty results
-                if (!courseInCohort)
-                {
-                    return new AdminGradesDto(course.Id.ToString(), course.Title, []);
-                }
-            }
+            enrolledStudentsQuery = enrolledStudentsQuery.Where(e => e.CourseId == course.Id);
+        }
+        else if (isCombined && cohortCourseIds != null)
+        {
+            // For combined view, filter enrollments to only courses in this cohort
+            enrolledStudentsQuery = enrolledStudentsQuery.Where(e => cohortCourseIds.Contains(e.CourseId));
         }
 
         var enrolledStudents = await enrolledStudentsQuery
-            .GroupBy(e => e.UserId)
-            .Select(g => g.First().User)
+            .Select(e => e.User)
+            .Distinct()
             .OrderBy(u => u.Name)
             .ToListAsync(cancellationToken);
 
@@ -496,7 +490,7 @@ public class InstructorService : IInstructorService
                 return new StudentGradeRowDto(
                     sub?.Id ?? Guid.Empty,
                     a.Id,
-                    a.Title,
+                    a.Title ?? "Untitled Assignment",
                     "Assignment",
                     maxScore,
                     sub?.Grade?.TotalScore,
@@ -506,11 +500,32 @@ public class InstructorService : IInstructorService
                     sub?.Grade?.Instructor?.Name);
             }).ToList();
 
-            return new AdminStudentGradeDto(student.Id, student.Name, student.Email, rows);
+            return new AdminStudentGradeDto(
+                student.Id, 
+                student.Name ?? "Unknown Student", 
+                student.Email ?? "no-email@example.com", 
+                rows);
         }).ToList();
 
-        var displayId = isCombined ? "combine" : course!.Id.ToString();
-        var displayTitle = isCombined ? "All Courses Combined" : course!.Title;
+        string displayId;
+        string displayTitle;
+        
+        if (isCombined)
+        {
+            displayId = "combine";
+            displayTitle = "All Courses Combined";
+        }
+        else if (course != null)
+        {
+            displayId = course.Id.ToString();
+            displayTitle = course.Title;
+        }
+        else
+        {
+            displayId = courseId;
+            displayTitle = courseId;
+        }
+        
         return new AdminGradesDto(displayId, displayTitle, studentDtos);
     }
 
