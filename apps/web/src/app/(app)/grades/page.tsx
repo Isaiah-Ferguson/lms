@@ -143,9 +143,14 @@ export default function GradesPage() {
 
   const rows = data?.rows ?? [];
   const graded = rows.filter((r) => r.status === "Graded");
-  const overallPct = graded.length
-    ? Math.round(graded.reduce((s, r) => s + (pct(r.totalScore, r.maxScore) ?? 0), 0) / graded.length)
+  
+  // Calculate overall percentage: total points earned / total points possible
+  const totalPointsEarned = graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0);
+  const totalPointsPossible = rows.reduce((sum, r) => sum + r.maxScore, 0);
+  const overallPct = totalPointsPossible > 0
+    ? Math.round((totalPointsEarned / totalPointsPossible) * 100)
     : 0;
+  
   const lastGradedRow = [...rows].reverse().find((r) => r.gradedAt);
 
   const exportGrades = () => {
