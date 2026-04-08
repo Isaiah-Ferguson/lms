@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { AssignmentSubmissionsRosterData, AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
 
 type RosterRow = AssignmentSubmissionsRosterData["rows"][number];
@@ -14,6 +15,7 @@ function statusBadge(status: AssignmentRosterStatus): React.ReactNode {
     Submitted:    { label: "Submitted",     cls: "bg-blue-100 text-blue-700" },
     NeedsGrading: { label: "Needs Grading", cls: "bg-amber-100 text-amber-700" },
     Graded:       { label: "Graded",        cls: "bg-emerald-100 text-emerald-700" },
+    Returned:     { label: "Returned",      cls: "bg-red-100 text-red-700" },
   };
   const { label, cls } = map[status] ?? map.NotSubmitted;
   return (
@@ -128,18 +130,28 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   {/* Action */}
                   <td className="px-4 py-3">
                     {row.submissionId ? (
-                      <button
-                        onClick={() => onGradeClick(row)}
-                        className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-                          ${row.status === "NeedsGrading"
-                            ? "bg-amber-500 text-white hover:bg-amber-600"
-                            : row.status === "Graded"
-                              ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                              : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                          }`}
-                      >
-                        {row.status === "Graded" ? "Edit Grade" : "Grade"}
-                      </button>
+                      <div className="flex gap-2">
+                        {row.status !== "Returned" && (
+                          <button
+                            onClick={() => onGradeClick(row)}
+                            className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
+                              ${row.status === "NeedsGrading"
+                                ? "bg-amber-500 text-white hover:bg-amber-600"
+                                : row.status === "Graded"
+                                  ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                                  : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                              }`}
+                          >
+                            {row.status === "Graded" ? "Edit Grade" : "Grade"}
+                          </button>
+                        )}
+                        <Link
+                          href={`/instructor/submissions/${row.submissionId}`}
+                          className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          View Details
+                        </Link>
+                      </div>
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
                     )}

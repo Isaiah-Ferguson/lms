@@ -7,7 +7,7 @@ import { getToken } from "@/lib/auth";
 import { SubmissionGuidelinesModal } from "@/components/submissions/SubmissionGuidelinesModal";
 
 export interface SubmissionState {
-  status: "NotSubmitted" | "Submitted";
+  status: "NotSubmitted" | "Submitted" | "Returned";
   submittedAt: string | null;
   fileName: string | null;
   fileSize: number | null;
@@ -215,13 +215,21 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
       <h2 className="text-sm font-semibold text-gray-900">My Submission</h2>
 
       {/* Submitted status */}
-      {state.status === "Submitted" && state.submittedAt && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 space-y-1.5">
-          <div className="flex items-center gap-2 text-sm font-medium text-green-800">
+      {(state.status === "Submitted" || state.status === "Returned") && state.submittedAt && (
+        <div className={`rounded-lg border px-4 py-3 space-y-1.5 ${
+          state.status === "Returned" 
+            ? "border-red-200 bg-red-50" 
+            : "border-green-200 bg-green-50"
+        }`}>
+          <div className={`flex items-center gap-2 text-sm font-medium ${
+            state.status === "Returned" ? "text-red-800" : "text-green-800"
+          }`}>
             <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Submitted
+            {state.status === "Returned" ? "Returned - Resubmit Required" : "Submitted"}
           </div>
-          <p className="text-xs text-green-700">
+          <p className={`text-xs ${
+            state.status === "Returned" ? "text-red-700" : "text-green-700"
+          }`}>
             {new Date(state.submittedAt).toLocaleString()}
             {state.fileName && (
               <> · <span className="font-medium">{state.fileName}</span></>
@@ -230,15 +238,17 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               <> ({formatBytes(state.fileSize)})</>
             )}
           </p>
-          {/* Download submitted ZIP */}
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="inline-flex items-center gap-1 text-xs font-medium text-green-900 underline underline-offset-2 hover:text-green-700 disabled:opacity-50"
-          >
-            <Download className="h-3 w-3" />
-            {downloading ? "Downloading..." : "Download submitted ZIP"}
-          </button>
+          {/* Download submitted ZIP - only show if not returned */}
+          {state.status !== "Returned" && (
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="inline-flex items-center gap-1 text-xs font-medium text-green-900 underline underline-offset-2 hover:text-green-700 disabled:opacity-50"
+            >
+              <Download className="h-3 w-3" />
+              {downloading ? "Downloading..." : "Download submitted ZIP"}
+            </button>
+          )}
           {downloadError && (
             <p className="text-xs text-red-600">{downloadError}</p>
           )}
@@ -365,13 +375,17 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
           </div>
         </div>
       ) : (
-        // Only show submit button if not already submitted (one submission per assignment)
-        state.status === "NotSubmitted" && (
+        // Show submit button if not submitted OR if returned (allow resubmission)
+        (state.status === "NotSubmitted" || state.status === "Returned") && (
           <button
             onClick={() => setShowUploader(true)}
-            className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium ${
+              state.status === "Returned"
+                ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            }`}
           >
-            <Upload className="h-3.5 w-3.5" /> Submit ZIP
+            <Upload className="h-3.5 w-3.5" /> {state.status === "Returned" ? "Resubmit ZIP" : "Submit ZIP"}
           </button>
         )
       )}

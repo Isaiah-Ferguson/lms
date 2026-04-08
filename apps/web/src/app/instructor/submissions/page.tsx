@@ -48,7 +48,7 @@ export default function SubmissionQueuePage() {
         courseFilter || undefined,
         statusFilter || undefined
       );
-      setItems(data);
+      setItems(data.items || []);
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to load submissions.");
     } finally {

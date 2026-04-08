@@ -59,6 +59,13 @@ export interface GradeSubmissionRequest {
   OverallComment: string;
 }
 
+export interface SubmissionQueuePage {
+  items: SubmissionQueueItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface SubmissionQueueItem {
   submissionId: string;
   studentName: string;

@@ -32,6 +32,12 @@ export default function InstructorGradingPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedGrade, setSavedGrade] = useState<ExistingGrade | null>(null);
 
+  // Return submission state
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+  const [returning, setReturning] = useState(false);
+  const [returnError, setReturnError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     const token = getToken();
     if (!token) { router.replace("/login"); return; }
@@ -83,6 +89,27 @@ export default function InstructorGradingPage() {
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleReturnSubmission() {
+    const token = getToken();
+    if (!token || !returnReason.trim()) return;
+
+    setReturnError(null);
+    setReturning(true);
+    try {
+      await instructorApi.returnSubmission(submissionId, returnReason, token);
+      // Redirect back to queue after successful return
+      router.push("/instructor/submissions");
+    } catch (err) {
+      setReturnError(
+        err instanceof ApiError
+          ? err.errors?.join(" ") ?? err.detail
+          : "Failed to return submission."
+      );
+    } finally {
+      setReturning(false);
     }
   }
 
@@ -439,14 +466,24 @@ export default function InstructorGradingPage() {
               />
             )}
 
-            <Button
-              className="w-full"
-              size="lg"
-              loading={saving}
-              onClick={handleSaveGrade}
-            >
-              {isAlreadyGraded ? "Update grade" : "Save grade"}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                className="flex-1"
+                size="lg"
+                loading={saving}
+                onClick={handleSaveGrade}
+              >
+                {isAlreadyGraded ? "Update grade" : "Save grade"}
+              </Button>
+              
+              <button
+                onClick={() => setShowReturnModal(true)}
+                disabled={detail.status === "Returned" || detail.status === "Draft"}
+                className="flex-1 rounded-lg border-2 border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Return Submission
+              </button>
+            </div>
 
             {/* Grade summary */}
             {savedGrade && (
@@ -460,6 +497,57 @@ export default function InstructorGradingPage() {
           </Card>
         </div>
       </div>
+
+      {/* Return Submission Modal */}
+      {showReturnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Return Submission</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              This will return the submission to the student and send them an email notification. They can resubmit after reviewing your feedback.
+            </p>
+
+            <div className="mb-4">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Reason for returning <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows={4}
+                value={returnReason}
+                onChange={(e) => setReturnReason(e.target.value)}
+                placeholder="e.g., Wrong assignment submitted, missing requirements, etc."
+                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+              />
+            </div>
+
+            {returnError && (
+              <Alert variant="error" message={returnError} className="mb-4" />
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowReturnModal(false);
+                  setReturnReason("");
+                  setReturnError(null);
+                }}
+                disabled={returning}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={handleReturnSubmission}
+                loading={returning}
+                disabled={!returnReason.trim()}
+              >
+                Return to Student
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

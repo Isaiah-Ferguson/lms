@@ -80,6 +80,26 @@ public class InstructorController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("submissions/{submissionId:guid}/return")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ReturnSubmission(
+        [FromRoute] Guid submissionId,
+        [FromBody] ReturnSubmissionDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _instructorService.ReturnSubmissionAsync(
+            submissionId, dto.Reason, cancellationToken);
+
+        _logger.LogInformation(
+            "Submission {SubmissionId} returned to student. Reason: {Reason}",
+            submissionId, dto.Reason);
+
+        return Ok();
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // GET /api/instructor/assignments/{assignmentId}/submissions-roster
     // Returns all enrolled students and their submission status for an assignment

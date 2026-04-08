@@ -13,6 +13,11 @@ public interface IInstructorService
         GradeSubmissionDto dto,
         CancellationToken cancellationToken = default);
 
+    Task ReturnSubmissionAsync(
+        Guid submissionId,
+        string reason,
+        CancellationToken cancellationToken = default);
+
     Task<SubmissionQueuePageDto> GetSubmissionQueueAsync(
         string? courseId,
         string? status,

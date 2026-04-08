@@ -70,7 +70,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
         // Map API response to SubmissionState
         if (submission.hasSubmitted) {
           setSubmissionState({
-            status: "Submitted",
+            status: submission.status === "Returned" ? "Returned" : "Submitted",
             submittedAt: submission.submittedAt,
             fileName: submission.fileName,
             fileSize: submission.fileSize,

@@ -191,6 +191,65 @@ public class InstructorService : IInstructorService
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // POST /api/instructor/submissions/{submissionId}/return
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task ReturnSubmissionAsync(
+        Guid submissionId,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        var submission = await _db.Submissions
+            .Include(s => s.Student)
+            .Include(s => s.Assignment)
+            .Include(s => s.Grade)
+            .Include(s => s.Artifacts)
+            .Include(s => s.GitHubInfo)
+            .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Submission), submissionId);
+
+        // Only allow returning submissions that are submitted (not draft or already returned)
+        if (submission.Status is SubmissionStatus.Draft or SubmissionStatus.Returned)
+            throw new ValidationException(
+                $"Submission is in '{submission.Status}' state and cannot be returned.");
+
+        // Delete the grade if it exists
+        if (submission.Grade != null)
+        {
+            _db.Grades.Remove(submission.Grade);
+        }
+
+        // Delete uploaded artifacts and blob files
+        if (submission.Artifacts.Count > 0)
+        {
+            foreach (var artifact in submission.Artifacts)
+            {
+                // Delete the blob file from storage
+                await _blob.DeleteBlobAsync(artifact.BlobPath, cancellationToken);
+                _db.SubmissionArtifacts.Remove(artifact);
+            }
+        }
+
+        // Delete GitHub info if it exists
+        if (submission.GitHubInfo != null)
+        {
+            _db.GitHubSubmissionInfos.Remove(submission.GitHubInfo);
+        }
+
+        // Clear submission URLs but keep the Note with the return reason
+        submission.Status = SubmissionStatus.Returned;
+        submission.FigmaUrl = null;
+        submission.GitHubRepoUrl = null;
+        submission.HostedUrl = null;
+        submission.Note = reason; // Store the return reason in the Note field
+        submission.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        // Enqueue background job to send email notification
+        _backgroundJobs.EnqueueSubmissionReturnedNotification(submissionId, reason);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // GET /api/instructor/submissions  (queue)
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<SubmissionQueuePageDto> GetSubmissionQueueAsync(
@@ -584,6 +643,8 @@ public class InstructorService : IInstructorService
                 status = "Graded";
             else if (submission.Status == SubmissionStatus.ReadyToGrade || submission.Status == SubmissionStatus.Grading)
                 status = "NeedsGrading";
+            else if (submission.Status == SubmissionStatus.Returned)
+                status = "Returned";
             else
                 status = "Submitted";
 

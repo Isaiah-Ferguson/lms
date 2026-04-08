@@ -17,4 +17,10 @@ public class HangfireBackgroundJobService : IBackgroundJobService
         // BackgroundJob.Enqueue<SendSubmissionNotificationJob>(job => 
         //     job.ExecuteAsync(submissionId));
     }
+
+    public void EnqueueSubmissionReturnedNotification(Guid submissionId, string reason)
+    {
+        BackgroundJob.Enqueue<SendSubmissionReturnedNotificationJob>(job => 
+            job.ExecuteAsync(submissionId, reason));
+    }
 }

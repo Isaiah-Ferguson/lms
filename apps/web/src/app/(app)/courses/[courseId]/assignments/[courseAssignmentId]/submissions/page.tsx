@@ -88,7 +88,7 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
 
   const counts = useMemo(() => {
     const sc: Record<AssignmentRosterStatus, number> = {
-      NotSubmitted: 0, Submitted: 0, NeedsGrading: 0, Graded: 0,
+      NotSubmitted: 0, Submitted: 0, NeedsGrading: 0, Graded: 0, Returned: 0,
     };
     rows.forEach((r) => { sc[r.status] += 1; });
     return {

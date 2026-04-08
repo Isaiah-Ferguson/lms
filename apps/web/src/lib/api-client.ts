@@ -20,6 +20,7 @@ import type {
   ExistingGrade,
   SubmissionDetail,
   GradeSubmissionRequest,
+  SubmissionQueuePage,
   SubmissionQueueItem,
   StudentGradeRow,
   StudentGrades,
@@ -69,6 +70,7 @@ export type {
   ExistingGrade,
   SubmissionDetail,
   GradeSubmissionRequest,
+  SubmissionQueuePage,
   SubmissionQueueItem,
   StudentGradeRow,
   StudentGrades,
@@ -141,7 +143,16 @@ async function apiFetch<T>(
     );
   }
 
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204 || res.status === 200) {
+    // Check if response has content
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      return undefined as T;
+    }
+    const text = await res.text();
+    if (!text) return undefined as T;
+    return JSON.parse(text) as T;
+  }
   return res.json() as Promise<T>;
 }
 
@@ -325,16 +336,31 @@ export const instructorApi = {
     );
   },
 
+  returnSubmission(
+    submissionId: string,
+    reason: string,
+    token: string
+  ): Promise<void> {
+    return apiFetch<void>(
+      `/api/instructor/submissions/${submissionId}/return`,
+      {
+        method: "POST",
+        body: JSON.stringify({ Reason: reason }),
+      },
+      token
+    );
+  },
+
   getSubmissionQueue(
     token: string,
     courseId?: string,
     status?: string
-  ): Promise<SubmissionQueueItem[]> {
+  ): Promise<SubmissionQueuePage> {
     const params = new URLSearchParams();
     if (courseId) params.set("courseId", courseId);
     if (status) params.set("status", status);
     const qs = params.toString();
-    return apiFetch<SubmissionQueueItem[]>(
+    return apiFetch<SubmissionQueuePage>(
       `/api/instructor/submissions${qs ? `?${qs}` : ""}`,
       {},
       token

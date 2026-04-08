@@ -7,7 +7,8 @@ export type AssignmentRosterStatus =
   | "NotSubmitted"
   | "Submitted"
   | "NeedsGrading"
-  | "Graded";
+  | "Graded"
+  | "Returned";
 
 export interface AssignmentSubmissionsRosterData {
   assignment: {

@@ -434,28 +434,22 @@ public static class ApplicationDbContextSeed
 
     private static async Task SeedAssignmentsAsync(ApplicationDbContext context)
     {
-        Console.WriteLine("=== Starting Assignment Seeding ===");
         var courses = await context.Courses.ToListAsync();
-        Console.WriteLine($"Found {courses.Count} courses");
         
         foreach (var course in courses)
         {
-            Console.WriteLine($"Checking course: {course.Title} (ID: {course.Id})");
             var modules = await context.Modules
                 .Where(m => m.CourseId == course.Id)
                 .OrderBy(m => m.Order)
                 .ToListAsync();
             
-            Console.WriteLine($"  Found {modules.Count} modules for {course.Title}");
 
             var existingAssignments = await context.Assignments
                 .AnyAsync(a => modules.Select(m => m.Id).Contains(a.ModuleId));
             
-            Console.WriteLine($"  Existing assignments: {existingAssignments}");
 
             if (!existingAssignments && modules.Count > 0)
             {
-                Console.WriteLine($"  Creating {Math.Min(5, modules.Count)} assignments for {course.Title}");
                 // Add one assignment per module (limit to first 5 to avoid too many)
                 foreach (var module in modules.Take(5))
                 {
@@ -470,7 +464,6 @@ public static class ApplicationDbContextSeed
                         CreatedAt = DateTime.UtcNow
                     };
                     context.Assignments.Add(assignment);
-                    Console.WriteLine($"    Added: {assignment.Title}");
                 }
             }
             else
@@ -480,6 +473,5 @@ public static class ApplicationDbContextSeed
         }
         
         await context.SaveChangesAsync();
-        Console.WriteLine("=== Assignment Seeding Complete ===");
     }
 }
