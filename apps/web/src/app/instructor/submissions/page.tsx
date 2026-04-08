@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ClipboardList, Search, X, Github, FileText,
-  CheckCircle2, Clock, AlertCircle, RefreshCw,
+  CheckCircle2, Clock, AlertCircle, RefreshCw, ArrowLeft,
 } from "lucide-react";
 import { instructorApi, ApiError, type SubmissionQueueItem } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
@@ -73,6 +73,19 @@ export default function SubmissionQueuePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Back button */}
+      <div className="border-b border-gray-200 bg-white px-4 py-3">
+        <div className="mx-auto max-w-6xl">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
