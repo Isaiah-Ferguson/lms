@@ -47,7 +47,7 @@ export default function ChangePasswordPage() {
         token,
       );
 
-      setSuccessMessage("Password updated. Redirecting to your dashboard...");
+      setSuccessMessage("Password updated. Redirecting to home...");
       setTimeout(() => router.push("/home"), 800);
     } catch (err) {
       if (err instanceof ApiError) {

@@ -77,11 +77,11 @@ export default function SubmissionQueuePage() {
       <div className="border-b border-gray-200 bg-white px-4 py-3">
         <div className="mx-auto max-w-6xl">
           <Link
-            href="/dashboard"
+            href="/home"
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            Back to Home
           </Link>
         </div>
       </div>
