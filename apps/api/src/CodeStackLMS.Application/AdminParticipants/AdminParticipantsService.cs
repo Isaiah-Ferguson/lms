@@ -156,7 +156,12 @@ public class AdminParticipantsService : IAdminParticipantsService
             .FirstOrDefaultAsync(u => u.Id == userGuid, cancellationToken)
             ?? throw new NotFoundException(nameof(User), userGuid);
 
-        // Toggle between Admin and Student (preserve Instructor role)
+        // Only toggle between Admin and Student (don't affect Instructors)
+        if (user.Role == UserRole.Instructor)
+        {
+            throw new ValidationException("Cannot toggle admin status for Instructor role. Instructors must be managed separately.");
+        }
+
         user.Role = user.Role == UserRole.Admin ? UserRole.Student : UserRole.Admin;
         await _db.SaveChangesAsync(cancellationToken);
     }

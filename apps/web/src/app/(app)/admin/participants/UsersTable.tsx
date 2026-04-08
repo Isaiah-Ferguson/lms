@@ -216,16 +216,18 @@ export function UsersTable({
                         label="Enroll"
                         onClick={() => onEnroll(u)}
                       />
-                      <ActionBtn
-                        icon={
-                          u.role === "Admin"
-                            ? <ShieldOff className="h-3.5 w-3.5" />
-                            : <ShieldCheck className="h-3.5 w-3.5" />
-                        }
-                        label={u.role === "Admin" ? "Remove admin" : "Make admin"}
-                        onClick={() => onToggleAdmin(u)}
-                        className={u.role === "Admin" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : ""}
-                      />
+                      {u.role !== "Instructor" && (
+                        <ActionBtn
+                          icon={
+                            u.role === "Admin"
+                              ? <ShieldOff className="h-3.5 w-3.5" />
+                              : <ShieldCheck className="h-3.5 w-3.5" />
+                          }
+                          label={u.role === "Admin" ? "Remove admin" : "Make admin"}
+                          onClick={() => onToggleAdmin(u)}
+                          className={u.role === "Admin" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : ""}
+                        />
+                      )}
                       <ActionBtn
                         icon={
                           u.status === "Active"

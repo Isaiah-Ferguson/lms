@@ -408,6 +408,7 @@ public class InstructorService : IInstructorService
 
         var assignments = await assignmentsQuery
             .OrderBy(a => a.Module.Order)
+            .ThenBy(a => a.DueDate)
             .ToListAsync(cancellationToken);
 
         var assignmentIds = assignments.Select(a => a.Id).ToList();
