@@ -72,3 +72,7 @@ obj/
 # OS
 Thumbs.db
 .DS_Store
+
+RESET_DATABASE.sql -
+SIMPLE_RESET.sql -
+reset-database.sh 

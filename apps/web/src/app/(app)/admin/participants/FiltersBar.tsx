@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import type { UserRole, UserStatus } from "@/lib/admin-participants-data";
+import type { UserRole, UserStatus, CourseOption } from "@/lib/admin-participants-data";
 
 interface Props {
   search: string;
@@ -10,6 +10,9 @@ interface Props {
   onRoleChange: (v: UserRole | "All") => void;
   statusFilter: UserStatus | "All";
   onStatusChange: (v: UserStatus | "All") => void;
+  yearFilter: string;
+  onYearChange: (v: string) => void;
+  courses: CourseOption[];
   totalCount: number;
   filteredCount: number;
 }
@@ -18,8 +21,16 @@ export function FiltersBar({
   search, onSearchChange,
   roleFilter, onRoleChange,
   statusFilter, onStatusChange,
+  yearFilter, onYearChange,
+  courses,
   totalCount, filteredCount,
 }: Props) {
+  // Get unique years from courses
+  const years = Array.from(new Set(courses.map(c => c.yearId)))
+    .map(yearId => {
+      const course = courses.find(c => c.yearId === yearId);
+      return { id: yearId, label: course?.yearLabel || yearId };
+    });
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Search */}
@@ -62,6 +73,22 @@ export function FiltersBar({
           <option value="All">All statuses</option>
           <option value="Active">Active</option>
           <option value="Disabled">Disabled</option>
+        </select>
+
+        {/* Year/Level filter */}
+        <label htmlFor="year-filter" className="sr-only">Filter by year/level</label>
+        <select
+          id="year-filter"
+          value={yearFilter}
+          onChange={(e) => onYearChange(e.target.value)}
+          className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          <option value="All">All years</option>
+          {years.map(year => (
+            <option key={year.id} value={year.id}>
+              {year.label}
+            </option>
+          ))}
         </select>
 
         {/* Count */}

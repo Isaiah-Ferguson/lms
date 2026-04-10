@@ -47,6 +47,7 @@ export default function ParticipantsPage() {
   const [search,       setSearch]       = useState("");
   const [roleFilter,   setRoleFilter]   = useState<UserRole | "All">("All");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "All">("All");
+  const [yearFilter,   setYearFilter]   = useState<string>("All");
   const [impersonating, setImpersonating] = useState<ParticipantUser | null>(null);
   const [toast,        setToast]        = useState<string | null>(null);
   const [currentPage,  setCurrentPage]  = useState(1);
@@ -91,9 +92,16 @@ export default function ParticipantsPage() {
         u.email.toLowerCase().includes(q);
       const matchRole   = roleFilter   === "All" || u.role   === roleFilter;
       const matchStatus = statusFilter === "All" || u.status === statusFilter;
-      return matchSearch && matchRole && matchStatus;
+      
+      // Year filter: check if user is enrolled in any course from the selected year
+      const matchYear = yearFilter === "All" || (() => {
+        const yearCourses = courses.filter(c => c.yearId === yearFilter).map(c => c.id);
+        return u.enrollments.some(enrollmentId => yearCourses.includes(enrollmentId));
+      })();
+      
+      return matchSearch && matchRole && matchStatus && matchYear;
     });
-  }, [users, search, roleFilter, statusFilter]);
+  }, [users, search, roleFilter, statusFilter, yearFilter, courses]);
 
   // ── Pagination ─────────────────────────────────────────────────────────────
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -106,7 +114,7 @@ export default function ParticipantsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, roleFilter, statusFilter]);
+  }, [search, roleFilter, statusFilter, yearFilter]);
 
   // ── Selection helpers ──────────────────────────────────────────────────────
   function toggleSelect(id: string) {
@@ -323,6 +331,9 @@ export default function ParticipantsPage() {
         onRoleChange={setRoleFilter}
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
+        yearFilter={yearFilter}
+        onYearChange={setYearFilter}
+        courses={courses}
         totalCount={users.length}
         filteredCount={filtered.length}
       />
