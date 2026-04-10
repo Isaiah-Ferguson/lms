@@ -54,9 +54,11 @@ builder.Services.AddHangfire(config => config
         DisableGlobalLocks = true
     }));
 
+var workerCount = builder.Configuration.GetValue<int?>("Hangfire:WorkerCount") ?? 5;
+
 builder.Services.AddHangfireServer(options =>
 {
-    options.WorkerCount = 5; // Number of concurrent jobs
+    options.WorkerCount = workerCount;
 });
 
 // ── Authentication / Authorization ────────────────────────────────────────────
@@ -93,7 +95,10 @@ builder.Services.AddCors(options =>
         {
             // Allow any localhost port in dev so Next.js port-hopping (3000/3001/3002) works
             policy.SetIsOriginAllowed(origin =>
-                    new Uri(origin).Host == "localhost")
+            {
+                return Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                && uri.Host == "localhost";
+            })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -112,8 +117,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 // ── Hangfire Dashboard ────────────────────────────────────────────────────────
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
