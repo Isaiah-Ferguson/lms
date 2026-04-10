@@ -47,15 +47,14 @@ export function SubmissionGuidelinesModal({
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4 py-6">
         <motion.div
-          ref={contentRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+          className="relative max-h-[90vh] w-full max-w-2xl rounded-2xl bg-white shadow-2xl flex flex-col"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+          <div className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100">
                 <AlertCircle className="h-5 w-5 text-brand-600" />
@@ -134,7 +133,7 @@ export function SubmissionGuidelinesModal({
                 <p className="text-sm text-gray-700">Your zip file must follow this format:</p>
                 <div className="rounded-lg bg-gray-50 px-3 py-2">
                   <code className="text-sm font-semibold text-gray-900">
-                    FirstInnitialLastNameAssignmentName#.zip
+                    FirstInitialLastNameAssignmentName#.zip
                   </code>
                 </div>
                 <div>

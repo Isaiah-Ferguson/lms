@@ -264,15 +264,13 @@ public class SubmissionService : ISubmissionService
             });
         }
 
-        // 7. Transition: PendingUpload → Uploaded → Processing
-        //    Processing is set immediately; a background job will move it to ReadyToGrade
-        submission.Status = SubmissionStatus.Processing;
+        // 7. Transition: PendingUpload → ReadyToGrade
+        //    Set to ReadyToGrade immediately since artifacts are already validated during upload
+        //    If background processing is needed in the future, use Processing status and implement background job
+        submission.Status = SubmissionStatus.ReadyToGrade;
         submission.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
-
-        // 8. TODO: enqueue background job → validate artifacts → set ReadyToGrade
-        //    e.g. _backgroundJobs.Enqueue<ISubmissionProcessingJob>(j => j.ProcessAsync(submission.Id));
 
         return new SubmissionResponseDto(
             submission.Id,

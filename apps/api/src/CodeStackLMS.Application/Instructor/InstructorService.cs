@@ -270,8 +270,8 @@ public class InstructorService : IInstructorService
             .AsNoTracking()
             .Include(s => s.Student)
             .Include(s => s.Assignment)
-                .ThenInclude(a => a.Module)
-                    .ThenInclude(m => m.Course)
+            .ThenInclude(a => a.Module)
+            .ThenInclude(m => m.Course)
             .Include(s => s.Grade)
             .ToListAsync(cancellationToken);
 

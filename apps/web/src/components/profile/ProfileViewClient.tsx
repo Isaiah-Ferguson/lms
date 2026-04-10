@@ -53,7 +53,10 @@ export function ProfileViewClient({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
-          <GradesSummaryCard gradesOverview={data.gradesOverview} gradesHref="/grades" />
+          <GradesSummaryCard 
+            gradesOverview={data.gradesOverview} 
+            gradesHref={isAdminViewingAnotherUser ? `/admin/participants/${data.user.id}/grades` : "/grades"} 
+          />
 
           <EditProfileCard
             user={data.user}
