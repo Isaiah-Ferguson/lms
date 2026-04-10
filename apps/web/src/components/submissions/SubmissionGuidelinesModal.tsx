@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,12 +15,39 @@ export function SubmissionGuidelinesModal({
   onClose,
   onAccept,
 }: SubmissionGuidelinesModalProps) {
+  const [canAccept, setCanAccept] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCanAccept(false);
+      return;
+    }
+
+    const checkScroll = () => {
+      if (contentRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
+        setCanAccept(isAtBottom);
+      }
+    };
+
+    const content = contentRef.current;
+    if (content) {
+      // Check initial scroll position
+      checkScroll();
+      content.addEventListener("scroll", checkScroll);
+      return () => content.removeEventListener("scroll", checkScroll);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4 py-6">
         <motion.div
+          ref={contentRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -53,11 +81,11 @@ export function SubmissionGuidelinesModal({
             <section>
               <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-700">
                 <CheckCircle2 className="h-4 w-4 text-brand-600" />
-                File Header (Required in Each File)
+                File Header Required
               </h3>
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                 <pre className="text-xs leading-relaxed text-gray-700">
-{`// Your Name
+                  {`// Your Name
 // Date Revised (last saved date)
 // Exercise or Lab Name
 // Brief description of what you completed
@@ -73,9 +101,9 @@ export function SubmissionGuidelinesModal({
                 Peer Review
               </h3>
               <div className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
-                <p className="text-sm text-gray-700">Your Challenges and Projects must be code reviewed.</p>
+                <p className="text-sm text-gray-700">Your Assignments must be code reviewed.</p>
                 <ul className="ml-5 list-disc space-y-1 text-sm text-gray-600">
-                  <li>Two different people must review your work</li>
+                  <li>A Peer must review your work</li>
                   <li>You cannot use the same reviewer twice</li>
                 </ul>
               </div>
@@ -106,12 +134,12 @@ export function SubmissionGuidelinesModal({
                 <p className="text-sm text-gray-700">Your zip file must follow this format:</p>
                 <div className="rounded-lg bg-gray-50 px-3 py-2">
                   <code className="text-sm font-semibold text-gray-900">
-                    LastNameFirstInitialAssignmentName#.zip
+                    FirstInnitialLastNameAssignmentName#.zip
                   </code>
                 </div>
                 <div>
                   <p className="mb-1 text-xs font-semibold text-gray-500">Example:</p>
-                  <code className="text-sm text-brand-600">MartinezKMC#2.zip</code>
+                  <code className="text-sm text-brand-600">IFergusonMC#2.zip</code>
                 </div>
               </div>
             </section>
@@ -122,9 +150,11 @@ export function SubmissionGuidelinesModal({
                 <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
                 <div>
                   <p className="font-semibold text-red-900">Important</p>
-                  <p className="mt-1 text-sm text-red-700">
-                    Submissions that do not follow these rules will be rejected.
-                  </p>
+                  <ul>
+                    <li className="mt-1 text-sm text-red-700">Submissions that do not follow these rules will be <strong>Returned</strong> or graded a <strong>0</strong>.</li>
+                    <li className="mt-1 text-sm text-red-700">By submitting this assignment I acknowledge this is my own work, except where I have acknowledged the use of the works of other people.</li>
+
+                  </ul>
                 </div>
               </div>
             </div>
@@ -142,9 +172,13 @@ export function SubmissionGuidelinesModal({
             <button
               type="button"
               onClick={onAccept}
-              className="rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:from-brand-700 hover:to-brand-600"
+              disabled={!canAccept}
+              className={`rounded-xl bg-gradient-to-r px-6 py-2.5 text-sm font-semibold shadow-lg transition ${canAccept
+                ? "from-brand-600 to-brand-500 text-white shadow-brand-500/30 hover:from-brand-700 hover:to-brand-600 cursor-pointer"
+                : "from-gray-400 to-gray-300 text-gray-100 cursor-not-allowed"
+                }`}
             >
-              I Understand, Continue
+              {canAccept ? "I Understand, Submit" : "Scroll to Continue"}
             </button>
           </div>
         </motion.div>

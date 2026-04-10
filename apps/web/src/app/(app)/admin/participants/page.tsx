@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Users, Layers, ShieldAlert } from "lucide-react";
+import { Plus, Users, Layers, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
 import { clsx } from "clsx";
 import { Button } from "@/components/ui/Button";
 import { adminParticipantsApi, ApiError } from "@/lib/api-client";
@@ -49,6 +49,8 @@ export default function ParticipantsPage() {
   const [statusFilter, setStatusFilter] = useState<UserStatus | "All">("All");
   const [impersonating, setImpersonating] = useState<ParticipantUser | null>(null);
   const [toast,        setToast]        = useState<string | null>(null);
+  const [currentPage,  setCurrentPage]  = useState(1);
+  const ITEMS_PER_PAGE = 15;
 
   const loadParticipants = useCallback(async () => {
     const token = getToken();
@@ -93,6 +95,19 @@ export default function ParticipantsPage() {
     });
   }, [users, search, roleFilter, statusFilter]);
 
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filtered.slice(startIndex, endIndex);
+  }, [filtered, currentPage, ITEMS_PER_PAGE]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, statusFilter]);
+
   // ── Selection helpers ──────────────────────────────────────────────────────
   function toggleSelect(id: string) {
     setSelectedIds((prev) =>
@@ -102,7 +117,7 @@ export default function ParticipantsPage() {
 
   function toggleSelectAll() {
     setSelectedIds((prev) =>
-      prev.length === filtered.length ? [] : filtered.map((u) => u.id)
+      prev.length === paginatedUsers.length ? [] : paginatedUsers.map((u) => u.id)
     );
   }
 
@@ -314,7 +329,7 @@ export default function ParticipantsPage() {
 
       {/* Table */}
       <UsersTable
-        users={filtered}
+        users={paginatedUsers}
         courses={courses}
         selectedIds={selectedIds}
         onToggleSelect={toggleSelect}
@@ -323,6 +338,73 @@ export default function ParticipantsPage() {
         onToggleAdmin={handleToggleAdmin}
         onToggleActive={handleToggleActive}
       />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <div className="text-sm text-gray-600">
+            Showing <span className="font-medium">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{" "}
+            <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)}</span> of{" "}
+            <span className="font-medium">{filtered.length}</span> participants
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                // Show first page, last page, current page, and pages around current
+                const showPage =
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1);
+                
+                if (!showPage) {
+                  // Show ellipsis
+                  if (page === currentPage - 2 || page === currentPage + 2) {
+                    return (
+                      <span key={page} className="px-2 text-gray-400">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                }
+
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={clsx(
+                      "h-8 min-w-[2rem] rounded-lg px-2 text-sm font-medium transition-colors",
+                      page === currentPage
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ── Modals ──────────────────────────────────────────────────────────── */}
 

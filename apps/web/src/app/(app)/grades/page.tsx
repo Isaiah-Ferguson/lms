@@ -144,9 +144,9 @@ export default function GradesPage() {
   const rows = data?.rows ?? [];
   const graded = rows.filter((r) => r.status === "Graded");
   
-  // Calculate overall percentage: total points earned / total points possible
+  // Calculate overall percentage: total points earned / total points possible (graded only)
   const totalPointsEarned = graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0);
-  const totalPointsPossible = rows.reduce((sum, r) => sum + r.maxScore, 0);
+  const totalPointsPossible = graded.reduce((sum, r) => sum + r.maxScore, 0);
   const overallPct = totalPointsPossible > 0
     ? Math.round((totalPointsEarned / totalPointsPossible) * 100)
     : 0;
@@ -173,7 +173,7 @@ export default function GradesPage() {
         ];
       }),
       [],
-      ["Course Total", graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1), rows.reduce((sum, r) => sum + r.maxScore, 0).toString(), letterGrade(overallPct), `${graded.length} of ${rows.length} graded`, "", "", `${overallPct}% overall`]
+      ["Course Total", graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1), graded.reduce((sum, r) => sum + r.maxScore, 0).toString(), letterGrade(overallPct), `${graded.length} of ${rows.length} graded`, "", "", `${overallPct}% overall`]
     ];
 
     const csvContent = csvRows.map(row => 
@@ -350,7 +350,7 @@ export default function GradesPage() {
                   <tr>
                     <td className="px-5 py-4 font-bold text-gray-900">Course Total</td>
                     <td className="px-5 py-4 text-right font-bold text-gray-900">
-                      {graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1)} / {rows.reduce((sum, r) => sum + r.maxScore, 0)}
+                      {graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1)} / {graded.reduce((sum, r) => sum + r.maxScore, 0)}
                     </td>
                     <td className={`px-5 py-4 text-center font-bold text-2xl ${percentColor(overallPct)}`}>
                       {letterGrade(overallPct)}
