@@ -24,8 +24,8 @@ const COURSES = [
 const STATUSES = [
   { id: "",              name: "All Statuses"   },
   { id: "ReadyToGrade",  name: "Ready to Grade" },
-  { id: "Grading",       name: "Grading"        },
   { id: "Graded",        name: "Graded"         },
+  { id: "Returned",      name: "Returned"       },
 ];
 
 export default function SubmissionQueuePage() {

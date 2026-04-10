@@ -94,6 +94,11 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
   nav.push({ label: "Calendar", href: "/calendar", icon: "calendar" });
   nav.push({ label: "Grades", href: "/grades", icon: "grades" });
 
+  // Admin/Instructor navigation
+  if (data.permissions.canManageYears || data.permissions.canViewAllLevels) {
+    nav.push({ label: "Submissions", href: "/instructor/submissions", icon: "clipboard" });
+  }
+
   // Admin-only navigation
   if (data.permissions.canManageYears) {
     nav.push({ label: "Participants", href: "/admin/participants", icon: "users" });

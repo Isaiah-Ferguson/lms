@@ -76,10 +76,14 @@ public class SubmissionService : ISubmissionService
         // 5. Validate file list
         ValidateFiles(dto.Files);
 
-        // 6. Pre-generate the submission ID so blob paths can be built before any DB write.
-        //    SAS URL generation happens here — before the transaction — so that a blob
-        //    storage failure cannot leave an orphaned PendingUpload submission in the DB.
-        var submissionId = Guid.NewGuid();
+        // 6. Check if there's an existing submission to reuse its ID
+        var existingSubmission = await _db.Submissions
+            .Where(s => s.AssignmentId == assignmentId && s.StudentId == studentId)
+            .OrderByDescending(s => s.AttemptNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // Use existing submission ID if found, otherwise generate new one
+        var submissionId = existingSubmission?.Id ?? Guid.NewGuid();
         var expiresAt = DateTimeOffset.UtcNow.Add(SasExpiry);
         var slots = new List<FileUploadSlot>();
 
@@ -116,30 +120,80 @@ public class SubmissionService : ISubmissionService
             await using var tx = await _db.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
-            var attemptNumber = await _db.Submissions
-                .Where(s => s.AssignmentId == assignmentId && s.StudentId == studentId)
-                .CountAsync(cancellationToken) + 1;
+            Submission submissionToUse;
 
-            var newSubmission = new Submission
+            if (existingSubmission != null)
             {
-                Id = submissionId,
-                AssignmentId = assignmentId,
-                StudentId = studentId,
-                AttemptNumber = attemptNumber,
-                Type = dto.Type,
-                Status = SubmissionStatus.PendingUpload,
-                CreatedAt = DateTime.UtcNow,
-                FigmaUrl = dto.FigmaUrl,
-                GitHubRepoUrl = dto.GitHubRepoUrl,
-                HostedUrl = dto.HostedUrl,
-                Note = dto.Note
-            };
+                // Reload with tracking and includes for update
+                var submissionToUpdate = await _db.Submissions
+                    .Include(s => s.Artifacts)
+                    .Include(s => s.Grade)
+                    .Include(s => s.GitHubInfo)
+                    .FirstOrDefaultAsync(s => s.Id == existingSubmission.Id, cancellationToken);
 
-            _db.Submissions.Add(newSubmission);
+                if (submissionToUpdate == null)
+                    throw new NotFoundException(nameof(Submission), existingSubmission.Id);
+
+                // Delete old artifacts and their blobs
+                if (submissionToUpdate.Artifacts.Count > 0)
+                {
+                    foreach (var artifact in submissionToUpdate.Artifacts.ToList())
+                    {
+                        await _blob.DeleteBlobAsync(artifact.BlobPath, cancellationToken);
+                        _db.SubmissionArtifacts.Remove(artifact);
+                    }
+                }
+
+                // Remove old grade if exists
+                if (submissionToUpdate.Grade != null)
+                {
+                    _db.Grades.Remove(submissionToUpdate.Grade);
+                }
+
+                // Remove old GitHub info if exists
+                if (submissionToUpdate.GitHubInfo != null)
+                {
+                    _db.GitHubSubmissionInfos.Remove(submissionToUpdate.GitHubInfo);
+                }
+
+                // Update existing submission with new data
+                submissionToUpdate.Type = dto.Type;
+                submissionToUpdate.Status = SubmissionStatus.PendingUpload;
+                submissionToUpdate.CreatedAt = DateTime.UtcNow; // Update submission date to now
+                submissionToUpdate.UpdatedAt = DateTime.UtcNow;
+                submissionToUpdate.FigmaUrl = dto.FigmaUrl;
+                submissionToUpdate.GitHubRepoUrl = dto.GitHubRepoUrl;
+                submissionToUpdate.HostedUrl = dto.HostedUrl;
+                submissionToUpdate.Note = dto.Note;
+
+                submissionToUse = submissionToUpdate;
+            }
+            else
+            {
+                // No existing submission - create new one
+                var newSubmission = new Submission
+                {
+                    Id = submissionId,
+                    AssignmentId = assignmentId,
+                    StudentId = studentId,
+                    AttemptNumber = 1,
+                    Type = dto.Type,
+                    Status = SubmissionStatus.PendingUpload,
+                    CreatedAt = DateTime.UtcNow,
+                    FigmaUrl = dto.FigmaUrl,
+                    GitHubRepoUrl = dto.GitHubRepoUrl,
+                    HostedUrl = dto.HostedUrl,
+                    Note = dto.Note
+                };
+
+                _db.Submissions.Add(newSubmission);
+                submissionToUse = newSubmission;
+            }
+
             await _db.SaveChangesAsync(cancellationToken);
             await tx.CommitAsync(cancellationToken);
 
-            return newSubmission;
+            return submissionToUse;
         });
 
         return new UploadUrlResponseDto(submission.Id, slots, expiresAt);

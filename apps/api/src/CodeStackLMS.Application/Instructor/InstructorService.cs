@@ -143,6 +143,9 @@ public class InstructorService : IInstructorService
 
         if (dto.TotalScore < 0)
             throw new ValidationException("Score cannot be negative.");
+        
+        if (dto.TotalScore > 100)
+            throw new ValidationException("Score cannot exceed 100.");
 
         var now = DateTime.UtcNow;
 
@@ -261,42 +264,58 @@ public class InstructorService : IInstructorService
     {
         pageSize = Math.Clamp(pageSize, 1, 200);
         page = Math.Max(1, page);
-        var query = _db.Submissions
+        
+        // Get all submissions with necessary includes
+        var allSubmissions = await _db.Submissions
             .AsNoTracking()
             .Include(s => s.Student)
             .Include(s => s.Assignment)
                 .ThenInclude(a => a.Module)
                     .ThenInclude(m => m.Course)
             .Include(s => s.Grade)
-            .AsQueryable();
+            .ToListAsync(cancellationToken);
 
         // Filter by course (GUID or slug)
         if (!string.IsNullOrWhiteSpace(courseId))
         {
             if (Guid.TryParse(courseId, out var parsedCourseId))
-                query = query.Where(s => s.Assignment.Module.CourseId == parsedCourseId);
+                allSubmissions = allSubmissions.Where(s => s.Assignment.Module.CourseId == parsedCourseId).ToList();
             else
             {
                 var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
                 if (resolvedTitle != null)
-                    query = query.Where(s => s.Assignment.Module.Course.Title == resolvedTitle);
+                    allSubmissions = allSubmissions.Where(s => s.Assignment.Module.Course.Title == resolvedTitle).ToList();
             }
         }
 
-        // Filter by status
+        // Group by student + assignment and take only the latest submission (highest attempt number)
+        var latestSubmissions = allSubmissions
+            .GroupBy(s => new { s.StudentId, s.AssignmentId })
+            .Select(g => g.OrderByDescending(s => s.AttemptNumber).First())
+            .ToList();
+
+        // Filter out intermediate statuses - only show submissions that are actionable for instructors
+        latestSubmissions = latestSubmissions
+            .Where(s => s.Status == SubmissionStatus.ReadyToGrade || 
+                       s.Status == SubmissionStatus.Graded || 
+                       s.Status == SubmissionStatus.Returned)
+            .ToList();
+
+        // Filter by status after getting latest submissions
         if (!string.IsNullOrWhiteSpace(status) &&
             Enum.TryParse<SubmissionStatus>(status, ignoreCase: true, out var parsedStatus))
         {
-            query = query.Where(s => s.Status == parsedStatus);
+            latestSubmissions = latestSubmissions.Where(s => s.Status == parsedStatus).ToList();
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = latestSubmissions.Count;
 
-        var submissions = await query
+        // Order by created date and paginate
+        var submissions = latestSubmissions
             .OrderByDescending(s => s.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var items = submissions.Select(s => new SubmissionQueueItemDto(
             s.Id,

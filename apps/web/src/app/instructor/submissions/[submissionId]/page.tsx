@@ -149,7 +149,7 @@ export default function InstructorGradingPage() {
   }
 
   const isAlreadyGraded = !!savedGrade;
-  const maxScore = detail.assignment.maxScore;
+  const maxScore = 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -417,26 +417,29 @@ export default function InstructorGradingPage() {
             <CardHeader>
               <CardTitle>Grade Submission</CardTitle>
               <CardDescription>
-                Max score: {maxScore} pts
+                Max score: 100 pts
               </CardDescription>
             </CardHeader>
 
             {/* Score input (100-point scale) */}
             <div className="mb-5">
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Score (out of {maxScore})
+                Score (out of 100)
               </label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   min={0}
-                  max={maxScore}
-                  step={0.5}
+                  max={100}
+                  step={1}
                   value={totalScore}
-                  onChange={(e) => setTotalScore(parseFloat(e.target.value) || 0)}
-                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setTotalScore(Math.min(Math.max(value, 0), 100));
+                  }}
+                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <span className="text-sm text-gray-400">/ {maxScore}</span>
+                <span className="text-sm text-gray-400">/ 100</span>
               </div>
             </div>
 
@@ -461,7 +464,7 @@ export default function InstructorGradingPage() {
             {savedGrade && !saveError && (
               <Alert
                 variant="success"
-                message={`Grade saved: ${savedGrade.totalScore} / ${maxScore} pts`}
+                message={`Grade saved: ${savedGrade.totalScore} / 100 pts`}
                 className="mb-4"
               />
             )}

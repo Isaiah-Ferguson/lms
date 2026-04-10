@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Grid2X2, Calendar, Hash, Users, GraduationCap, BarChart2, X } from "lucide-react";
+import { Grid2X2, Calendar, Hash, Users, GraduationCap, BarChart2, X, ClipboardList } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { NavItem } from "@/lib/dashboard-data";
 import { clsx } from "clsx";
@@ -21,6 +21,7 @@ function NavIcon({ icon }: { icon: string }) {
   if (icon === "users")       return <Users className="h-5 w-5 shrink-0" />;
   if (icon === "grades")      return <GraduationCap className="h-5 w-5 shrink-0" />;
   if (icon === "admingrades") return <BarChart2 className="h-5 w-5 shrink-0" />;
+  if (icon === "clipboard")   return <ClipboardList className="h-5 w-5 shrink-0" />;
   return (
     <span className="flex h-5 w-5 shrink-0 items-center justify-center">
       <Hash className="h-4 w-4" />
