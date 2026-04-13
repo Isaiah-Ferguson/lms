@@ -7,6 +7,7 @@ import { assignmentsApi, instructorApi, gradesApi, type Assignment } from "@/lib
 import { getToken, getUserRole } from "@/lib/auth";
 import { SubmissionCard } from "./components/SubmissionCard";
 import { ParticipationCard } from "./components/ParticipationCard";
+import { EditAssignmentModal } from "./components/EditAssignmentModal";
 import type { SubmissionState } from "./components/SubmissionCard";
 import type { ParticipationCounts } from "./components/ParticipationCard";
 import { formatDateTime } from "@/lib/date-utils";
@@ -50,6 +51,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
   const [editAssignmentType, setEditAssignmentType] = useState("Challenge");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const role = getUserRole();
   const isInstructor = role === "Admin" || role === "Instructor";
@@ -243,11 +245,13 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
 
         {/* ── Right: action cards ─────────────────────────────────────────── */}
         <div className="space-y-4">
-          {/* Submission card — shown to all */}
-          <SubmissionCard
-            courseAssignmentId={params.courseAssignmentId}
-            initial={submissionState}
-          />
+          {/* Submission card — shown to students only */}
+          {!isInstructor && (
+            <SubmissionCard
+              courseAssignmentId={params.courseAssignmentId}
+              initial={submissionState}
+            />
+          )}
 
           {/* Participation counts — instructors only */}
           {isInstructor && (
@@ -261,52 +265,17 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
                 <Users className="h-4 w-4 text-gray-500" /> Manage Assignment
               </h2>
 
-              <form onSubmit={handleSaveDueDate} className="space-y-3">
-                <div>
-                  <label htmlFor="AssignmentType" className="mb-1 block text-xs font-medium text-gray-600">
-                    Type
-                  </label>
-                  <select
-                    id="AssignmentType"
-                    value={editAssignmentType}
-                    onChange={(e) => setEditAssignmentType(e.target.value)}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="MiniChallenge">Mini Challenge</option>
-                    <option value="Challenge">Challenge</option>
-                    <option value="Project">Project</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="DueDate" className="mb-1 block text-xs font-medium text-gray-600">
-                    Due Date
-                  </label>
-                  <input
-                  id="DueDate"
-                    type="datetime-local"
-                    value={editDueDate}
-                    onChange={(e) => setEditDueDate(e.target.value)}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
+              <div className="border-t border-gray-100 pt-3 space-y-2">
                 <button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+                  type="button"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
                 >
-                  {saving ? "Saving…" : "Save Changes"}
+                  Edit Assignment
                 </button>
-                {saveMsg && (
-                  <p className={`text-xs ${saveMsg.includes("Failed") ? "text-red-600" : "text-green-600"}`}>
-                    {saveMsg}
-                  </p>
-                )}
-              </form>
-
-              <div className="border-t border-gray-100 pt-3">
                 <Link
                   href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}/submissions`}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center justify-center rounded-lg gap-2 bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
                 >
                   <Users className="h-4 w-4" />
                   View Submissions
@@ -316,6 +285,19 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
           )}
         </div>
       </div>
+
+      {/* Edit Assignment Modal */}
+      {isInstructor && assignment && (
+        <EditAssignmentModal
+          isOpen={isEditModalOpen}
+          assignment={assignment}
+          onClose={() => setIsEditModalOpen(false)}
+          onSaved={(updated) => {
+            setAssignment(updated);
+            setIsEditModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

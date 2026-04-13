@@ -395,13 +395,17 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
   return (
     <Modal title="Create New Week" onClose={onClose} wide>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Week number"
-          type="number"
-          min="1"
-          value={form.weekNumber}
-          onChange={(e) => { setForm((f) => ({ ...f, weekNumber: parseInt(e.target.value) || 1 })); setError(""); }}
-        />
+        <div>
+          <Input
+            label="Week number"
+            type="number"
+            min="1"
+            value={form.weekNumber}
+            onChange={(e) => { setForm((f) => ({ ...f, weekNumber: parseInt(e.target.value) || 1 })); setError(""); }}
+            disabled
+          />
+          <p className="mt-1 text-xs text-gray-500">Weeks must be created sequentially. This is the next available week number.</p>
+        </div>
         <Input
           label="Week title"
           placeholder="e.g. API Foundations"
@@ -906,7 +910,7 @@ export function LevelDashboardClient({
       {/* ── Week create modal ───────────────────────────────────────────────── */}
       {creatingWeek && (
         <WeekCreateModal
-          defaultWeekNumber={weeks.length + 1}
+          defaultWeekNumber={weeks.length > 0 ? Math.max(...weeks.map(w => w.weekNumber)) + 1 : 1}
           defaultZoomUrl={data.zoomUrl}
           onClose={() => { setCreatingWeek(false); setSaveError(""); }}
           onSave={(week) => void handleWeekCreate(week)}

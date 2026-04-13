@@ -89,6 +89,15 @@ public class CourseDetailService : ICourseDetailService
         if (existingWeek != null)
             throw new InvalidOperationException($"Week {dto.WeekNumber} already exists for this course.");
 
+        // Enforce sequential week creation - get the highest week number
+        var maxWeekNumber = await _db.Modules
+            .Where(m => m.CourseId == parsedCourseId && m.WeekNumber.HasValue)
+            .MaxAsync(m => (int?)m.WeekNumber, cancellationToken) ?? 0;
+
+        var expectedNextWeek = maxWeekNumber + 1;
+        if (dto.WeekNumber != expectedNextWeek)
+            throw new InvalidOperationException($"Weeks must be created sequentially. Next week should be Week {expectedNextWeek}, but received Week {dto.WeekNumber}.");
+
         // Get the highest order number for this course
         var maxOrder = await _db.Modules
             .Where(m => m.CourseId == parsedCourseId)

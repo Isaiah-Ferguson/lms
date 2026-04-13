@@ -91,8 +91,8 @@ public class HomeService : IHomeService
 
         var permissions = new HomePermissionsDto(
             CanManageYears: user.Role.ToString() == "Admin",
-            CanViewAllLevels: user.Role.ToString() == "Admin",
-            CanViewEnrolledOnly: user.Role.ToString() != "Admin");
+            CanViewAllLevels: user.Role.ToString() == "Admin" || user.Role.ToString() == "Instructor",
+            CanViewEnrolledOnly: user.Role.ToString() != "Admin" && user.Role.ToString() != "Instructor");
 
         var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
 

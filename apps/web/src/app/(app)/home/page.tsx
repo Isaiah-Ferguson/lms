@@ -176,13 +176,25 @@ export default function HomePage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Welcome back!</h1>
             <p className="text-brand-50/90 max-w-xl">
-              {permissions.canViewAllLevels
+              {permissions.canManageYears
                 ? "Manage all courses and academic years from your dashboard."
+                : permissions.canViewAllLevels
+                ? "View and interact with all courses across different academic years."
                 : "Continue your learning journey. Your enrolled courses are organized by year below."}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {permissions.canViewAllLevels && !permissions.canManageYears && (
+              <YearSelector
+                years={visibleYears}
+                selectedYearId={selectedYearId}
+                onChange={(yearId) => {
+                  setSelectedYearId(yearId);
+                  router.push(`${pathname}?year=${yearId}`);
+                }}
+              />
+            )}
             {permissions.canManageYears && (
               <button
                 type="button"
