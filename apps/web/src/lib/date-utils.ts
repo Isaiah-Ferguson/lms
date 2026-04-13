@@ -10,7 +10,17 @@ export function formatDateTime(
 ): string {
   if (!dateString) return "—";
 
-  const date = new Date(dateString);
+  // Ensure the date string is treated as UTC if it doesn't have timezone info
+  let normalizedDateString = dateString;
+  if (!dateString.endsWith('Z') && !dateString.includes('+') && !dateString.includes('T')) {
+    // If it's just a date without time, treat as UTC
+    normalizedDateString = dateString + 'T00:00:00Z';
+  } else if (dateString.includes('T') && !dateString.endsWith('Z') && !dateString.includes('+')) {
+    // If it has time but no timezone, add Z for UTC
+    normalizedDateString = dateString + 'Z';
+  }
+
+  const date = new Date(normalizedDateString);
   
   // Check if date is valid
   if (isNaN(date.getTime())) return "Invalid date";
