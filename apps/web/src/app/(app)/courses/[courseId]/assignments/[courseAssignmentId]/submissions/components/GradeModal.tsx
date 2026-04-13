@@ -6,6 +6,7 @@ import { X, Download, Star } from "lucide-react";
 import type { AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
 import { instructorApi, type ArtifactInfo } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { formatDateTime } from "@/lib/date-utils";
 
 export interface GradeModalRow {
   userId: string;
@@ -214,13 +215,13 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
           <span>
             Submitted:{" "}
             <span className={pastDue ? "font-semibold text-red-600" : "font-medium text-gray-700"}>
-              {new Date(row.submittedAt).toLocaleString()}
+              {formatDateTime(row.submittedAt)}
               {pastDue && " — Past due"}
             </span>
           </span>
           {row.dueDate && (
             <span>
-              Due: <span className="font-medium text-gray-700">{new Date(row.dueDate).toLocaleString()}</span>
+              Due: <span className="font-medium text-gray-700">{formatDateTime(row.dueDate)}</span>
             </span>
           )}
           {/* Download */}

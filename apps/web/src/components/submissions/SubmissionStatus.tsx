@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SubmissionStatus as StatusType, SubmissionResponse } from "@/lib/api-client";
+import { formatDateTime } from "@/lib/date-utils";
 
 const STATUS_CONFIG: Record<
   StatusType,
@@ -60,7 +61,7 @@ export function SubmissionResultCard({
           </h3>
           <p className="mt-1 text-sm text-gray-500">
             Attempt #{submission.attemptNumber} ·{" "}
-            {new Date(submission.createdAt).toLocaleString()}
+            {formatDateTime(submission.createdAt)}
           </p>
         </div>
         <SubmissionStatusBadge status={submission.status} />

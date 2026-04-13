@@ -10,6 +10,7 @@ import { Search, X, ChevronUp, ChevronDown, Download } from "lucide-react";
 import { gradesApi, homeApi, ApiError, type AdminGrades, type AdminStudentGrade, type StudentGradeRow } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 const COURSES = [
   { id: "combine", name: "Combine" },
@@ -70,7 +71,7 @@ function deriveStats(rows: StudentGradeRow[]) {
     totalPossible,
     gradedCount: graded.length,
     totalCount: rows.length,
-    lastGraded: lastGraded?.gradedAt ? new Date(lastGraded.gradedAt).toLocaleDateString() : "—",
+    lastGraded: formatDate(lastGraded?.gradedAt),
   };
 }
 
@@ -321,9 +322,7 @@ export default function AdminGradesPage() {
                         const percentage = row.maxScore > 0 && row.totalScore !== null
                           ? Math.round((row.totalScore / row.maxScore) * 100) + "%"
                           : "—";
-                        const gradedAt = row.gradedAt 
-                          ? new Date(row.gradedAt).toLocaleString()
-                          : "—";
+                        const gradedAt = formatDateTime(row.gradedAt);
                         
                         csvRows.push([
                           student.name,

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { instructorApi, type SubmissionDetail } from "@/lib/api-client";
 import { getToken, getUserRole } from "@/lib/auth";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface SubmissionGradingPageProps {
   params: {
@@ -210,7 +211,7 @@ export default function SubmissionGradingPage({ params }: SubmissionGradingPageP
 
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-600">Submitted At</p>
-            <p className="text-sm text-gray-700">{new Date(data.createdAt).toLocaleString()}</p>
+            <p className="text-sm text-gray-700">{formatDateTime(data.createdAt)}</p>
           </div>
 
           <div>
@@ -301,7 +302,7 @@ export default function SubmissionGradingPage({ params }: SubmissionGradingPageP
             </p>
             <p>
               <span className="font-semibold">Graded At:</span>{" "}
-              {data.existingGrade?.gradedAt ? new Date(data.existingGrade.gradedAt).toLocaleString() : "—"}
+              {formatDateTime(data.existingGrade?.gradedAt)}
             </p>
           </div>
         </Card>

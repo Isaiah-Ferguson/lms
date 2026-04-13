@@ -11,6 +11,7 @@ import { instructorApi, ApiError } from "@/lib/api-client";
 import type { SubmissionDetail, ExistingGrade } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { formatBytes, formatStatus } from "@/lib/utils";
+import { formatDateTime } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -192,7 +193,7 @@ export default function InstructorGradingPage() {
               <div>
                 <dt className="text-gray-400">Submitted</dt>
                 <dd className="font-medium text-gray-700">
-                  {new Date(detail.createdAt).toLocaleString()}
+                  {formatDateTime(detail.createdAt)}
                 </dd>
               </div>
               <div>
@@ -407,7 +408,7 @@ export default function InstructorGradingPage() {
               <div className="text-sm">
                 <p className="font-medium text-green-800">Already graded</p>
                 <p className="text-green-600">
-                  {new Date(savedGrade!.gradedAt).toLocaleString()}
+                  {formatDateTime(savedGrade!.gradedAt)}
                 </p>
               </div>
             </div>
@@ -493,7 +494,7 @@ export default function InstructorGradingPage() {
               <div className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
-                  Last graded {new Date(savedGrade.gradedAt).toLocaleString()}
+                  Last graded {formatDateTime(savedGrade.gradedAt)}
                 </div>
               </div>
             )}

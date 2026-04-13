@@ -127,11 +127,16 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     setSaving(true);
     setSaveMsg(null);
     try {
+      // Convert datetime-local value (which is in local time) to UTC ISO string
+      // datetime-local format: "2026-04-13T14:30" (no timezone info)
+      // We need to treat this as local time and convert to UTC
+      const localDate = new Date(editDueDate);
+      
       const updated = await assignmentsApi.updateAssignment(assignment.id, {
         title: assignment.title,
         assignmentType: editAssignmentType,
         instructions: assignment.instructions,
-        dueDate: new Date(editDueDate).toISOString(),
+        dueDate: localDate.toISOString(),
         attachmentUrl: assignment.attachmentUrl,
       }, token);
       setAssignment(updated);

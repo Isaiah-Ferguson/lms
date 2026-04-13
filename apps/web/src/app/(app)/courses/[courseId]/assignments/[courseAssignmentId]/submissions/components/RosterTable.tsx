@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AssignmentSubmissionsRosterData, AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
+import { formatDateTime } from "@/lib/date-utils";
 
 type RosterRow = AssignmentSubmissionsRosterData["rows"][number];
 
@@ -46,7 +47,7 @@ function gradeDisplay(grade: string | null): React.ReactNode {
 
 function formatDate(value: string | null): React.ReactNode {
   if (!value) return <span className="text-gray-400">—</span>;
-  return new Date(value).toLocaleString();
+  return formatDateTime(value);
 }
 
 function isPastDue(submittedAt: string | null, dueDate: string | null): boolean {
@@ -99,7 +100,7 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   <td className="px-4 py-3">
                     {row.submittedAt ? (
                       <span className={pastDue ? "font-medium text-red-600" : "text-gray-600"}>
-                        {new Date(row.submittedAt).toLocaleString()}
+                        {formatDateTime(row.submittedAt)}
                         {pastDue && (
                           <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
                             Late
