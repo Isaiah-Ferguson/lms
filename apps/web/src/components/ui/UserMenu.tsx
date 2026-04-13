@@ -45,12 +45,23 @@ function Avatar({ name, avatarUrl, isOnProbation }: { name: string; avatarUrl: s
 
 // ─── Dropdown items ───────────────────────────────────────────────────────────
 
-const MENU_ITEMS = [
-  { label: "Dashboard",   href: "/home",        icon: LayoutDashboard },
-  { label: "Profile",     href: "/profile",     icon: User },
-  { label: "Grades",      href: "/grades",      icon: BarChart2 },
-  { label: "Preferences", href: "/preferences", icon: Settings },
-] as const;
+function getMenuItems(role: string) {
+  const items = [
+    { label: "Dashboard",   href: "/home",        icon: LayoutDashboard },
+    { label: "Profile",     href: "/profile",     icon: User },
+  ];
+
+  // Show Admin Grades for admins, regular Grades for others
+  if (role === "Admin") {
+    items.push({ label: "Admin Grades", href: "/admin/grades", icon: BarChart2 });
+  } else {
+    items.push({ label: "Grades", href: "/grades", icon: BarChart2 });
+  }
+
+  items.push({ label: "Preferences", href: "/preferences", icon: Settings });
+
+  return items;
+}
 
 // ─── UserMenu ─────────────────────────────────────────────────────────────────
 
@@ -118,7 +129,7 @@ export function UserMenu({ user }: { user: UserInfo }) {
 
           {/* Nav links */}
           <div className="p-1">
-            {MENU_ITEMS.map(({ label, href, icon: Icon }) => (
+            {getMenuItems(user.role).map(({ label, href, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}

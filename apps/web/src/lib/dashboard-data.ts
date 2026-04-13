@@ -21,6 +21,7 @@ export interface UserInfo {
   name: string;
   avatarUrl: string | null; // null → show initials fallback
   isOnProbation?: boolean;
+  role: string;
 }
 
 export interface DashboardData {
@@ -90,9 +91,13 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
     }
   }
 
-  // Always show Calendar and Grades
+  // Always show Calendar
   nav.push({ label: "Calendar", href: "/calendar", icon: "calendar" });
-  nav.push({ label: "Grades", href: "/grades", icon: "grades" });
+  
+  // Show Grades only for non-admins (students and instructors)
+  if (!data.permissions.canManageYears) {
+    nav.push({ label: "Grades", href: "/grades", icon: "grades" });
+  }
 
   // Admin/Instructor navigation
   if (data.permissions.canManageYears || data.permissions.canViewAllLevels) {
@@ -114,6 +119,7 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
     name: data.user.name,
     avatarUrl: data.user.avatarUrl,
     isOnProbation: data.user.isOnProbation ?? false,
+    role: data.user.role,
   };
 
   return { nav, cards: [], currentLevel, user };
@@ -183,6 +189,7 @@ export function getDashboardData(cohortStartYear: number = 2025): DashboardData 
   const user: UserInfo = {
     name: "Isaiah Ferguson",
     avatarUrl: null,
+    role: "Student",
   };
 
   return { nav, cards: allCards, currentLevel, user };
