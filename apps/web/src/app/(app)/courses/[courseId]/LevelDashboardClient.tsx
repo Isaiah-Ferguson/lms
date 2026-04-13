@@ -9,8 +9,10 @@ import {
   Plus, Pencil, ChevronRight, ExternalLink, Trash2,
 } from "lucide-react";
 import { clsx } from "clsx";
-import { Button } from "@/components/ui/Button";
+import { AssignmentManager } from "@/components/assignments/AssignmentManager";
+import { CreateAssignmentModal } from "./components/CreateAssignmentModal";
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 // ─── Shared types (used by both Level 1 and Level 2) ─────────────────────────
 
@@ -708,10 +710,13 @@ const COL_META: {
 
 function AssignmentsSection({
   courseId,
+  canEdit,
+  onCreateClick,
 }: {
   courseId: string;
   weeks: LevelWeek[];
   canEdit: boolean;
+  onCreateClick?: () => void;
 }) {
   const [assignments, setAssignments] = useState<LevelData["assignments"]>({ miniChallenges: [], challenges: [], projects: [] });
 
@@ -741,8 +746,17 @@ function AssignmentsSection({
 
   return (
     <section className="space-y-4">
-      <div>
+      <div className="flex items-center justify-between">
         <h2 className="text-[30px] font-bold text-gray-900">Assignments</h2>
+        {canEdit && onCreateClick && (
+          <button
+            onClick={onCreateClick}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create Assignment
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -818,6 +832,7 @@ export function LevelDashboardClient({
   const [weeks, setWeeks] = useState<LevelWeek[]>(data.weeks);
   const [editingWeek, setEditingWeek] = useState<LevelWeek | null>(null);
   const [creatingWeek, setCreatingWeek] = useState(false);
+  const [creatingAssignment, setCreatingAssignment] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
@@ -905,6 +920,7 @@ export function LevelDashboardClient({
         courseId={data.courseId}
         weeks={weeks}
         canEdit={data.permissions.canEditAssignments}
+        onCreateClick={() => setCreatingAssignment(true)}
       />
 
       {/* ── Week create modal ───────────────────────────────────────────────── */}
@@ -925,6 +941,21 @@ export function LevelDashboardClient({
           week={editingWeek}
           onClose={() => setEditingWeek(null)}
           onSave={(updated) => void handleWeekSave(updated)}
+        />
+      )}
+
+      {/* ── Create Assignment modal ─────────────────────────────────────────── */}
+      {creatingAssignment && (
+        <CreateAssignmentModal
+          isOpen={creatingAssignment}
+          courseId={data.courseId}
+          weeks={weeks}
+          onClose={() => setCreatingAssignment(false)}
+          onCreated={() => {
+            setCreatingAssignment(false);
+            // Trigger a refresh by updating a dummy state or reloading assignments
+            window.location.reload();
+          }}
         />
       )}
     </div>
