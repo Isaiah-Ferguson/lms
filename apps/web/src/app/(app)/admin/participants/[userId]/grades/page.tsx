@@ -75,7 +75,7 @@ export default function StudentGradesPage() {
   const params = useParams();
   const userId = params.userId as string;
   
-  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [activeCourseId, setActiveCourseId] = useState<string>(COURSES[0].id); // Auto-select first course (Combine)
   const [data, setData] = useState<AdminGrades | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -129,18 +129,6 @@ export default function StudentGradesPage() {
       load(activeCourseId, activeCohortId);
     }
   }, [activeCourseId, cohortLoaded, activeCohortId, load]);
-
-  useEffect(() => {
-    if (cohortLoaded && data && !activeCourseId) {
-      const student = data.students.find(s => s.userId === userId);
-      if (student && student.rows.length > 0) {
-        const firstCourseId = COURSES[0].id;
-        setActiveCourseId(firstCourseId);
-      } else {
-        setActiveCourseId(COURSES[0].id);
-      }
-    }
-  }, [cohortLoaded, data, userId, activeCourseId]);
 
   const student = data?.students.find(s => s.userId === userId);
   const rows = student?.rows ?? [];

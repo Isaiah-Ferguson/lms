@@ -5,6 +5,7 @@ import { CheckCircle2, Upload, RefreshCw, Download, X } from "lucide-react";
 import { submissionsApi, uploadFileToBlobSas } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { SubmissionGuidelinesModal } from "@/components/submissions/SubmissionGuidelinesModal";
+import { formatDateTime } from "@/lib/date-utils";
 
 export interface SubmissionState {
   status: "NotSubmitted" | "Submitted" | "Returned";
@@ -230,7 +231,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
           <p className={`text-xs ${
             state.status === "Returned" ? "text-red-700" : "text-green-700"
           }`}>
-            {new Date(state.submittedAt).toLocaleString()}
+            {formatDateTime(state.submittedAt)}
             {state.fileName && (
               <> · <span className="font-medium">{state.fileName}</span></>
             )}

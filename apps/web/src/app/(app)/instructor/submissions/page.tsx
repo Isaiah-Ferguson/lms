@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import { instructorApi, ApiError, type SubmissionQueueItem } from "@/lib/api-cli
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 const COURSES = [
   { id: "",         name: "All Courses" },
@@ -231,10 +232,10 @@ export default function SubmissionQueuePage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">
-                      {new Date(item.submittedAt).toLocaleDateString()}
+                      {formatDateTime(item.submittedAt)}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">
-                      {item.gradedAt ? new Date(item.gradedAt).toLocaleDateString() : "—"}
+                      {formatDateTime(item.gradedAt)}
                     </td>
                     <td className="px-4 py-3">
                       <Link

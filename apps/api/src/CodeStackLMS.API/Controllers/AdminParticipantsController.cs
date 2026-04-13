@@ -48,7 +48,10 @@ public class AdminParticipantsController : ControllerBase
         [FromRoute] string userId,
         CancellationToken cancellationToken)
     {
-        await _adminParticipantsService.ToggleUserActiveAsync(userId, cancellationToken);
+        var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? throw new UnauthorizedAccessException("User ID not found in token.");
+        
+        await _adminParticipantsService.ToggleUserActiveAsync(userId, currentUserId, cancellationToken);
         return NoContent();
     }
 

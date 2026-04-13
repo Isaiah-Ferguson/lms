@@ -27,17 +27,35 @@ export function SubmissionGuidelinesModal({
     const checkScroll = () => {
       if (contentRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
+        
+        // If content doesn't overflow (no scrollbar needed), enable button immediately
+        const hasScroll = scrollHeight > clientHeight;
+        if (!hasScroll) {
+          setCanAccept(true);
+          return;
+        }
+        
+        // If scrollable, check if user has scrolled to bottom
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px tolerance
         setCanAccept(isAtBottom);
       }
     };
 
     const content = contentRef.current;
     if (content) {
-      // Check initial scroll position
-      checkScroll();
+      // Check initial scroll position with a small delay to ensure content is rendered
+      setTimeout(checkScroll, 100);
+      
+      // Listen for scroll events
       content.addEventListener("scroll", checkScroll);
-      return () => content.removeEventListener("scroll", checkScroll);
+      
+      // Listen for resize events (in case window is resized)
+      window.addEventListener("resize", checkScroll);
+      
+      return () => {
+        content.removeEventListener("scroll", checkScroll);
+        window.removeEventListener("resize", checkScroll);
+      };
     }
   }, [isOpen]);
 
@@ -75,7 +93,10 @@ export function SubmissionGuidelinesModal({
           </div>
 
           {/* Content */}
-          <div className="space-y-6 px-6 py-6">
+          <div 
+            ref={contentRef}
+            className="space-y-6 px-6 py-6 overflow-y-auto flex-1"
+          >
             {/* File Header Section */}
             <section>
               <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-700">
@@ -160,7 +181,7 @@ export function SubmissionGuidelinesModal({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}

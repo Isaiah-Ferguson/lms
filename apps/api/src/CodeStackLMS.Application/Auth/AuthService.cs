@@ -39,9 +39,16 @@ public class AuthService : IAuthService
 
         var user = await _db.Users
             .FirstOrDefaultAsync(
-                u => u.Email == emailLower && u.IsActive,
-                cancellationToken)
-            ?? throw new ValidationException("Invalid email or password.");
+                u => u.Email == emailLower,
+                cancellationToken);
+
+        // Check if user exists
+        if (user == null)
+            throw new ValidationException("Invalid email or password.");
+
+        // Check if account is deactivated
+        if (!user.IsActive)
+            throw new ValidationException("Your account has been deactivated. Please contact an administrator for assistance.");
 
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new ValidationException("Invalid email or password.");
@@ -128,11 +135,15 @@ public class AuthService : IAuthService
         var emailLower = dto.Email.Trim().ToLower();
 
         var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.Email == emailLower && u.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == emailLower, cancellationToken);
 
         // Silently return if email doesn't exist to prevent email enumeration attacks
         if (user == null)
             return;
+
+        // Check if account is deactivated - throw error instead of silently returning
+        if (!user.IsActive)
+            throw new ValidationException("Your account has been deactivated. Please contact an administrator for assistance.");
 
         // Generate temporary password
         var temporaryPassword = GenerateTemporaryPassword();

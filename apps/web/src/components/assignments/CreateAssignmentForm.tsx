@@ -21,13 +21,23 @@ export function CreateAssignmentForm({
   onAssignmentCreated,
   onCancel,
 }: CreateAssignmentFormProps) {
-  const [formData, setFormData] = useState<CreateAssignmentRequest>({
-    title: existingAssignment?.title ?? "",
-    assignmentType: existingAssignment?.assignmentType ?? "Challenge",
-    instructions: existingAssignment?.instructions ?? "",
-    dueDate: existingAssignment?.dueDate ? new Date(existingAssignment.dueDate).toISOString().slice(0, 16) : "",
-    attachmentUrl: existingAssignment?.attachmentUrl ?? "",
-    moduleId: existingAssignment?.moduleId ?? moduleId,
+  const [formData, setFormData] = useState<CreateAssignmentRequest>(() => {
+    // Convert UTC date to local datetime-local format
+    let localDueDate = "";
+    if (existingAssignment?.dueDate) {
+      const date = new Date(existingAssignment.dueDate);
+      const offset = date.getTimezoneOffset() * 60000;
+      localDueDate = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+    }
+    
+    return {
+      title: existingAssignment?.title ?? "",
+      assignmentType: existingAssignment?.assignmentType ?? "Challenge",
+      instructions: existingAssignment?.instructions ?? "",
+      dueDate: localDueDate,
+      attachmentUrl: existingAssignment?.attachmentUrl ?? "",
+      moduleId: existingAssignment?.moduleId ?? moduleId,
+    };
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

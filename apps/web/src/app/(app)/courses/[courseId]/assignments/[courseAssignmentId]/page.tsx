@@ -9,6 +9,7 @@ import { SubmissionCard } from "./components/SubmissionCard";
 import { ParticipationCard } from "./components/ParticipationCard";
 import type { SubmissionState } from "./components/SubmissionCard";
 import type { ParticipationCounts } from "./components/ParticipationCard";
+import { formatDateTime } from "@/lib/date-utils";
 
 interface AssignmentDetailsPageProps {
   params: {
@@ -64,7 +65,11 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     ])
       .then(([a, submission]) => {
         setAssignment(a);
-        setEditDueDate(new Date(a.dueDate).toISOString().slice(0, 16));
+        // Convert UTC date to local datetime-local format
+        const localDate = new Date(a.dueDate);
+        const offset = localDate.getTimezoneOffset() * 60000; // offset in milliseconds
+        const localISOTime = new Date(localDate.getTime() - offset).toISOString().slice(0, 16);
+        setEditDueDate(localISOTime);
         setEditAssignmentType(a.assignmentType ?? "Challenge");
 
         // Map API response to SubmissionState
@@ -190,7 +195,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
           <span className="flex items-center gap-1">
             <CalendarDays className="h-3.5 w-3.5" />
-            Due {new Date(assignment.dueDate).toLocaleString()} · {timeRemaining(assignment.dueDate)}
+            Due {formatDateTime(assignment.dueDate)} · {timeRemaining(assignment.dueDate)}
           </span>
           <span className="flex items-center gap-1">
             <BookOpen className="h-3.5 w-3.5" />

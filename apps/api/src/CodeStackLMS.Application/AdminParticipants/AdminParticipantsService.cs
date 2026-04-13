@@ -138,9 +138,17 @@ public class AdminParticipantsService : IAdminParticipantsService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task ToggleUserActiveAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task ToggleUserActiveAsync(string userId, string currentUserId, CancellationToken cancellationToken = default)
     {
         var userGuid = ParseGuid(userId);
+        var currentUserGuid = ParseGuid(currentUserId);
+        
+        // Prevent admins from deactivating themselves
+        if (userGuid == currentUserGuid)
+        {
+            throw new ValidationException("You cannot deactivate your own account.");
+        }
+        
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Id == userGuid, cancellationToken)
             ?? throw new NotFoundException(nameof(User), userGuid);
