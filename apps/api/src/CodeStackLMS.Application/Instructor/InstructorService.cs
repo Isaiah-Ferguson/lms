@@ -289,12 +289,12 @@ public class InstructorService : IInstructorService
 
         // Filter by year (cohort) if provided - only include submissions for courses in that cohort
         // If yearId is provided but has no courses, show empty results (not all submissions)
-        // if (yearCourseIds != null)
-        // {
-        //     allSubmissions = allSubmissions
-        //         .Where(s => yearCourseIds.Contains(s.Assignment.Module.CourseId))
-        //         .ToList();
-        // }
+        if (yearCourseIds != null)
+        {
+            allSubmissions = allSubmissions
+                .Where(s => yearCourseIds.Contains(s.Assignment.Module.CourseId))
+                .ToList();
+        }
 
         // Filter by course (GUID or slug)
         if (!string.IsNullOrWhiteSpace(courseId))
