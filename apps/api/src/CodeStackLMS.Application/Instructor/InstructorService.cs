@@ -258,13 +258,25 @@ public class InstructorService : IInstructorService
     public async Task<SubmissionQueuePageDto> GetSubmissionQueueAsync(
         string? courseId,
         string? status,
+        string? yearId,
         int page = 1,
         int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
         pageSize = Math.Clamp(pageSize, 1, 200);
         page = Math.Max(1, page);
-        
+
+        // Get course IDs for the specified year (cohort) if yearId is provided
+        List<Guid>? yearCourseIds = null;
+        if (!string.IsNullOrWhiteSpace(yearId) && Guid.TryParse(yearId, out var parsedYearId))
+        {
+            yearCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedYearId)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+        }
+
         // Get all submissions with necessary includes
         var allSubmissions = await _db.Submissions
             .AsNoTracking()
@@ -274,6 +286,15 @@ public class InstructorService : IInstructorService
             .ThenInclude(m => m.Course)
             .Include(s => s.Grade)
             .ToListAsync(cancellationToken);
+
+        // Filter by year (cohort) if provided - only include submissions for courses in that cohort
+        // If yearId is provided but has no courses, show empty results (not all submissions)
+        // if (yearCourseIds != null)
+        // {
+        //     allSubmissions = allSubmissions
+        //         .Where(s => yearCourseIds.Contains(s.Assignment.Module.CourseId))
+        //         .ToList();
+        // }
 
         // Filter by course (GUID or slug)
         if (!string.IsNullOrWhiteSpace(courseId))

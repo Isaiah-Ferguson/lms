@@ -8,7 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { CheckCircle2, Clock, AlertCircle, TrendingUp, BookOpen, Calendar, Download } from "lucide-react";
-import { gradesApi, profileApi, homeApi, ApiError, type StudentGrades, type StudentGradeRow, type Enrollment } from "@/lib/api-client";
+import { gradesApi, profileApi, ApiError, type StudentGrades, type StudentGradeRow, type Enrollment } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 
@@ -74,31 +74,6 @@ export default function GradesPage() {
   const [loading, setLoading] = useState(true);
   const [loadingEnrollments, setLoadingEnrollments] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
-  const [cohortLoaded, setCohortLoaded] = useState(false);
-
-  // Fetch active cohort on mount
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setCohortLoaded(true);
-      return;
-    }
-    homeApi.getDashboard(token)
-      .then((dashboard) => {
-        const activeCohort = dashboard.years.find(y => y.isActive);
-        if (activeCohort) {
-          setActiveCohortId(activeCohort.id);
-        }
-      })
-      .catch(() => {
-        // Failed to fetch active cohort, will load all grades
-      })
-      .finally(() => {
-        setCohortLoaded(true);
-      });
-  }, []);
-
   // Load user's enrolled courses
   useEffect(() => {
     const token = getToken();
@@ -120,13 +95,13 @@ export default function GradesPage() {
       });
   }, [router]);
 
-  const load = useCallback(async (courseId: string, cohortId: string | null) => {
+  const load = useCallback(async (courseId: string) => {
     const token = getToken();
     if (!token) { router.replace("/login"); return; }
     setLoading(true);
     setError(null);
     try {
-      const result = await gradesApi.getMyGrades(courseId, token, cohortId ?? undefined);
+      const result = await gradesApi.getMyGrades(courseId, token);
       setData(result);
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to load grades.");
@@ -136,10 +111,10 @@ export default function GradesPage() {
   }, [router]);
 
   useEffect(() => {
-    if (activeCourseId && cohortLoaded) {
-      load(activeCourseId, activeCohortId);
+    if (activeCourseId) {
+      load(activeCourseId);
     }
-  }, [activeCourseId, cohortLoaded, activeCohortId, load]);
+  }, [activeCourseId, load]);
 
   const rows = data?.rows ?? [];
   const graded = rows.filter((r) => r.status === "Graded");
@@ -236,10 +211,6 @@ export default function GradesPage() {
           <BookOpen className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
           <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-slate-100">No Courses Enrolled</h3>
           <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">You are not enrolled in any courses yet. Contact your instructor to get enrolled.</p>
-        </div>
-      ) : loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
         </div>
       ) : (
         <>

@@ -52,11 +52,12 @@ public class InstructorController : ControllerBase
     public async Task<IActionResult> GetSubmissionQueue(
         [FromQuery] string? courseId,
         [FromQuery] string? status,
+        [FromQuery] string? yearId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
-        var result = await _instructorService.GetSubmissionQueueAsync(courseId, status, page, pageSize, cancellationToken);
+        var result = await _instructorService.GetSubmissionQueueAsync(courseId, status, yearId, page, pageSize, cancellationToken);
         return Ok(result);
     }
 

@@ -354,11 +354,13 @@ export const instructorApi = {
   getSubmissionQueue(
     token: string,
     courseId?: string,
-    status?: string
+    status?: string,
+    yearId?: string
   ): Promise<SubmissionQueuePage> {
     const params = new URLSearchParams();
     if (courseId) params.set("courseId", courseId);
     if (status) params.set("status", status);
+    if (yearId) params.set("yearId", yearId);
     const qs = params.toString();
     return apiFetch<SubmissionQueuePage>(
       `/api/instructor/submissions${qs ? `?${qs}` : ""}`,

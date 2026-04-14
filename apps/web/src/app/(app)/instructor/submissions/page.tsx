@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ClipboardList, Search, X, Github, FileText,
   CheckCircle2, Clock, AlertCircle, RefreshCw,
 } from "lucide-react";
-import { instructorApi, ApiError, type SubmissionQueueItem } from "@/lib/api-client";
+import { instructorApi, homeApi, ApiError, type SubmissionQueueItem } from "@/lib/api-client";
+import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
@@ -31,12 +32,40 @@ const STATUSES = [
 
 export default function SubmissionQueuePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryYearId = searchParams.get("year");
+
   const [items, setItems] = useState<SubmissionQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [courseFilter, setCourseFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [years, setYears] = useState<AcademicYear[]>([]);
+  const [selectedYearId, setSelectedYearId] = useState("");
+
+  // Load available years and determine selected year
+  useEffect(() => {
+    async function loadYears() {
+      const token = getToken();
+      if (!token) return;
+
+      try {
+        const data = await homeApi.getDashboard(token);
+        setYears(data.years);
+
+        // Determine which year to use
+        const activeYearId = data.years.find((year) => year.isActive)?.id ?? data.years[0]?.id ?? "";
+        const preferredYearId = queryYearId && data.years.some((y) => y.id === queryYearId)
+          ? queryYearId
+          : activeYearId;
+        setSelectedYearId(preferredYearId);
+      } catch {
+        // Silently fail - submissions will still load without year filter
+      }
+    }
+    void loadYears();
+  }, [queryYearId]);
 
   const load = useCallback(async () => {
     const token = getToken();
@@ -47,7 +76,8 @@ export default function SubmissionQueuePage() {
       const data = await instructorApi.getSubmissionQueue(
         token,
         courseFilter || undefined,
-        statusFilter || undefined
+        statusFilter || undefined,
+        selectedYearId || undefined
       );
       setItems(data.items || []);
     } catch (err) {
@@ -55,7 +85,7 @@ export default function SubmissionQueuePage() {
     } finally {
       setLoading(false);
     }
-  }, [router, courseFilter, statusFilter]);
+  }, [router, courseFilter, statusFilter, selectedYearId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -71,6 +101,7 @@ export default function SubmissionQueuePage() {
   const pendingCount = items.filter(
     (i) => i.status === "ReadyToGrade" || i.status === "Grading"
   ).length;
+  console.log(items)
 
   return (
     <div className="space-y-6">
@@ -78,10 +109,15 @@ export default function SubmissionQueuePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Submission Queue</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-600">
             {pendingCount > 0
               ? `${pendingCount} submission${pendingCount !== 1 ? "s" : ""} awaiting grading`
               : "All submissions graded"}
+            {selectedYearId && years.length > 0 && (
+              <span className="ml-2">
+                · {years.find(y => y.id === selectedYearId)?.label || ""}
+              </span>
+            )}
           </p>
         </div>
         <button
