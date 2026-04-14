@@ -80,7 +80,7 @@ function deriveStats(rows: StudentGradeRow[]) {
 type SortKey = "name" | "overallPct" | "gradedCount" | "letterGrade";
 
 function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: "asc" | "desc" }) {
-  if (col !== active) return <ChevronUp className="h-3 w-3 text-gray-400" />;
+  if (col !== active) return <ChevronUp className="h-3 w-3 text-gray-400 dark:text-slate-500" />;
   return dir === "asc"
     ? <ChevronUp className="h-3 w-3 text-blue-500" />
     : <ChevronDown className="h-3 w-3 text-blue-500" />;
@@ -180,7 +180,7 @@ export default function AdminGradesPage() {
   function Th({ col, children }: { col: SortKey; children: React.ReactNode }) {
     return (
       <th
-        className="cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 hover:text-gray-800"
+        className="cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200"
         onClick={() => handleSort(col)}
       >
         <span className="inline-flex items-center gap-1">
@@ -196,8 +196,8 @@ export default function AdminGradesPage() {
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Grades</h1>
-            <p className="mt-1 text-sm text-gray-500">Class-wide grade overview by course.</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Admin Grades</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Class-wide grade overview by course.</p>
           </div>
         </div>
 
@@ -210,7 +210,7 @@ export default function AdminGradesPage() {
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeCourseId === c.id
                   ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700"
               }`}
             >
               {c.name}
@@ -227,8 +227,8 @@ export default function AdminGradesPage() {
         ) : (
           <>
             {/* Distribution chart */}
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-sm font-semibold text-gray-700">
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-300">
                 Score Distribution — {data?.courseName}
               </h2>
               <ResponsiveContainer width="100%" height={160}>
@@ -245,59 +245,59 @@ export default function AdminGradesPage() {
             {/* Search */}
             <div className="relative max-w-xs">
               <label htmlFor="grades-search" className="sr-only">Search students</label>
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
               <input
                 id="grades-search"
                 type="text"
                 placeholder="Search student or email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 py-2 pl-9 pr-4 text-sm shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
 
             {/* Roster table */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
               {sorted.length === 0 && !loading ? (
-                <div className="px-4 py-12 text-center text-sm text-gray-600">
+                <div className="px-4 py-12 text-center text-sm text-gray-600 dark:text-slate-400">
                   {studentsWithStats.length === 0 ? "No enrolled students found for this course." : "No students match your search."}
                 </div>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50">
+                    <tr className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
                       <Th col="name">Student</Th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Email</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Score</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-slate-400">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-slate-400">Score</th>
                       <Th col="overallPct">Grade</Th>
                       <Th col="gradedCount">Graded</Th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Last Graded</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-slate-400">Last Graded</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                     {sorted.map((s) => (
-                      <tr key={s.userId} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">
-                          <Link href={`/admin/participants/${s.userId}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                      <tr key={s.userId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-slate-100">
+                          <Link href={`/admin/participants/${s.userId}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
                             {s.name}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-gray-500">{s.email}</td>
-                        <td className="px-4 py-3 text-gray-600">
+                        <td className="px-4 py-3 text-gray-500 dark:text-slate-400">{s.email}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-slate-300">
                           {s.totalEarned} / {s.totalPossible}
                         </td>
                         <td className="px-4 py-3">
                           <GradeCell pct={s.overallPct} grade={s.letterGrade} />
                         </td>
-                        <td className="px-4 py-3 text-gray-600">
-                          {s.gradedCount} <span className="text-gray-500">/ {s.totalCount}</span>
+                        <td className="px-4 py-3 text-gray-600 dark:text-slate-300">
+                          {s.gradedCount} <span className="text-gray-500 dark:text-slate-400">/ {s.totalCount}</span>
                         </td>
-                        <td className="px-4 py-3 text-gray-500 text-xs">{s.lastGraded}</td>
+                        <td className="px-4 py-3 text-gray-500 dark:text-slate-400 text-xs">{s.lastGraded}</td>
                       </tr>
                     ))}
                   </tbody>

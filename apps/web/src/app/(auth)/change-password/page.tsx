@@ -59,7 +59,7 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900 px-4 py-12">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>
@@ -106,9 +106,9 @@ export default function ChangePasswordPage() {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-4 text-center text-sm text-gray-500 dark:text-slate-400">
             Need to return to sign in?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:underline">
+            <Link href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
               Back to login
             </Link>
           </p>

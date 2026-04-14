@@ -125,10 +125,10 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
   }
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
       <div className="mb-3">
-        <h3 className="text-sm font-semibold text-gray-900">Admin Tools</h3>
-        <p className="text-xs text-gray-500">Upload week media and attach it to Week {weekNumber}.</p>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Admin Tools</h3>
+        <p className="text-xs text-gray-500 dark:text-slate-400">Upload week media and attach it to Week {weekNumber}.</p>
       </div>
 
       <div className="space-y-3">
@@ -144,7 +144,7 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
 
         <div className="grid gap-3 md:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="video-url-input" className="text-sm font-medium text-gray-700">Video URL</label>
+            <label htmlFor="video-url-input" className="text-sm font-medium text-gray-700 dark:text-slate-300">Video URL</label>
             <input
               id="video-url-input"
               type="url"
@@ -154,12 +154,12 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
                 setError("");
               }}
               placeholder="https://codestackcdnwest.blob.core.windows.net/..."
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="code-file-input" className="text-sm font-medium text-gray-700">Upload Code</label>
+            <label htmlFor="code-file-input" className="text-sm font-medium text-gray-700 dark:text-slate-300">Upload Code</label>
             <input
               id="code-file-input"
               type="file"
@@ -168,17 +168,17 @@ export function AdminUploadPanel({ weekNumber, moduleId, onAttach }: AdminUpload
                 setCodeFile(e.target.files?.[0] ?? null);
                 setError("");
               }}
-              className="block w-full rounded-lg border border-gray-300 px-3 py-1 text-xs text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-gray-600"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1 text-xs text-gray-700 dark:text-slate-100 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 dark:file:bg-slate-700 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-gray-600 dark:file:text-slate-300"
             />
           </div>
         </div>
 
         {uploading && (
           <div>
-            <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+            <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-slate-700">
               <div className="h-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
             </div>
-            <p className="mt-1 text-xs text-gray-500">Uploading... {progress}%</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Uploading... {progress}%</p>
           </div>
         )}
 

@@ -79,22 +79,22 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
         {/* User selection */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-gray-700 dark:text-slate-300">
               Users
-              <span className="ml-1.5 text-xs text-gray-400">
+              <span className="ml-1.5 text-xs text-gray-400 dark:text-slate-500">
                 ({checkedUsers.length} selected)
               </span>
             </label>
             <button
               type="button"
               onClick={toggleAll}
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
             >
               {allChecked ? "Deselect all" : "Select all"}
             </button>
           </div>
 
-          <ul className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 divide-y divide-gray-100">
+          <ul className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-600 divide-y divide-gray-100 dark:divide-slate-700">
             {users.map((u) => {
               const checked = checkedUsers.includes(u.id);
               return (
@@ -102,13 +102,13 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
                   key={u.id}
                   onClick={() => toggleUser(u.id)}
                   className={clsx(
-                    "flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-gray-50",
-                    checked && "bg-blue-50"
+                    "flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700/50",
+                    checked && "bg-blue-50 dark:bg-blue-950/30"
                   )}
                 >
                   <div className={clsx(
                     "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
-                    checked ? "border-blue-500 bg-blue-500" : "border-gray-300 bg-white"
+                    checked ? "border-blue-500 bg-blue-500" : "border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-900"
                   )}>
                     {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
@@ -116,14 +116,14 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
                     {u.avatarInitials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-800">
+                    <p className="truncate text-sm font-medium text-gray-800 dark:text-slate-200">
                       {u.firstName} {u.lastName}
                     </p>
-                    <p className="truncate text-xs text-gray-400">{u.email}</p>
+                    <p className="truncate text-xs text-gray-400 dark:text-slate-500">{u.email}</p>
                   </div>
                   <span className={clsx(
                     "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                    u.status === "Active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                    u.status === "Active" ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
                   )}>
                     {u.status}
                   </span>
@@ -135,17 +135,17 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
 
         {/* Course selection grouped by year */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Enroll in courses</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Enroll in courses</label>
           <div className="space-y-6">
             {coursesByYear.map((group, index) => (
               <div 
                 key={group.yearId}
                 className={clsx(
-                  "rounded-lg border border-gray-200 bg-gray-50/50 p-4",
+                  "rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50/50 dark:bg-slate-900/50 p-4",
                   index > 0 && "mt-4"
                 )}
               >
-                <p className="mb-3 text-sm font-bold text-gray-900">
+                <p className="mb-3 text-sm font-bold text-gray-900 dark:text-slate-100">
                   {group.yearLabel}
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -157,15 +157,15 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
                       className={clsx(
                         "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
                         selectedCourses.includes(c.id)
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
+                          : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                       )}
                     >
                       <div className={clsx(
                         "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                         selectedCourses.includes(c.id)
                           ? "border-blue-500 bg-blue-500"
-                          : "border-gray-300"
+                          : "border-gray-300 dark:border-slate-500"
                       )}>
                         {selectedCourses.includes(c.id) && <Check className="h-2.5 w-2.5 text-white" />}
                       </div>
@@ -178,10 +178,10 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
           </div>
         </div>
 
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
         <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-slate-500">
             <Users className="h-3.5 w-3.5" />
             {checkedUsers.length} user{checkedUsers.length !== 1 ? "s" : ""} ·{" "}
             {selectedCourses.length} course{selectedCourses.length !== 1 ? "s" : ""}

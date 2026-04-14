@@ -64,7 +64,7 @@ export function AssignmentList({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-sm text-gray-500">
+      <div className="flex items-center justify-center py-8 text-sm text-gray-500 dark:text-slate-400">
         Loading assignments...
       </div>
     );
@@ -72,7 +72,7 @@ export function AssignmentList({
 
   if (error) {
     return (
-      <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-md bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-400">
         {error}
       </div>
     );
@@ -80,7 +80,7 @@ export function AssignmentList({
 
   if (assignments.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-gray-500">
+      <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-400">
         No assignments found.
       </div>
     );
@@ -91,32 +91,32 @@ export function AssignmentList({
       {assignments.map((assignment) => (
         <div
           key={assignment.id}
-          className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow"
+          className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow"
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h4 className="text-base font-medium text-gray-900 hover:text-blue-600 cursor-pointer"
+              <h4 className="text-base font-medium text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                   onClick={() => onAssignmentSelect?.(assignment as any)}>
                 {assignment.title}
               </h4>
-              <div className="mt-1 text-sm text-gray-500">
+              <div className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 <p>{assignment.moduleTitle} • {assignment.courseTitle}</p>
                 <p>Due: {new Date(assignment.dueDate).toLocaleDateString()}</p>
                 <p>{assignment.submissionCount} submissions</p>
               </div>
             </div>
-            
+
             {canEdit && (
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => onAssignmentEdit?.(assignment as any)}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(assignment.id)}
-                  className="text-sm text-red-600 hover:text-red-800"
+                  className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                 >
                   Delete
                 </button>

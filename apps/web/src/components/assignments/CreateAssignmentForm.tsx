@@ -91,12 +91,12 @@ export function CreateAssignmentForm({
   return (
     <div>
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-md bg-red-50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-400">{error}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Assignment Title
           </label>
           <input
@@ -104,20 +104,20 @@ export function CreateAssignmentForm({
             id="title"
             value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="assignmentType" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="assignmentType" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Type
           </label>
           <select
             id="assignmentType"
             value={formData.assignmentType}
             onChange={(e) => handleInputChange("assignmentType", e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           >
             <option value="MiniChallenge">Mini Challenge</option>
             <option value="Challenge">Challenge</option>
@@ -126,7 +126,7 @@ export function CreateAssignmentForm({
         </div>
 
         <div>
-          <label htmlFor="instructions" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Instructions
           </label>
           <textarea
@@ -134,13 +134,13 @@ export function CreateAssignmentForm({
             value={formData.instructions}
             onChange={(e) => handleInputChange("instructions", e.target.value)}
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Due Date
           </label>
           <input
@@ -148,38 +148,38 @@ export function CreateAssignmentForm({
             id="dueDate"
             value={formData.dueDate}
             onChange={(e) => handleInputChange("dueDate", e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="attachmentUrl" className="block text-sm font-medium text-gray-700">
-            Attachment URL <span className="text-gray-400 font-normal">(optional)</span>
+          <label htmlFor="attachmentUrl" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Attachment URL <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span>
           </label>
           <input
             type="url"
             id="attachmentUrl"
             value={formData.attachmentUrl}
             onChange={(e) => handleInputChange("attachmentUrl", e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             placeholder="https://example.com/file.zip"
           />
         </div>
 
         <div>
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">
-            Or Upload Zip File <span className="text-gray-400 font-normal">(optional)</span>
+          <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Or Upload Zip File <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span>
           </label>
           <input
             type="file"
             id="file"
             accept=".zip"
             onChange={handleFileChange}
-            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="mt-1 block w-full text-sm text-gray-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-950/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/40"
           />
           {selectedFile && (
-            <p className="mt-1 text-sm text-gray-600">Selected: {selectedFile.name}</p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">Selected: {selectedFile.name}</p>
           )}
         </div>
 
@@ -188,7 +188,7 @@ export function CreateAssignmentForm({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
             >
               Cancel
             </button>
@@ -196,7 +196,7 @@ export function CreateAssignmentForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? (existingAssignment ? "Updating…" : "Creating…") : (existingAssignment ? "Update Assignment" : "Create Assignment")}
           </button>

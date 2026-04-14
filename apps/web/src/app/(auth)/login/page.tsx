@@ -191,7 +191,7 @@ function LoginForm() {
       </div>
 
       {/* ── Right side: Login Form ─────────────────────────────────────────── */}
-      <div className="flex w-full lg:w-1/2 flex-col bg-white">
+      <div className="flex w-full lg:w-1/2 flex-col bg-white dark:bg-slate-900">
         <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -213,8 +213,8 @@ function LoginForm() {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Welcome back</h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
                 Sign in to access your learning dashboard
               </p>
             </div>
@@ -243,18 +243,18 @@ function LoginForm() {
               />
 
               <div className="flex items-center justify-between">
-                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
-                  Remember me
+                  <span className="dark:text-slate-300">Remember me</span>
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-semibold text-brand-700 hover:text-brand-900 transition-colors"
+                  className="text-sm font-semibold text-brand-700 dark:text-brand-400 hover:text-brand-900 dark:hover:text-brand-300 transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -273,7 +273,7 @@ function LoginForm() {
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-gray-500 dark:text-slate-400">
               Need an account? Contact your administrator.
             </p>
           </motion.div>
@@ -285,7 +285,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center dark:bg-slate-900 dark:text-slate-100">Loading...</div>}>
       <LoginForm />
     </Suspense>
   );

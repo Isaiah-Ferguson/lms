@@ -91,12 +91,12 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to course
         </Link>
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-sm text-gray-500 dark:text-slate-400">
           Loading week details...
         </div>
       </div>
@@ -108,12 +108,12 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to course
         </Link>
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-sm text-gray-500 dark:text-slate-400">
           Week not found.
         </div>
       </div>
@@ -190,12 +190,12 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
         Back to course
       </Link>
 
-      <header className="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-900">
+      <header className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-4 shadow-sm">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-slate-100">
           {courseTitle} — Week {parsedWeekNumber}
-          {realModuleTitle && <span className="font-normal text-gray-600"> — {realModuleTitle}</span>}
+          {realModuleTitle && <span className="font-normal text-gray-600 dark:text-slate-400"> — {realModuleTitle}</span>}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Review recordings and download week code artifacts.
         </p>
       </header>
@@ -217,7 +217,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
           </section>
         </>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-sm text-gray-500 dark:text-slate-400">
           No videos available for this week yet.
         </div>
       )}
@@ -233,8 +233,8 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
 
       {/* Assignments Section - always show */}
       {realCourseId && (
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Week {parsedWeekNumber} Assignments</h2>
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Week {parsedWeekNumber} Assignments</h2>
           <AssignmentManager
             courseId={realCourseId}
             moduleId={realModuleId ?? undefined}
@@ -246,14 +246,14 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
 
       {/* Edit Video Modal */}
       {editingVideo && (
-        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl">
-            <div className="border-b border-gray-100 px-6 py-4">
-              <h2 className="text-base font-semibold text-gray-900">Edit Video</h2>
+        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
+            <div className="border-b border-gray-100 dark:border-slate-700 px-6 py-4">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Edit Video</h2>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label htmlFor="VideoTitle" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label htmlFor="VideoTitle" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Title
                 </label>
                 <input
@@ -261,11 +261,11 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                 />
               </div>
               <div>
-                <label htmlFor="VideoURL" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label htmlFor="VideoURL" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Video URL
                 </label>
                 <input
@@ -274,18 +274,18 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   placeholder="https://..."
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Code Artifacts
                 </label>
                 <div className="space-y-2">
                   {editingVideo.codeArtifacts.length > 0 ? (
                     editingVideo.codeArtifacts.map((artifact) => (
-                      <div key={artifact.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                        <span className="text-sm text-gray-700">{artifact.label}</span>
+                      <div key={artifact.id} className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 px-3 py-2">
+                        <span className="text-sm text-gray-700 dark:text-slate-300">{artifact.label}</span>
                         <button
                           onClick={async () => {
                             const token = getToken();
@@ -319,7 +319,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">No code artifacts attached yet.</p>
+                    <p className="text-sm text-gray-500 dark:text-slate-400">No code artifacts attached yet.</p>
                   )}
                   <div className="mt-2">
                     <input
@@ -360,7 +360,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                     />
                     <label
                       htmlFor="artifact-upload"
-                      className="inline-flex cursor-pointer items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      className="inline-flex cursor-pointer items-center rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                     >
                       {uploadingArtifact ? 'Uploading...' : '+ Add Code File'}
                     </label>
@@ -368,10 +368,10 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-slate-700 px-6 py-4">
               <button
                 onClick={() => setEditingVideo(null)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>

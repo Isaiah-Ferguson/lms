@@ -63,11 +63,11 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
     <>
       <ProfileCard title="Preferences" description="Customize your learning experience.">
         <div className="space-y-3">
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-slate-700">
             <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
               <div>
-                <p className="text-sm font-medium text-gray-800">Email notifications</p>
-                <p className="text-xs text-gray-500">Receive updates about assignments and grades</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-slate-200">Email notifications</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Receive updates about assignments and grades</p>
               </div>
               <button
                 onClick={() => handleToggle("email", !emailNotifications)}
@@ -89,8 +89,8 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
 
             <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
               <div>
-                <p className="text-sm font-medium text-gray-800">Dark mode</p>
-                <p className="text-xs text-gray-500">Switch to a darker colour scheme</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-slate-200">Dark mode</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Switch to a darker colour scheme</p>
               </div>
               <button
                 onClick={() => handleToggle("darkMode", !darkMode)}

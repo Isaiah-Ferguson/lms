@@ -11,14 +11,14 @@ const STATUS_CONFIG: Record<
   StatusType,
   { label: string; icon: React.ElementType; color: string; bg: string }
 > = {
-  Draft:        { label: "Draft",           icon: Clock,        color: "text-gray-500",  bg: "bg-gray-100" },
-  PendingUpload:{ label: "Pending Upload",  icon: Upload,       color: "text-blue-500",  bg: "bg-blue-50"  },
-  Uploaded:     { label: "Uploaded",        icon: CheckCircle2, color: "text-teal-500",  bg: "bg-teal-50"  },
-  Processing:   { label: "Processing",      icon: Cog,          color: "text-amber-500", bg: "bg-amber-50" },
-  ReadyToGrade: { label: "Ready to Grade",  icon: BookOpen,     color: "text-purple-500",bg: "bg-purple-50"},
-  Grading:      { label: "Grading",         icon: Star,         color: "text-orange-500",bg: "bg-orange-50"},
-  Graded:       { label: "Graded",          icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50" },
-  Returned:     { label: "Returned",        icon: RotateCcw,    color: "text-indigo-500",bg: "bg-indigo-50"},
+  Draft:        { label: "Draft",           icon: Clock,        color: "text-gray-500 dark:text-slate-400",  bg: "bg-gray-100 dark:bg-slate-700" },
+  PendingUpload:{ label: "Pending Upload",  icon: Upload,       color: "text-blue-500 dark:text-blue-400",  bg: "bg-blue-50 dark:bg-blue-950/30"  },
+  Uploaded:     { label: "Uploaded",        icon: CheckCircle2, color: "text-teal-500 dark:text-teal-400",  bg: "bg-teal-50 dark:bg-teal-950/30"  },
+  Processing:   { label: "Processing",      icon: Cog,          color: "text-amber-500 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30" },
+  ReadyToGrade: { label: "Ready to Grade",  icon: BookOpen,     color: "text-purple-500 dark:text-purple-400",bg: "bg-purple-50 dark:bg-purple-950/30"},
+  Grading:      { label: "Grading",         icon: Star,         color: "text-orange-500 dark:text-orange-400",bg: "bg-orange-50 dark:bg-orange-950/30"},
+  Graded:       { label: "Graded",          icon: CheckCircle2, color: "text-green-500 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/30" },
+  Returned:     { label: "Returned",        icon: RotateCcw,    color: "text-indigo-500 dark:text-indigo-400",bg: "bg-indigo-50 dark:bg-indigo-950/30"},
 };
 
 interface SubmissionStatusBadgeProps {
@@ -53,13 +53,13 @@ export function SubmissionResultCard({
   onSubmitAnother,
 }: SubmissionResultCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-base font-semibold text-gray-900">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">
             Submission received
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             Attempt #{submission.attemptNumber} ·{" "}
             {formatDateTime(submission.createdAt)}
           </p>
@@ -69,19 +69,19 @@ export function SubmissionResultCard({
 
       <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div>
-          <dt className="text-gray-400">Submission ID</dt>
-          <dd className="mt-0.5 font-mono text-xs text-gray-700 break-all">
+          <dt className="text-gray-400 dark:text-slate-500">Submission ID</dt>
+          <dd className="mt-0.5 font-mono text-xs text-gray-700 dark:text-slate-300 break-all">
             {submission.id}
           </dd>
         </div>
         <div>
-          <dt className="text-gray-400">Type</dt>
-          <dd className="mt-0.5 font-medium text-gray-700">{submission.type}</dd>
+          <dt className="text-gray-400 dark:text-slate-500">Type</dt>
+          <dd className="mt-0.5 font-medium text-gray-700 dark:text-slate-300">{submission.type}</dd>
         </div>
       </dl>
 
       {submission.status === "Processing" && (
-        <p className="mt-4 text-xs text-amber-600">
+        <p className="mt-4 text-xs text-amber-600 dark:text-amber-400">
           Your submission is being processed. This usually takes under a minute.
         </p>
       )}
@@ -90,7 +90,7 @@ export function SubmissionResultCard({
         <button
           type="button"
           onClick={onSubmitAnother}
-          className="mt-5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+          className="mt-5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
         >
           Submit another attempt →
         </button>

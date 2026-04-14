@@ -29,14 +29,14 @@ function EventDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onMouseDown={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-xl"
+        className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4">
           <div>
             <span
               className={`mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -47,20 +47,20 @@ function EventDetailsModal({
             >
               {event.type === "assignment" ? "Assignment" : "Announcement"}
             </span>
-            <h2 className="text-base font-semibold text-gray-900">{event.title}</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{event.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="space-y-4 p-5 text-sm text-gray-600">
+        <div className="space-y-4 p-5 text-sm text-gray-600 dark:text-slate-300">
           <div className="flex items-start gap-2">
-            <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+            <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
             <div>
-              <p className="font-medium text-gray-800">
+              <p className="font-medium text-gray-800 dark:text-slate-200">
                 {event.type === "assignment" ? "Due date" : "Posted"}
               </p>
               <p>{formattedStart}</p>
@@ -68,17 +68,17 @@ function EventDetailsModal({
           </div>
           {event.courseTitle && (
             <div className="flex items-start gap-2">
-              <span className="mt-0.5 h-4 w-4 shrink-0 text-center text-xs font-bold text-gray-400">
+              <span className="mt-0.5 h-4 w-4 shrink-0 text-center text-xs font-bold text-gray-400 dark:text-slate-500">
                 ≡
               </span>
               <div>
-                <p className="font-medium text-gray-800">Course</p>
+                <p className="font-medium text-gray-800 dark:text-slate-200">Course</p>
                 <p>{event.courseTitle}</p>
               </div>
             </div>
           )}
           {event.description && (
-            <div className="rounded-lg bg-gray-50 p-3 text-gray-700 whitespace-pre-line">
+            <div className="rounded-lg bg-gray-50 dark:bg-slate-900/50 p-3 text-gray-700 dark:text-slate-300 whitespace-pre-line">
               {event.description}
             </div>
           )}
@@ -231,22 +231,22 @@ export default function CalendarPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Calendar</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Upcoming assignments and announcements across your enrolled courses.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm md:grid-cols-2">
         <div>
-          <label htmlFor="Courses" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <label htmlFor="Courses" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Course
           </label>
           <select
             id="Courses"
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
             disabled={loading}
           >
             <option value="all">All Courses</option>
@@ -259,7 +259,7 @@ export default function CalendarPage() {
         </div>
 
         <div>
-          <p className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <p className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Types
           </p>
           <div className="flex flex-wrap gap-2">
@@ -283,10 +283,10 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
           </div>
         ) : (
           <FullCalendar
@@ -309,7 +309,7 @@ export default function CalendarPage() {
           />
         )}
 
-        <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+        <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-slate-400">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Assignments
           </span>

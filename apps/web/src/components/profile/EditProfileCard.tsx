@@ -160,14 +160,14 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={!canEditProfile}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 disabled:cursor-not-allowed disabled:text-gray-400"
+              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-slate-500"
             >
               <Camera className="h-3.5 w-3.5" />
               Upload avatar
             </button>
-            <p className="text-xs text-gray-700 text-center">Max 2MB</p>
+            <p className="text-xs text-gray-700 dark:text-slate-300 text-center">Max 2MB</p>
             {uploadError && (
-              <p className="text-xs text-red-600 text-center max-w-[120px]">{uploadError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 text-center max-w-[120px]">{uploadError}</p>
             )}
           </div>
 

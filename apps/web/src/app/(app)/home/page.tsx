@@ -159,11 +159,11 @@ export default function HomePage() {
   const selectedYear = years.find((year) => year.id === selectedYearId);
 
   if (loading) {
-    return <div className="py-16 text-center text-sm text-gray-500">Loading dashboard...</div>;
+    return <div className="py-16 text-center text-sm text-gray-500 dark:text-slate-400">Loading dashboard...</div>;
   }
 
   if (error) {
-    return <div className="py-16 text-center text-sm text-red-600">{error}</div>;
+    return <div className="py-16 text-center text-sm text-red-600 dark:text-red-400">{error}</div>;
   }
 
   return (
@@ -214,9 +214,9 @@ export default function HomePage() {
           {levelsByYear.map(({ year, levels: yearLevels, enrolledLevelIds }) => (
             <section key={year.id}>
               <div className="mb-4 flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900">{year.label}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{year.label}</h2>
                 {year.isActive && (
-                  <span className="inline-flex items-center rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
+                  <span className="inline-flex items-center rounded-full bg-brand-100 dark:bg-brand-900/30 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400">
                     Current Year
                   </span>
                 )}
@@ -233,7 +233,7 @@ export default function HomePage() {
       ) : (
         /* Admins: show single year view */
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500">
             All levels · {selectedYear?.label ?? ""}
           </h2>
           <LevelCardGrid

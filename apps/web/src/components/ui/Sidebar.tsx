@@ -50,7 +50,7 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-black/50 dark:bg-black/70 backdrop-blur-sm lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -58,7 +58,7 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
       {/* Sidebar - hidden on mobile by default, always visible on desktop */}
       <aside
         className={clsx(
-          "flex h-full w-64 shrink-0 flex-col border-r border-gray-100 bg-gradient-to-b from-white to-gray-50/50",
+          "flex h-full w-64 shrink-0 flex-col border-r border-gray-100 dark:border-slate-800 bg-gradient-to-b from-white to-gray-50/50 dark:from-slate-900 dark:to-slate-900/50",
           "transition-transform duration-300 ease-in-out",
           // Mobile: fixed position, slide in/out
           "fixed inset-y-0 left-0 z-50",
@@ -69,11 +69,11 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
       >
       {/* Mobile close button */}
       {onClose && (
-        <div className="flex items-center justify-between border-b border-gray-100 p-4 lg:hidden">
-          <span className="text-sm font-semibold text-gray-700">Navigation</span>
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 p-4 lg:hidden">
+          <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">Navigation</span>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="rounded-lg p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 transition-colors"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -99,8 +99,8 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
                 className={clsx(
                   "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200",
                   isActive
-                    ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/30"
-                    : "text-gray-700 hover:bg-white hover:shadow-md hover:scale-[1.02]"
+                    ? "bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-400 dark:to-brand-500 text-white shadow-lg shadow-brand-500/30 dark:shadow-brand-400/20"
+                    : "text-gray-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:scale-[1.02]"
                 )}
               >
                 {/* Active indicator */}

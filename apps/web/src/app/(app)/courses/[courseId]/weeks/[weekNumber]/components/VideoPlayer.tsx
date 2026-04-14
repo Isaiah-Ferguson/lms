@@ -35,10 +35,10 @@ export function VideoPlayer({ video }: VideoPlayerProps) {
   const embedUrl = isEmbedUrl ? toEmbedUrl(video.videoWatchUrl) : video.videoWatchUrl;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-4 py-3">
-        <h2 className="text-sm font-semibold text-gray-800">Now Playing</h2>
-        <p className="text-xs text-gray-500">{video.title}</p>
+    <section className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+      <div className="border-b border-gray-100 dark:border-slate-700 px-4 py-3">
+        <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-200">Now Playing</h2>
+        <p className="text-xs text-gray-500 dark:text-slate-400">{video.title}</p>
       </div>
       <div className="aspect-video w-full bg-black">
         {isEmbedUrl ? (

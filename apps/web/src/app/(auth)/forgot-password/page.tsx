@@ -50,13 +50,13 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Form */}
-      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-20">
+      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-20 dark:bg-slate-900">
         <div className="mx-auto w-full max-w-md">
 
           {/* Back to login */}
           <Link
             href="/login"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to login
@@ -64,8 +64,8 @@ export default function ForgotPasswordPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Forgot password?</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Forgot password?</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
               Enter your email address and we'll send you a temporary password to get back into your account.
             </p>
           </div>
@@ -75,13 +75,13 @@ export default function ForgotPasswordPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4"
+              className="mb-6 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 p-4"
             >
               <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 shrink-0 text-green-600 mt-0.5" />
+                <CheckCircle className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-semibold text-green-900">Password reset email sent!</h3>
-                  <p className="mt-1 text-sm text-green-700">
+                  <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">Password reset email sent!</h3>
+                  <p className="mt-1 text-sm text-green-700 dark:text-green-400">
                     Check your inbox for a temporary password. You can use it to log in and then change your password.
                   </p>
                 </div>
@@ -97,25 +97,25 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" />
                 <input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className={`h-10 w-full rounded-lg border bg-white pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 ${
+                  className={`h-10 w-full rounded-lg border bg-white dark:bg-slate-900 pl-10 pr-3 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-colors focus:outline-none focus:ring-2 ${
                     errors.email
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-                      : "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      : "border-gray-300 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                   }`}
                   {...register("email")}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1.5 text-xs text-red-600">{errors.email.message}</p>
+                <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.email.message}</p>
               )}
             </div>
 
@@ -130,11 +130,11 @@ export default function ForgotPasswordPage() {
 
           {/* Additional help */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-400">
               Remember your password?{" "}
               <Link
                 href="/login"
-                className="font-semibold text-brand-700 hover:text-brand-900 transition-colors"
+                className="font-semibold text-brand-700 dark:text-brand-400 hover:text-brand-900 dark:hover:text-brand-300 transition-colors"
               >
                 Sign in
               </Link>

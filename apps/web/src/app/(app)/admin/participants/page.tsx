@@ -27,8 +27,8 @@ type ActiveModal =
 
 function Toast({ message }: { message: string }) {
   return (
-    <div className="fixed bottom-5 right-5 z-50 rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-lg">
-      <p className="text-sm font-medium text-green-800">{message}</p>
+    <div className="fixed bottom-5 right-5 z-50 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 px-4 py-3 shadow-lg">
+      <p className="text-sm font-medium text-green-800 dark:text-green-300">{message}</p>
     </div>
   );
 }
@@ -266,8 +266,8 @@ export default function ParticipantsPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Participants</h1>
+          <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">
             Manage users, enrollments, and permissions.
           </p>
         </div>
@@ -279,12 +279,12 @@ export default function ParticipantsPage() {
             variant="secondary"
             onClick={() => setModal({ type: "bulk" })}
             disabled={selectedIds.length === 0}
-            className={clsx(selectedIds.length > 0 && "border-blue-300 text-blue-700")}
+            className={clsx(selectedIds.length > 0 && "border-blue-300 dark:border-blue-800 text-blue-700 dark:text-blue-400")}
           >
             <Layers className="h-3.5 w-3.5" />
             Bulk actions
             {selectedIds.length > 0 && (
-              <span className="ml-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
+              <span className="ml-1 rounded-full bg-blue-100 dark:bg-blue-950/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-400">
                 {selectedIds.length}
               </span>
             )}
@@ -316,8 +316,8 @@ export default function ParticipantsPage() {
           { label: "Instructors", value: instructorCount, color: "text-amber-600" },
           { label: "Admins",      value: adminCount,    color: "text-violet-600" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs font-medium text-gray-600">{label}</p>
+          <div key={label} className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
+            <p className="text-xs font-medium text-gray-600 dark:text-slate-400">{label}</p>
             <p className={clsx("mt-0.5 text-2xl font-bold", color)}>{value}</p>
           </div>
         ))}
@@ -352,8 +352,8 @@ export default function ParticipantsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
+          <div className="text-sm text-gray-600 dark:text-slate-300">
             Showing <span className="font-medium">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{" "}
             <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)}</span> of{" "}
             <span className="font-medium">{filtered.length}</span> participants
@@ -380,7 +380,7 @@ export default function ParticipantsPage() {
                   // Show ellipsis
                   if (page === currentPage - 2 || page === currentPage + 2) {
                     return (
-                      <span key={page} className="px-2 text-gray-400">
+                      <span key={page} className="px-2 text-gray-400 dark:text-slate-500">
                         ...
                       </span>
                     );

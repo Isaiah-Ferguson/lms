@@ -22,17 +22,17 @@ export function GradesSummaryCard({ gradesOverview, gradesHref = "/grades" }: Gr
     <ProfileCard title="Current Grades" description="Your enrolled courses and current letter grades.">
       <div className="space-y-4">
         {courseGrades.length === 0 ? (
-          <p className="text-sm text-gray-500 py-4">No graded assignments yet.</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 py-4">No graded assignments yet.</p>
         ) : (
           <div className="space-y-2">
             {courseGrades.map((course) => (
               <div
                 key={course.courseId}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors"
               >
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{course.courseName}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-gray-900 dark:text-slate-100">{course.courseName}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
                     {course.gradedCount} / {course.totalCount} graded
                   </p>
                 </div>

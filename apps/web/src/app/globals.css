@@ -21,3 +21,62 @@
     @apply bg-gray-900 text-gray-100;
   }
 }
+
+/* FullCalendar Dark Mode */
+.dark .fc {
+  --fc-border-color: rgb(51 65 85); /* slate-700 */
+  --fc-button-bg-color: rgb(30 41 59); /* slate-800 */
+  --fc-button-border-color: rgb(51 65 85); /* slate-700 */
+  --fc-button-hover-bg-color: rgb(51 65 85); /* slate-700 */
+  --fc-button-hover-border-color: rgb(71 85 105); /* slate-600 */
+  --fc-button-active-bg-color: rgb(51 65 85); /* slate-700 */
+  --fc-button-active-border-color: rgb(71 85 105); /* slate-600 */
+  --fc-today-bg-color: rgba(59, 130, 246, 0.1); /* blue-500/10 */
+}
+
+.dark .fc .fc-col-header-cell {
+  background-color: rgb(15 23 42); /* slate-900 */
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+.dark .fc .fc-daygrid-day {
+  background-color: rgb(30 41 59); /* slate-800 */
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .fc .fc-daygrid-day-number {
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+.dark .fc .fc-daygrid-day.fc-day-today {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .fc .fc-toolbar-title {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .fc .fc-button {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .fc .fc-list {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .fc .fc-list-day-cushion {
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+.dark .fc .fc-list-event:hover td {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .fc .fc-timegrid-slot {
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .fc .fc-timegrid-axis {
+  color: rgb(148 163 184); /* slate-400 */
+}

@@ -32,15 +32,15 @@ export function Modal({ title, onClose, children, width = "md" }: ModalProps) {
   const modalContent = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
-      <div className={`w-full ${widths[width]} flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl`}>
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 shrink-0">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+      <div className={`w-full ${widths[width]} flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl`}>
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4 shrink-0">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
           >
             <X className="h-4 w-4" />
           </button>

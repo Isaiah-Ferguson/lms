@@ -85,16 +85,16 @@ function Modal({ title, onClose, children, wide }: {
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onMouseDown={(e) => { if (e.currentTarget === e.target) onClose(); }}
     >
       <div className={clsx(
-        "w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl",
+        "w-full overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl",
         wide ? "max-w-lg" : "max-w-md"
       )}>
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
+          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -150,13 +150,13 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
           onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setError(""); }}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Body</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Body</label>
           <textarea
             rows={3}
             value={form.body}
             onChange={(e) => { setForm((f) => ({ ...f, body: e.target.value })); setError(""); }}
             placeholder="Announcement details…"
-            className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -167,11 +167,11 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Tag</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Tag</label>
             <select
               value={form.tag ?? "Info"}
               onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value as AnnTag }))}
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             >
               <option value="Info">Info</option>
               <option value="Event">Event</option>
@@ -245,33 +245,33 @@ function AnnouncementsCard({
 
   return (
     <>
-      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
+      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+        <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 px-4 py-3">
           <div className="flex items-center gap-2">
-            <Megaphone className="h-4 w-4 shrink-0 text-gray-500" />
-            <h3 className="text-xl font-semibold text-gray-800">Announcements</h3>
+            <Megaphone className="h-4 w-4 shrink-0 text-gray-500 dark:text-slate-400" />
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100">Announcements</h3>
           </div>
           {canEdit && (
             <button
               onClick={() => setModal({ mode: "create" })}
               title="Add announcement"
-              className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+              className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700"
             >
               <Plus className="h-3 w-3" />
               Add
             </button>
           )}
         </div>
-        <ul className="flex-1 divide-y divide-gray-100 overflow-y-auto">
+        <ul className="flex-1 divide-y divide-gray-100 dark:divide-slate-700 overflow-y-auto">
           {announcements.length === 0 && (
-            <li className="px-4 py-6 text-center text-xs text-gray-600">No announcements yet.</li>
+            <li className="px-4 py-6 text-center text-xs text-gray-600 dark:text-slate-400">No announcements yet.</li>
           )}
           {announcements.map((ann) => {
             const tag = ann.tag ? TAG_STYLES[ann.tag] : TAG_STYLES.Info;
             return (
               <li key={ann.id} className="group px-4 py-3">
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <span className="text-md font-semibold leading-snug text-gray-800">{ann.title}</span>
+                  <span className="text-md font-semibold leading-snug text-gray-800 dark:text-slate-100">{ann.title}</span>
                   <div className="flex shrink-0 items-center gap-1">
                     {ann.tag && (
                       <span className={clsx(
@@ -287,14 +287,14 @@ function AnnouncementsCard({
                         <button
                           onClick={() => setModal({ mode: "edit", ann })}
                           title="Edit"
-                          className="rounded p-0.5 text-gray-300 hover:bg-gray-100 hover:text-gray-600"
+                          className="rounded p-0.5 text-gray-300 dark:text-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
                         >
                           <Pencil className="h-3 w-3" />
                         </button>
                         <button
                           onClick={() => handleDelete(ann.id)}
                           title="Delete"
-                          className="rounded p-0.5 text-gray-300 hover:bg-red-50 hover:text-red-500"
+                          className="rounded p-0.5 text-gray-300 dark:text-slate-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 dark:hover:text-red-400"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -302,8 +302,8 @@ function AnnouncementsCard({
                     )}
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed text-gray-600">{ann.body}</p>
-                <p className="mt-1 text-[12px] text-gray-500">{fmtDate(ann.date)}</p>
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-300">{ann.body}</p>
+                <p className="mt-1 text-[12px] text-gray-500 dark:text-slate-400">{fmtDate(ann.date)}</p>
               </li>
             );
           })}
@@ -327,13 +327,13 @@ function AnnouncementsCard({
 
 function ClassLinkCard({ zoomUrl }: { zoomUrl: string }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
+    <div className="flex h-full flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/30 p-6 shadow-sm">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-md">
         <Video className="h-7 w-7 text-white" />
       </div>
       <div className="text-center">
-        <p className="text-sm font-semibold text-blue-900">Live Class</p>
-        <p className="mt-0.5 text-xs text-blue-600">Join via Zoom</p>
+        <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">Live Class</p>
+        <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">Join via Zoom</p>
       </div>
       <a
         href={zoomUrl}
@@ -406,7 +406,7 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
             onChange={(e) => { setForm((f) => ({ ...f, weekNumber: parseInt(e.target.value) || 1 })); setError(""); }}
             disabled
           />
-          <p className="mt-1 text-xs text-gray-500">Weeks must be created sequentially. This is the next available week number.</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Weeks must be created sequentially. This is the next available week number.</p>
         </div>
         <Input
           label="Week title"
@@ -427,18 +427,18 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
           onChange={(e) => { setForm((f) => ({ ...f, zoomUrl: e.target.value })); setError(""); }}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">
             Topics / Content Covered
-            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line (not video titles)</span>
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">one per line (not video titles)</span>
           </label>
           <textarea
             rows={6}
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
             placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
-            className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
-          <p className="text-xs text-gray-500">Note: Video titles are managed separately in the week details page.</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Note: Video titles are managed separately in the week details page.</p>
         </div>
         {(error || saveError) && <p className="text-xs text-red-600">{error || saveError}</p>}
         <div className="flex justify-end gap-2 pt-1">
@@ -498,9 +498,9 @@ function WeekEditModal({ week, onClose, onSave }: {
           onChange={(e) => { setForm((f) => ({ ...f, dateRange: e.target.value })); setError(""); }}
         />
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="WeekText" className="text-sm font-medium text-gray-700">
+          <label htmlFor="WeekText" className="text-sm font-medium text-gray-700 dark:text-slate-300">
             Topics / Content Covered
-            <span className="ml-1.5 text-xs font-normal text-gray-400">one per line (not video titles)</span>
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">one per line (not video titles)</span>
           </label>
           <textarea
             id="WeekText"
@@ -508,11 +508,11 @@ function WeekEditModal({ week, onClose, onSave }: {
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
             placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
-            className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
-          <p className="text-xs text-gray-500">Note: Video titles are managed separately in the week details page.</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Note: Video titles are managed separately in the week details page.</p>
         </div>
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
           <Button type="submit" size="sm">Save week</Button>
@@ -550,25 +550,25 @@ function WeekCard({ week, canEdit, onEdit }: {
   }, [week.id]);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
       {/* Header */}
-      <div className="border-b border-gray-100 bg-gray-50 px-4 py-3">
+      <div className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-xl font-bold text-gray-900 truncate">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 truncate">
               Week {week.weekNumber}
               {week.title && (
-                <span className="ml-1.5 font-medium text-gray-500">— {week.title}</span>
+                <span className="ml-1.5 font-medium text-gray-500 dark:text-slate-400">— {week.title}</span>
               )}
             </h3>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="text-[11px] font-medium text-gray-600">{week.dateRange}</span>
+            <span className="text-[11px] font-medium text-gray-600 dark:text-slate-400">{week.dateRange}</span>
             {canEdit && (
               <button
                 onClick={() => onEdit(week)}
                 title="Edit week"
-                className="rounded p-1 text-gray-300 hover:bg-gray-200 hover:text-gray-600 transition-colors"
+                className="rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
               >
                 <Pencil className="h-3 w-3" />
               </button>
@@ -578,13 +578,13 @@ function WeekCard({ week, canEdit, onEdit }: {
       </div>
 
       {/* Topics / Content Covered */}
-      <div className="px-4 py-3 border-b border-gray-100">
-        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500 dark:text-slate-400">
           Topics / Content Covered
         </p>
         <ul className="space-y-1.5">
           {week.topics.map((topic, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+            <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-slate-300">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
               {topic}
             </li>
@@ -594,39 +594,39 @@ function WeekCard({ week, canEdit, onEdit }: {
 
       {/* Videos */}
       <div className="flex-1 px-4 py-3">
-        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-widest text-gray-500 dark:text-slate-400">
           Videos
         </p>
         {loadingVideos ? (
-          <p className="text-sm text-gray-400">Loading videos...</p>
+          <p className="text-sm text-gray-400 dark:text-slate-500">Loading videos...</p>
         ) : videos.length > 0 ? (
           <ul className="space-y-1.5">
             {videos.map((video, i) => (
-              <li key={video.id} className="flex items-start gap-2 text-sm text-gray-700">
+              <li key={video.id} className="flex items-start gap-2 text-sm text-gray-700 dark:text-slate-300">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-400" />
                 {video.title}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-gray-500">No videos yet</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">No videos yet</p>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-gray-100 px-4 py-2.5">
+      <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-700 px-4 py-2.5">
         <a
           href={week.zoomUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+          className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
         >
           <Video className="h-3 w-3" />
           Class link
         </a>
         <Link
           href={week.detailsHref}
-          className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
         >
           View Details
           <ChevronRight className="h-3 w-3" />
@@ -669,11 +669,11 @@ function AssignmentForm({ initial, onSave, onCancel, saving }: {
         error={error}
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">Type</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Type</label>
         <select
           value={form.type}
           onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as AssignmentType }))}
-          className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
         >
           <option value="MiniChallenge">Mini Challenge</option>
           <option value="Challenge">Challenge</option>
@@ -747,11 +747,11 @@ function AssignmentsSection({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-[30px] font-bold text-gray-900">Assignments</h2>
+        <h2 className="text-[30px] font-bold text-gray-900 dark:text-slate-100">Assignments</h2>
         {canEdit && onCreateClick && (
           <button
             onClick={onCreateClick}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
           >
             <Plus className="h-3.5 w-3.5" />
             Create Assignment
@@ -761,14 +761,14 @@ function AssignmentsSection({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {COL_META.map(({ key, label, accent, badge }) => (
-          <div key={key} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div key={key} className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
             <div className={clsx("h-1 w-full", accent)} />
-            <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-              <h3 className="text-lg font-semibold uppercase tracking-wide text-gray-500">{label}</h3>
+            <div className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 px-4 py-2.5">
+              <h3 className="text-lg font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">{label}</h3>
             </div>
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100 dark:divide-slate-700">
               {assignments[key].length === 0 && (
-                <li className="px-4 py-4 text-center text-xs text-gray-700">No assignments yet.</li>
+                <li className="px-4 py-4 text-center text-xs text-gray-700 dark:text-slate-400">No assignments yet.</li>
               )}
               {assignments[key].map((a) => (
                 <li
@@ -778,8 +778,8 @@ function AssignmentsSection({
                   <Link
                     href={a.href}
                     className="group flex items-center justify-between rounded-md px-3 py-2 text-md font-medium 
-             bg-blue-50 text-blue-700 transition-all duration-150 
-             hover:bg-blue-100 hover:text-blue-800 active:bg-blue-200"
+             bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 transition-all duration-150 
+             hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-300 active:bg-blue-200 dark:active:bg-blue-900/50"
                   >
                     <span className="flex items-center gap-2">
                       {a.title}
@@ -865,27 +865,27 @@ export function LevelDashboardClient({
     <div className="mx-auto max-w-6xl space-y-10">
 
       {/* ── Banner ─────────────────────────────────────────────────────────── */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         <div className={clsx("h-2 w-full", data.accentColor)} />
         <div className="px-6 py-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-600">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-slate-400">
             CodeStack Academy
           </p>
-          <h1 className="mt-0.5 text-3xl font-bold text-gray-900">{data.courseTitle}</h1>
-          <p className="mt-1 text-sm text-gray-600">{data.courseMeta}</p>
+          <h1 className="mt-0.5 text-3xl font-bold text-gray-900 dark:text-slate-100">{data.courseTitle}</h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">{data.courseMeta}</p>
         </div>
       </div>
 
       {/* ── Week grid ──────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500">
             Weekly schedule
           </h2>
           {data.permissions.canEditAssignments && (
             <button
               onClick={() => setCreatingWeek(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Week

@@ -110,14 +110,14 @@ export function CreateAssignmentModal({
   }
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/45 px-4 py-6">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Create Assignment</h2>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/45 dark:bg-black/60 backdrop-blur-sm px-4 py-6">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Create Assignment</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
           >
             <X className="h-4 w-4" />
           </button>
@@ -125,7 +125,7 @@ export function CreateAssignmentModal({
 
         <form onSubmit={handleSave} className="space-y-5 px-6 py-5">
           <div>
-            <label htmlFor="AssignmentTitle" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="AssignmentTitle" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
               Title
             </label>
             <input
@@ -135,12 +135,12 @@ export function CreateAssignmentModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Build a Landing Page"
               required
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label htmlFor="AssignmentInstructions" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="AssignmentInstructions" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
               Instructions
             </label>
             <textarea
@@ -150,20 +150,20 @@ export function CreateAssignmentModal({
               placeholder="Describe the assignment requirements..."
               rows={8}
               required
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="AssignmentType" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="AssignmentType" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Type
               </label>
               <select
                 id="AssignmentType"
                 value={assignmentType}
                 onChange={(e) => setAssignmentType(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 <option value="MiniChallenge">Mini Challenge</option>
                 <option value="Challenge">Challenge</option>
@@ -172,7 +172,7 @@ export function CreateAssignmentModal({
             </div>
 
             <div>
-              <label htmlFor="DueDate" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="DueDate" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Due Date
               </label>
               <input
@@ -181,13 +181,13 @@ export function CreateAssignmentModal({
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 required
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="WeekSelect" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="WeekSelect" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
               Week
             </label>
             <select
@@ -195,7 +195,7 @@ export function CreateAssignmentModal({
               value={selectedWeekId}
               onChange={(e) => setSelectedWeekId(e.target.value)}
               required
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               <option value="">Select a week...</option>
               {weeks.map((week) => (
@@ -207,7 +207,7 @@ export function CreateAssignmentModal({
           </div>
 
           <div>
-            <label htmlFor="AttachmentUrl" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="AttachmentUrl" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
               Attachment URL (optional)
             </label>
             <input
@@ -216,19 +216,19 @@ export function CreateAssignmentModal({
               value={attachmentUrl}
               onChange={(e) => setAttachmentUrl(e.target.value)}
               placeholder="https://..."
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           )}
 
-          <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-slate-700 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               Cancel
             </button>

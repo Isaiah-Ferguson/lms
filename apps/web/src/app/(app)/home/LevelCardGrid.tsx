@@ -48,7 +48,7 @@ export function LevelCardGrid({
 
   if (visibleLevels.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-10 text-center text-sm text-gray-500">
+      <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
         No enrolled levels found for {yearLabel}.
       </div>
     );
@@ -73,8 +73,8 @@ export function LevelCardGrid({
             <Link
               href={`/courses/${level.id}`}
               className={clsx(
-                "group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-soft transition-all duration-300",
-                "hover:shadow-xl hover:-translate-y-1",
+                "group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-soft transition-all duration-300",
+                "hover:shadow-xl hover:-translate-y-1 dark:border dark:border-slate-700",
                 accent.glow,
                 level.isArchived && "opacity-80"
               )}
@@ -101,15 +101,15 @@ export function LevelCardGrid({
               {/* Content */}
               <div className="flex flex-1 flex-col gap-3 p-6">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">{yearLabel}</p>
-                  <h2 className="mt-1 text-xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-slate-400">{yearLabel}</p>
+                  <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                     {level.title}
                   </h2>
                 </div>
-                <p className="flex-1 text-sm leading-relaxed text-gray-600">{level.description}</p>
+                <p className="flex-1 text-sm leading-relaxed text-gray-600 dark:text-slate-400">{level.description}</p>
                 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-sm font-semibold text-brand-800 transition-all group-hover:gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-brand-800 dark:text-brand-400 transition-all group-hover:gap-3">
                   <span>Explore course</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>

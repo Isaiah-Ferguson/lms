@@ -62,11 +62,11 @@ export function UsersTable({
   const someSelected = selectedIds.length > 0 && !allSelected;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] text-sm">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
+            <tr className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
               {/* Checkbox */}
               <th className="w-10 px-4 py-3">
                 <span className="sr-only">Select</span>
@@ -97,10 +97,10 @@ export function UsersTable({
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
             {users.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-600">
+                <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-600 dark:text-slate-400">
                   No users match your filters.
                 </td>
               </tr>
@@ -111,8 +111,8 @@ export function UsersTable({
                 <tr
                   key={u.id}
                   className={clsx(
-                    "transition-colors hover:bg-gray-50",
-                    selected && "bg-blue-50 hover:bg-blue-50"
+                    "transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50",
+                    selected && "bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                   )}
                 >
                   {/* Checkbox */}
@@ -122,7 +122,7 @@ export function UsersTable({
                       aria-label={`Select ${u.firstName} ${u.lastName}`}
                       className={clsx(
                         "flex h-4 w-4 items-center justify-center rounded border",
-                        selected ? "border-blue-500 bg-blue-500" : "border-gray-300 bg-white"
+                        selected ? "border-blue-500 bg-blue-500" : "border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                       )}
                     >
                       {selected && <Check className="h-2.5 w-2.5 text-white" />}
@@ -146,30 +146,30 @@ export function UsersTable({
                       <div>
                         <Link
                           href={`/admin/participants/${u.id}`}
-                          className="font-medium text-gray-900 hover:text-blue-600 hover:underline"
+                          className="font-medium text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
                         >
                           {u.firstName} {u.lastName}
                         </Link>
-                        <p className="text-xs text-gray-500">{u.town}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{u.town}</p>
                       </div>
                     </div>
                   </td>
 
                   {/* Username */}
-                  <td className="px-4 py-3 text-gray-600">{u.username}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-slate-300">{u.username}</td>
 
                   {/* Email */}
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-slate-300">{u.email}</td>
 
                   {/* Role */}
                   <td className="px-4 py-3">
                     <span className={clsx(
                       "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
                       u.role === "Admin"
-                        ? "bg-violet-100 text-violet-700"
+                        ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400"
                         : u.role === "Instructor"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                        : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300"
                     )}>
                       {u.role}
                     </span>
@@ -180,8 +180,8 @@ export function UsersTable({
                     <span className={clsx(
                       "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
                       u.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                        : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
                     )}>
                       <span className={clsx(
                         "h-1.5 w-1.5 rounded-full",
@@ -197,7 +197,7 @@ export function UsersTable({
                   </td>
 
                   {/* Last login */}
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">
                     {fmtDate(u.lastLoginAt)}
                   </td>
 
@@ -207,7 +207,7 @@ export function UsersTable({
                       <Link
                         href={`/admin/participants/${u.id}`}
                         title="Edit"
-                        className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                        className="rounded-lg p-1.5 text-gray-400 dark:text-slate-500 transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-300"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Link>
@@ -225,7 +225,7 @@ export function UsersTable({
                           }
                           label={u.role === "Admin" ? "Remove admin" : "Make admin"}
                           onClick={() => onToggleAdmin(u)}
-                          className={u.role === "Admin" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : ""}
+                          className={u.role === "Admin" ? "text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" : ""}
                         />
                       )}
                       <ActionBtn
@@ -236,7 +236,7 @@ export function UsersTable({
                         }
                         label={u.status === "Active" ? "Deactivate account" : "Activate account"}
                         onClick={() => onToggleActive(u)}
-                        className={u.status === "Active" ? "text-red-400 hover:text-red-600 hover:bg-red-50" : "text-green-500 hover:text-green-700 hover:bg-green-50"}
+                        className={u.status === "Active" ? "text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" : "text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"}
                       />
                     </div>
                   </td>
@@ -263,7 +263,7 @@ function ActionBtn({
       onClick={onClick}
       title={label}
       className={clsx(
-        "rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors",
+        "rounded-lg p-1.5 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-300 transition-colors",
         className
       )}
     >

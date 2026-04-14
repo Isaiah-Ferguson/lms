@@ -101,7 +101,7 @@ export function UserMenu({ user }: { user: UserInfo }) {
       {/* Trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none"
+        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none"
         aria-haspopup="true"
         aria-expanded={open}
       >
@@ -111,7 +111,7 @@ export function UserMenu({ user }: { user: UserInfo }) {
         </span>
         <ChevronDown
           className={clsx(
-            "h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform",
+            "h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-slate-500 transition-transform",
             open && "rotate-180"
           )}
         />
@@ -119,10 +119,10 @@ export function UserMenu({ user }: { user: UserInfo }) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg">
           {/* User info header */}
-          <div className="border-b border-gray-100 px-4 py-3">
-            <p className="truncate text-sm font-semibold text-gray-900">
+          <div className="border-b border-gray-100 dark:border-slate-700 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
               {user.name}
             </p>
           </div>
@@ -134,19 +134,19 @@ export function UserMenu({ user }: { user: UserInfo }) {
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700"
               >
-                <Icon className="h-4 w-4 shrink-0 text-gray-400" />
+                <Icon className="h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
                 {label}
               </Link>
             ))}
           </div>
 
           {/* Sign out */}
-          <div className="border-t border-gray-100 p-1">
+          <div className="border-t border-gray-100 dark:border-slate-700 p-1">
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
             >
               <LogOut className="h-4 w-4 shrink-0" />
               Sign out

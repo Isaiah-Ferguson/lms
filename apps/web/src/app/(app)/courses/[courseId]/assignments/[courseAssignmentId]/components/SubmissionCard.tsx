@@ -201,10 +201,10 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm space-y-4">
       {/* Success toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-green-200 bg-green-600 px-5 py-3.5 text-sm font-medium text-white shadow-xl animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-600 dark:bg-green-700 px-5 py-3.5 text-sm font-medium text-white shadow-xl animate-in slide-in-from-bottom-4 duration-300">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           {toast}
           <button onClick={() => setToast(null)} className="ml-1 opacity-70 hover:opacity-100">
@@ -213,23 +213,23 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
         </div>
       )}
 
-      <h2 className="text-sm font-semibold text-gray-900">My Submission</h2>
+      <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">My Submission</h2>
 
       {/* Submitted status */}
       {(state.status === "Submitted" || state.status === "Returned") && state.submittedAt && (
         <div className={`rounded-lg border px-4 py-3 space-y-1.5 ${
-          state.status === "Returned" 
-            ? "border-red-200 bg-red-50" 
-            : "border-green-200 bg-green-50"
+          state.status === "Returned"
+            ? "border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30"
+            : "border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30"
         }`}>
           <div className={`flex items-center gap-2 text-sm font-medium ${
-            state.status === "Returned" ? "text-red-800" : "text-green-800"
+            state.status === "Returned" ? "text-red-800 dark:text-red-300" : "text-green-800 dark:text-green-300"
           }`}>
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             {state.status === "Returned" ? "Returned - Resubmit Required" : "Submitted"}
           </div>
           <p className={`text-xs ${
-            state.status === "Returned" ? "text-red-700" : "text-green-700"
+            state.status === "Returned" ? "text-red-700 dark:text-red-400" : "text-green-700 dark:text-green-400"
           }`}>
             {formatDateTime(state.submittedAt)}
             {state.fileName && (
@@ -244,14 +244,14 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="inline-flex items-center gap-1 text-xs font-medium text-green-900 underline underline-offset-2 hover:text-green-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1 text-xs font-medium text-green-900 dark:text-green-400 underline underline-offset-2 hover:text-green-700 dark:hover:text-green-300 disabled:opacity-50"
             >
               <Download className="h-3 w-3" />
               {downloading ? "Downloading..." : "Download submitted ZIP"}
             </button>
           )}
           {downloadError && (
-            <p className="text-xs text-red-600">{downloadError}</p>
+            <p className="text-xs text-red-600 dark:text-red-400">{downloadError}</p>
           )}
         </div>
       )}
@@ -266,16 +266,16 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
               type="file"
               accept=".zip,application/zip,application/x-zip-compressed"
               onChange={handleFileChange}
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-700
-                file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-2.5
-                file:py-1.5 file:text-xs file:font-medium file:text-gray-600 hover:file:bg-gray-200"
+              className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300
+                file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 dark:file:bg-slate-700 file:px-2.5
+                file:py-1.5 file:text-xs file:font-medium file:text-gray-600 dark:file:text-slate-300 hover:file:bg-gray-200 dark:hover:file:bg-slate-600"
             />
           </label>
 
           {/* External URL fields */}
           <div className="space-y-2">
             <div>
-              <label htmlFor="FigmaUrl" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="FigmaUrl" className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Figma URL (optional)
               </label>
               <input
@@ -284,11 +284,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={figmaUrl}
                 onChange={(e) => setFigmaUrl(e.target.value)}
                 placeholder="https://figma.com/file/..."
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
             </div>
             <div>
-              <label htmlFor="GithubURL" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="GithubURL" className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">
                 GitHub Repo URL (optional)
               </label>
               <input
@@ -297,11 +297,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={githubRepoUrl}
                 onChange={(e) => setGithubRepoUrl(e.target.value)}
                 placeholder="https://github.com/username/repo"
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
             </div>
             <div>
-              <label htmlFor="HostedURL" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="HostedURL" className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Hosted URL (optional)
               </label>
               <input
@@ -310,11 +310,11 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={hostedUrl}
                 onChange={(e) => setHostedUrl(e.target.value)}
                 placeholder="https://your-app.vercel.app"
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
               />
             </div>
             <div>
-              <label htmlFor="CommentField" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="CommentField" className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Note / Comment (optional)
               </label>
               <textarea
@@ -323,30 +323,30 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes or comments about your submission..."
                 rows={3}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
               />
             </div>
           </div>
 
           {selectedFile && !fileError && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               <span className="font-medium">{selectedFile.name}</span> · {formatBytes(selectedFile.size)}
             </p>
           )}
 
           {fileError && (
-            <p className="text-xs text-red-600">{fileError}</p>
+            <p className="text-xs text-red-600 dark:text-red-400">{fileError}</p>
           )}
 
           {uploading && (
             <div className="space-y-1">
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
                 <div
                   className="h-full rounded-full bg-blue-500 transition-all duration-200"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500">Uploading… {progress}%</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Uploading… {progress}%</p>
             </div>
           )}
 
@@ -368,7 +368,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
             <button
               onClick={handleCancelUpload}
               disabled={uploading}
-              className="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+              className="flex items-center gap-1 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
             >
               <X className="h-3.5 w-3.5" />
               Cancel
@@ -382,8 +382,8 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
             onClick={() => setShowUploader(true)}
             className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium ${
               state.status === "Returned"
-                ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
-                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                ? "border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40"
+                : "border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
             }`}
           >
             <Upload className="h-3.5 w-3.5" /> {state.status === "Returned" ? "Resubmit ZIP" : "Submit ZIP"}

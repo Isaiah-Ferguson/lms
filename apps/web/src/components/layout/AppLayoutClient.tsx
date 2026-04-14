@@ -31,7 +31,7 @@ export function AppLayoutClient({ nav, currentLevel, user, children }: AppLayout
   return (
     <>
       {/* Top Banner */}
-      <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-md px-6 shadow-sm z-50">
+      <header className="relative flex h-16 shrink-0 items-center justify-between border-b border-gray-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 shadow-sm z-50">
         {/* Left: mobile menu + logo + title */}
         <div className="flex items-center gap-3">
           <MobileMenuButton onClick={handleOpenSidebar} />
@@ -39,7 +39,7 @@ export function AppLayoutClient({ nav, currentLevel, user, children }: AppLayout
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-500 shadow-lg shadow-brand-500/30 transition-transform group-hover:scale-105">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 dark:from-slate-50 dark:to-slate-200 bg-clip-text text-transparent">
               CodeStack LMS
             </span>
           </Link>

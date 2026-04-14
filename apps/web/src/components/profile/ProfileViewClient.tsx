@@ -35,12 +35,12 @@ export function ProfileViewClient({
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{title}</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{subtitle}</p>
         </div>
 
         {isAdminViewingAnotherUser && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 dark:bg-violet-900/30 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400">
             <ShieldCheck className="h-3.5 w-3.5" />
             Viewing as Admin
           </span>

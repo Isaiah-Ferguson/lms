@@ -126,10 +126,10 @@ export default function InstructorGradingPage() {
   // ── Loading / error states ─────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
-          <p className="text-sm">Loading submission…</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900">
+        <div className="flex flex-col items-center gap-3 text-gray-400 dark:text-slate-500">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
+          <p className="text-sm dark:text-slate-400">Loading submission…</p>
         </div>
       </div>
     );
@@ -141,7 +141,7 @@ export default function InstructorGradingPage() {
         <Alert variant="error" message={loadError ?? "Submission not found."} />
         <button
           onClick={() => router.back()}
-          className="mt-4 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="mt-4 flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
@@ -153,20 +153,20 @@ export default function InstructorGradingPage() {
   const maxScore = 100;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Top bar */}
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
           <div className="flex items-center gap-3">
             <SubmissionStatusBadge status={detail.status} />
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-slate-500">
               Attempt #{detail.attemptNumber}
             </span>
           </div>
@@ -181,24 +181,24 @@ export default function InstructorGradingPage() {
           {/* Student info */}
           <Card>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                <User className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/30">
+                <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">{detail.student.name}</p>
-                <p className="text-sm text-gray-400">{detail.student.email}</p>
+                <p className="font-semibold text-gray-900 dark:text-slate-100">{detail.student.name}</p>
+                <p className="text-sm text-gray-400 dark:text-slate-500">{detail.student.email}</p>
               </div>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div>
-                <dt className="text-gray-400">Submitted</dt>
-                <dd className="font-medium text-gray-700">
+                <dt className="text-gray-400 dark:text-slate-500">Submitted</dt>
+                <dd className="font-medium text-gray-700 dark:text-slate-300">
                   {formatDateTime(detail.createdAt)}
                 </dd>
               </div>
               <div>
-                <dt className="text-gray-400">Type</dt>
-                <dd className="font-medium text-gray-700">{formatStatus(detail.type)}</dd>
+                <dt className="text-gray-400 dark:text-slate-500">Type</dt>
+                <dd className="font-medium text-gray-700 dark:text-slate-300">{formatStatus(detail.type)}</dd>
               </div>
             </dl>
           </Card>
@@ -207,12 +207,12 @@ export default function InstructorGradingPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-gray-400" />
+                <BookOpen className="h-4 w-4 text-gray-400 dark:text-slate-500" />
                 <CardTitle>{detail.assignment.title}</CardTitle>
               </div>
               <CardDescription>Assignment instructions</CardDescription>
             </CardHeader>
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="prose prose-sm max-w-none text-gray-700 dark:text-slate-300">
               <p className="whitespace-pre-wrap text-sm leading-relaxed">
                 {detail.assignment.instructions}
               </p>
@@ -231,25 +231,25 @@ export default function InstructorGradingPage() {
                   href={ensureProtocol(detail.figmaUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                    <FileText className="h-5 w-5 text-purple-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/30">
+                    <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">Figma Design</p>
-                    <p className="text-xs text-gray-500 truncate">{detail.figmaUrl}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Figma Design</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{detail.figmaUrl}</p>
                   </div>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400" />
+                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
                 </a>
               ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                    <FileText className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-800/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
+                    <FileText className="h-5 w-5 text-gray-400 dark:text-slate-500" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-400">Figma Design</p>
-                    <p className="text-xs text-gray-400">Not provided</p>
+                    <p className="text-sm font-medium text-gray-400 dark:text-slate-500">Figma Design</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-600">Not provided</p>
                   </div>
                 </div>
               )}
@@ -258,25 +258,25 @@ export default function InstructorGradingPage() {
                   href={ensureProtocol(detail.githubRepoUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                    <Github className="h-5 w-5 text-gray-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
+                    <Github className="h-5 w-5 text-gray-600 dark:text-slate-300" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">GitHub Repository</p>
-                    <p className="text-xs text-gray-500 truncate">{detail.githubRepoUrl}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-slate-100">GitHub Repository</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{detail.githubRepoUrl}</p>
                   </div>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400" />
+                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
                 </a>
               ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                    <Github className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-800/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
+                    <Github className="h-5 w-5 text-gray-400 dark:text-slate-500" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-400">GitHub Repository</p>
-                    <p className="text-xs text-gray-400">Not provided</p>
+                    <p className="text-sm font-medium text-gray-400 dark:text-slate-500">GitHub Repository</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-600">Not provided</p>
                   </div>
                 </div>
               )}
@@ -285,25 +285,25 @@ export default function InstructorGradingPage() {
                   href={ensureProtocol(detail.hostedUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                    <ExternalLink className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/30">
+                    <ExternalLink className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">Hosted Application</p>
-                    <p className="text-xs text-gray-500 truncate">{detail.hostedUrl}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Hosted Application</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{detail.hostedUrl}</p>
                   </div>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400" />
+                  <ExternalLink className="h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
                 </a>
               ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                    <ExternalLink className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-800/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
+                    <ExternalLink className="h-5 w-5 text-gray-400 dark:text-slate-500" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-400">Hosted Application</p>
-                    <p className="text-xs text-gray-400">Not provided</p>
+                    <p className="text-sm font-medium text-gray-400 dark:text-slate-500">Hosted Application</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-600">Not provided</p>
                   </div>
                 </div>
               )}
@@ -317,8 +317,8 @@ export default function InstructorGradingPage() {
                 <CardTitle>Student Note</CardTitle>
                 <CardDescription>Comment provided by the student</CardDescription>
               </CardHeader>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{detail.note}</p>
+              <div className="rounded-lg bg-gray-50 dark:bg-slate-900/50 p-4">
+                <p className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-wrap">{detail.note}</p>
               </div>
             </Card>
           )}
@@ -334,28 +334,28 @@ export default function InstructorGradingPage() {
             {/* GitHub submission */}
             {detail.type === "GitHub" && detail.gitHubInfo && (
               <div className="space-y-3">
-                <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
-                  <Github className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
+                <div className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+                  <Github className="mt-0.5 h-5 w-5 shrink-0 text-gray-500 dark:text-slate-400" />
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <a
                       href={detail.gitHubInfo.repoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+                      className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       {detail.gitHubInfo.repoUrl}
                       <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                     </a>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
                       Branch:{" "}
-                      <code className="rounded bg-gray-100 px-1 py-0.5 text-gray-700">
+                      <code className="rounded bg-gray-100 dark:bg-slate-700 px-1 py-0.5 text-gray-700 dark:text-slate-300">
                         {detail.gitHubInfo.branch}
                       </code>
                     </p>
                     {detail.gitHubInfo.commitHash && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-slate-400">
                         Commit:{" "}
-                        <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-gray-700">
+                        <code className="rounded bg-gray-100 dark:bg-slate-700 px-1 py-0.5 font-mono text-gray-700 dark:text-slate-300">
                           {detail.gitHubInfo.commitHash}
                         </code>
                       </p>
@@ -371,14 +371,14 @@ export default function InstructorGradingPage() {
                 {detail.artifacts.map((a) => (
                   <li
                     key={a.id}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5"
                   >
-                    <FileText className="h-4 w-4 shrink-0 text-gray-400" />
+                    <FileText className="h-4 w-4 shrink-0 text-gray-400 dark:text-slate-500" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-800">
+                      <p className="truncate text-sm font-medium text-gray-800 dark:text-slate-200">
                         {a.fileName}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 dark:text-slate-500">
                         {a.contentType} · {formatBytes(a.sizeBytes)}
                       </p>
                     </div>
@@ -386,7 +386,7 @@ export default function InstructorGradingPage() {
                       href={a.readUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex shrink-0 items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                     >
                       Download
                       <ExternalLink className="h-3 w-3" />
@@ -403,11 +403,11 @@ export default function InstructorGradingPage() {
 
           {/* Already graded banner */}
           {isAlreadyGraded && (
-            <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+            <div className="flex items-center gap-2 rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 px-4 py-3">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500 dark:text-green-400" />
               <div className="text-sm">
-                <p className="font-medium text-green-800">Already graded</p>
-                <p className="text-green-600">
+                <p className="font-medium text-green-800 dark:text-green-300">Already graded</p>
+                <p className="text-green-600 dark:text-green-400">
                   {formatDateTime(savedGrade!.gradedAt)}
                 </p>
               </div>
@@ -424,7 +424,7 @@ export default function InstructorGradingPage() {
 
             {/* Score input (100-point scale) */}
             <div className="mb-5">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Score (out of 100)
               </label>
               <div className="flex items-center gap-2">
@@ -438,15 +438,15 @@ export default function InstructorGradingPage() {
                     const value = parseInt(e.target.value) || 0;
                     setTotalScore(Math.min(Math.max(value, 0), 100));
                   }}
-                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-24 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <span className="text-sm text-gray-400">/ 100</span>
+                <span className="text-sm text-gray-400 dark:text-slate-500">/ 100</span>
               </div>
             </div>
 
             {/* Overall comment */}
             <div className="mb-5">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Overall comment
               </label>
               <textarea
@@ -454,7 +454,7 @@ export default function InstructorGradingPage() {
                 value={overallComment}
                 onChange={(e) => setOverallComment(e.target.value)}
                 placeholder="Feedback for the student…"
-                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full resize-none rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-300 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
               />
             </div>
 
@@ -483,7 +483,7 @@ export default function InstructorGradingPage() {
               <button
                 onClick={() => setShowReturnModal(true)}
                 disabled={detail.status === "Returned" || detail.status === "Draft"}
-                className="flex-1 rounded-lg border-2 border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 rounded-lg border-2 border-red-200 dark:border-red-900/50 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Return Submission
               </button>
@@ -491,7 +491,7 @@ export default function InstructorGradingPage() {
 
             {/* Grade summary */}
             {savedGrade && (
-              <div className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
+              <div className="mt-4 rounded-lg bg-gray-50 dark:bg-slate-900/50 p-3 text-xs text-gray-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
                   Last graded {formatDateTime(savedGrade.gradedAt)}
@@ -504,23 +504,23 @@ export default function InstructorGradingPage() {
 
       {/* Return Submission Modal */}
       {showReturnModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Return Submission</h3>
-            <p className="text-sm text-gray-600 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-2">Return Submission</h3>
+            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
               This will return the submission to the student and send them an email notification. They can resubmit after reviewing your feedback.
             </p>
 
             <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Reason for returning <span className="text-red-500">*</span>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Reason for returning <span className="text-red-500 dark:text-red-400">*</span>
               </label>
               <textarea
                 rows={4}
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
                 placeholder="e.g., Wrong assignment submitted, missing requirements, etc."
-                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                className="w-full resize-none rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-red-500 dark:focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 dark:focus:ring-red-400/20"
               />
             </div>
 
@@ -536,7 +536,7 @@ export default function InstructorGradingPage() {
                   setReturnError(null);
                 }}
                 disabled={returning}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
               >
                 Cancel
               </button>

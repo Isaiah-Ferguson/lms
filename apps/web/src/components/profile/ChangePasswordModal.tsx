@@ -64,22 +64,22 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl"
+        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-gray-700" />
-            <h2 className="text-lg font-bold text-gray-900">Change Password</h2>
+            <Lock className="h-5 w-5 text-gray-700 dark:text-slate-300" />
+            <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Change Password</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="rounded-lg p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -88,7 +88,7 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               Current Password
             </label>
             <input
@@ -97,12 +97,12 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20"
             />
           </div>
 
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               New Password
             </label>
             <input
@@ -112,13 +112,13 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
               onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20"
             />
-            <p className="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Minimum 8 characters</p>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               Confirm New Password
             </label>
             <input
@@ -128,7 +128,7 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20"
             />
           </div>
 
@@ -136,8 +136,8 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
             <div
               className={`rounded-lg px-4 py-3 text-sm ${
                 message.type === "success"
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
+                  ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50"
+                  : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50"
               }`}
             >
               {message.text}

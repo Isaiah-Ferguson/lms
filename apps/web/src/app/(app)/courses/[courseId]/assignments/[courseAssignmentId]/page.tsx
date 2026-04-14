@@ -152,7 +152,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 text-sm text-gray-500">
+      <div className="flex items-center justify-center py-24 text-sm text-gray-500 dark:text-slate-400">
         Loading assignment…
       </div>
     );
@@ -163,11 +163,11 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" /> Back to course
         </Link>
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-sm text-gray-500 dark:text-slate-400">
           {error ?? "Assignment not found."}
         </div>
       </div>
@@ -179,27 +179,27 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     <div className="mx-auto max-w-6xl space-y-6">
       <Link
         href={`/courses/${params.courseId}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
       >
         <ArrowLeft className="h-4 w-4" /> Back to course
       </Link>
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
+      <header className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-600">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-slate-400">
               {assignment.moduleTitle}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-gray-900">{assignment.title}</h1>
+            <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-slate-100">{assignment.title}</h1>
           </div>
-          <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="shrink-0 rounded-full bg-blue-100 dark:bg-blue-950/30 px-3 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400">
             {studentGrade?.totalScore !== null && studentGrade?.totalScore !== undefined
               ? `${studentGrade.totalScore} / ${studentGrade.maxScore} pts`
               : `${studentGrade?.maxScore ?? 100} pts max`}
           </span>
         </div>
-        <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+        <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-slate-400">
           <span className="flex items-center gap-1">
             <CalendarDays className="h-3.5 w-3.5" />
             Due {formatDateTime(assignment.dueDate)} · {timeRemaining(assignment.dueDate)}
@@ -216,25 +216,25 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
 
         {/* ── Left: instructions + rubric ─────────────────────────────────── */}
         <div className="space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-3 text-base font-semibold text-gray-900">Instructions</h2>
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+            <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-slate-100">Instructions</h2>
             {assignment.instructions ? (
-              <div className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-700">
+              <div className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-700 dark:text-slate-300">
                 {assignment.instructions}
               </div>
             ) : (
-              <p className="text-sm italic text-gray-500">No instructions provided.</p>
+              <p className="text-sm italic text-gray-500 dark:text-slate-500">No instructions provided.</p>
             )}
           </div>
 
           {assignment.attachmentUrl && (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-3 text-base font-semibold text-gray-900">Assignment Files</h2>
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+              <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-slate-100">Assignment Files</h2>
               <a
                 href={assignment.attachmentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/30 px-4 py-3 text-sm font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 Download Assignment File
@@ -260,22 +260,22 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
 
           {/* Instructor-only: manage assignment */}
           {isInstructor && (
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                <Users className="h-4 w-4 text-gray-500" /> Manage Assignment
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm space-y-4">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-slate-100">
+                <Users className="h-4 w-4 text-gray-500 dark:text-slate-400" /> Manage Assignment
               </h2>
 
-              <div className="border-t border-gray-100 pt-3 space-y-2">
+              <div className="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40"
                 >
                   Edit Assignment
                 </button>
                 <Link
                   href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}/submissions`}
-                  className="flex w-full items-center justify-center rounded-lg gap-2 bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+                  className="flex w-full items-center justify-center rounded-lg gap-2 bg-gray-900 dark:bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 dark:hover:bg-slate-600 disabled:opacity-50"
                 >
                   <Users className="h-4 w-4" />
                   View Submissions

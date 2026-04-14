@@ -7,19 +7,19 @@ interface CodeLinksPanelProps {
 
 export function CodeLinksPanel({ video }: CodeLinksPanelProps) {
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-800">Code for Selected Video</h3>
-        <p className="text-xs text-gray-500">{video.title}</p>
+    <section className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+      <div className="border-b border-gray-100 dark:border-slate-700 px-4 py-3">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200">Code for Selected Video</h3>
+        <p className="text-xs text-gray-500 dark:text-slate-400">{video.title}</p>
       </div>
 
-      <ul className="divide-y divide-gray-100">
+      <ul className="divide-y divide-gray-100 dark:divide-slate-700">
         {video.codeArtifacts.length === 0 && (
-          <li className="px-4 py-6 text-xs text-gray-600">No code artifacts attached yet.</li>
+          <li className="px-4 py-6 text-xs text-gray-600 dark:text-slate-400">No code artifacts attached yet.</li>
         )}
         {video.codeArtifacts.map((artifact) => (
           <li key={artifact.id} className="flex items-center justify-between gap-3 px-4 py-3">
-            <span className="text-sm text-gray-700">{artifact.label}</span>
+            <span className="text-sm text-gray-700 dark:text-slate-300">{artifact.label}</span>
             <a
               href={artifact.downloadUrl}
               target="_blank"
