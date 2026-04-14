@@ -378,7 +378,7 @@ export function Level1DashboardClient({ data }: { data: Level1Data }) {
 
       {/* ── Week grid ──────────────────────────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-300">
           Weekly schedule
         </h2>
 

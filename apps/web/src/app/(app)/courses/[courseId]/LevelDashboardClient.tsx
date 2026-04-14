@@ -879,7 +879,7 @@ export function LevelDashboardClient({
       {/* ── Week grid ──────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-600">
             Weekly schedule
           </h2>
           {data.permissions.canEditAssignments && (
