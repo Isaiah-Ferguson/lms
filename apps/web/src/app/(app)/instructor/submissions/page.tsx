@@ -136,8 +136,12 @@ export default function SubmissionQueuePage() {
 
           {/* Search */}
           <div className="relative ml-auto">
+            <label htmlFor="submission-search" className="sr-only">
+              Search submissions
+            </label>
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
             <input
+              id="submission-search"
               type="text"
               placeholder="Search student or assignment…"
               value={search}

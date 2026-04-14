@@ -232,32 +232,12 @@ export default function CalendarPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Calendar</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-100">
           Upcoming assignments and announcements across your enrolled courses.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm md:grid-cols-2">
-        <div>
-          <label htmlFor="Courses" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
-            Course
-          </label>
-          <select
-            id="Courses"
-            value={selectedCourseId}
-            onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
-            disabled={loading}
-          >
-            <option value="all">All Courses</option>
-            {enrollments.map((e) => (
-              <option key={e.courseId} value={e.courseId}>
-                {e.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div>
           <p className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Types

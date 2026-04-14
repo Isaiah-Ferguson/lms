@@ -36,7 +36,7 @@ export function ProfileViewClient({
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{title}</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{subtitle}</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-200">{subtitle}</p>
         </div>
 
         {isAdminViewingAnotherUser && (

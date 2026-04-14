@@ -424,11 +424,12 @@ export default function InstructorGradingPage() {
 
             {/* Score input (100-point scale) */}
             <div className="mb-5">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              <label htmlFor="totalScore" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Score (out of 100)
               </label>
               <div className="flex items-center gap-2">
                 <input
+                id="totalScore"
                   type="number"
                   min={0}
                   max={100}
@@ -446,10 +447,11 @@ export default function InstructorGradingPage() {
 
             {/* Overall comment */}
             <div className="mb-5">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              <label htmlFor="gradetext" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Overall comment
               </label>
               <textarea
+                id="gradetext"
                 rows={4}
                 value={overallComment}
                 onChange={(e) => setOverallComment(e.target.value)}

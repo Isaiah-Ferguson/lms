@@ -19,18 +19,18 @@ type GradeStatus = StudentGradeRow["status"];
 function statusBadge(status: GradeStatus) {
   if (status === "Graded")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-950/30 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
         <CheckCircle2 className="h-3 w-3" /> Graded
       </span>
     );
   if (status === "Missing")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-950/30 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400">
         <AlertCircle className="h-3 w-3" /> Missing
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700">
+    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 dark:bg-yellow-950/30 px-2 py-0.5 text-xs font-semibold text-yellow-700 dark:text-yellow-400">
       <Clock className="h-3 w-3" /> Pending
     </span>
   );
@@ -200,14 +200,14 @@ export default function GradesPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Grades</h1>
-        <p className="mt-1 text-sm text-gray-500">Your submission results and feedback.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">My Grades</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Your submission results and feedback.</p>
       </div>
 
       {/* Course tabs */}
       <div className="flex flex-wrap gap-2">
         {enrollments.length === 0 ? (
-          <p className="text-sm text-gray-500">You are not enrolled in any courses yet.</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400">You are not enrolled in any courses yet.</p>
         ) : (
           enrollments.map((c) => (
             <button
@@ -216,7 +216,7 @@ export default function GradesPage() {
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeCourseId === c.courseId
                   ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
               }`}
             >
               {c.title}
@@ -229,49 +229,49 @@ export default function GradesPage() {
 
       {loadingEnrollments ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
         </div>
       ) : enrollments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-4 text-base font-semibold text-gray-900">No Courses Enrolled</h3>
-          <p className="mt-2 text-sm text-gray-500">You are not enrolled in any courses yet. Contact your instructor to get enrolled.</p>
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-12 text-center">
+          <BookOpen className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
+          <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-slate-100">No Courses Enrolled</h3>
+          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">You are not enrolled in any courses yet. Contact your instructor to get enrolled.</p>
         </div>
       ) : loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
         </div>
       ) : (
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
+                <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Overall</p>
+                <p className="text-xs text-gray-500 dark:text-slate-300 uppercase tracking-wide font-medium">Overall</p>
                 <p className={`text-2xl font-bold ${percentColor(overallPct)}`}>{overallPct}%</p>
               </div>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                <BookOpen className="h-5 w-5 text-emerald-600" />
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/30">
+                <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Graded</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {graded.length} <span className="text-sm text-gray-400">/ {rows.length}</span>
+                <p className="text-xs text-gray-500 dark:text-slate-300 uppercase tracking-wide font-medium">Graded</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+                  {graded.length} <span className="text-sm text-gray-400 dark:text-slate-300">/ {rows.length}</span>
                 </p>
               </div>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                <Calendar className="h-5 w-5 text-purple-600" />
+            <div className="rounded-xl border border-gray-200 dark:border-slate-300 bg-white dark:bg-slate-800 p-5 shadow-sm flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/30">
+                <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Last Graded</p>
-                <p className="text-base font-semibold text-gray-900">
+                <p className="text-xs text-gray-500 dark:text-slate-300 uppercase tracking-wide font-medium">Last Graded</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-slate-100">
                   {lastGradedRow?.gradedAt
                     ? new Date(lastGradedRow.gradedAt).toLocaleDateString()
                     : "—"}
@@ -282,13 +282,13 @@ export default function GradesPage() {
 
           {/* Score over time chart */}
           {percentOverTime.length > 1 && (
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-sm font-semibold text-gray-700">Score Over Time</h2>
+            <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-300">Score Over Time</h2>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={percentOverTime} margin={{ top: 4, right: 8, left: -20, bottom: 40 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" interval={0} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#64748b" }} angle={-35} textAnchor="end" interval={0} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "#64748b" }} />
                   <Tooltip formatter={(v) => typeof v === 'number' ? `${v}%` : "—"} />
                   <Line type="monotone" dataKey="percent" stroke="#2563eb" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
@@ -297,15 +297,15 @@ export default function GradesPage() {
           )}
 
           {/* Grades table */}
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
             {rows.length === 0 ? (
-              <div className="px-5 py-12 text-center text-sm text-gray-400">
+              <div className="px-5 py-12 text-center text-sm text-gray-400 dark:text-slate-500">
                 No assignments found for this course.
               </div>
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <tr className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
                     <th className="px-5 py-3">Assignment</th>
                     <th className="px-5 py-3 text-right">Score</th>
                     <th className="px-5 py-3 text-center">Grade</th>
@@ -315,47 +315,47 @@ export default function GradesPage() {
                     <th className="px-5 py-3">Feedback</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                   {rows.map((row) => {
                     const p = pct(row.totalScore, row.maxScore);
                     const grade = letterGrade(p);
                     return (
-                      <tr key={row.assignmentId} className="hover:bg-gray-50">
-                        <td className="px-5 py-3 font-medium text-gray-800">
-                          <Link href={`/courses/${activeCourseId}/assignments/${row.assignmentId}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                      <tr key={row.assignmentId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                        <td className="px-5 py-3 font-medium text-gray-800 dark:text-slate-300">
+                          <Link href={`/courses/${activeCourseId}/assignments/${row.assignmentId}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
                             {row.assignmentTitle}
                           </Link>
                         </td>
-                        <td className="px-5 py-3 text-right font-semibold text-gray-800">
+                        <td className="px-5 py-3 text-right font-semibold text-gray-800 dark:text-slate-300">
                           {row.totalScore !== null ? `${row.totalScore} / ${row.maxScore}` : "—"}
                         </td>
                         <td className={`px-5 py-3 text-center font-bold text-lg ${percentColor(p)}`}>
                           {grade}
                         </td>
                         <td className="px-5 py-3">{statusBadge(row.status)}</td>
-                        <td className="px-5 py-3 text-gray-600 text-sm">
+                        <td className="px-5 py-3 text-gray-600 dark:text-slate-300 text-sm">
                           {row.gradedBy || "—"}
                         </td>
-                        <td className="px-5 py-3 text-gray-500 text-xs">
+                        <td className="px-5 py-3 text-gray-500 dark:text-slate-400 text-xs">
                           {row.gradedAt ? new Date(row.gradedAt).toLocaleDateString() : "—"}
                         </td>
-                        <td className="px-5 py-3 text-xs text-gray-500 max-w-xs truncate">
+                        <td className="px-5 py-3 text-xs text-gray-500 dark:text-slate-400 max-w-xs truncate">
                           {row.overallComment || "—"}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
-                <tfoot className="border-t-2 border-gray-300 bg-gray-50">
+                <tfoot className="border-t-2 border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-900/50">
                   <tr>
-                    <td className="px-5 py-4 font-bold text-gray-900">Course Total</td>
-                    <td className="px-5 py-4 text-right font-bold text-gray-900">
+                    <td className="px-5 py-4 font-bold text-gray-900 dark:text-slate-100">Course Total</td>
+                    <td className="px-5 py-4 text-right font-bold text-gray-900 dark:text-slate-100">
                       {graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1)} / {graded.reduce((sum, r) => sum + r.maxScore, 0)}
                     </td>
                     <td className={`px-5 py-4 text-center font-bold text-2xl ${percentColor(overallPct)}`}>
                       {letterGrade(overallPct)}
                     </td>
-                    <td colSpan={4} className="px-5 py-4 text-sm text-gray-500">
+                    <td colSpan={4} className="px-5 py-4 text-sm text-gray-500 dark:text-slate-400">
                       {graded.length} of {rows.length} assignments graded • {overallPct}% overall
                     </td>
                   </tr>

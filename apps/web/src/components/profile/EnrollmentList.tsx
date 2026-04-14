@@ -22,7 +22,7 @@ export function EnrollmentList({ enrollments }: EnrollmentListProps) {
           <li key={enrollment.courseId} className="flex items-center justify-between py-3">
             <Link
               href={`/courses/${enrollment.courseId}`}
-              className="group flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-blue-600"
+              className="group flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-slate-100 hover:text-blue-600"
             >
               {enrollment.title}
               <ArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
