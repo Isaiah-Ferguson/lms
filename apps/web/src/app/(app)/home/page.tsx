@@ -233,7 +233,7 @@ export default function HomePage() {
       ) : (
         /* Admins: show single year view */
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-100">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-700">
             All levels · {selectedYear?.label ?? ""}
           </h2>
           <LevelCardGrid

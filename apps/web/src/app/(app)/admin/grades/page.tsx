@@ -197,7 +197,7 @@ export default function AdminGradesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Admin Grades</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-slate-200">Class-wide grade overview by course.</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-700">Class-wide grade overview by course.</p>
           </div>
         </div>
 

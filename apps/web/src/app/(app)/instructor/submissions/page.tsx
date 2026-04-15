@@ -112,7 +112,7 @@ export default function SubmissionQueuePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Submission Queue</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-600">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-700">
             {pendingCount > 0
               ? `${pendingCount} submission${pendingCount !== 1 ? "s" : ""} awaiting grading`
               : "All submissions graded"}
