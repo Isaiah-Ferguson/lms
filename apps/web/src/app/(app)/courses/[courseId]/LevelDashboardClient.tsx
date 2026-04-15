@@ -725,8 +725,9 @@ function AssignmentsSection({
     if (!token || !courseId) return;
     assignmentsApi.getAssignmentsByCourse(courseId, token)
       .then((items: AssignmentListItem[]) => {
+        const sorted = [...items].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         const result: LevelData["assignments"] = { miniChallenges: [], challenges: [], projects: [] };
-        for (const a of items) {
+        for (const a of sorted) {
           const key =
             a.assignmentType === "MiniChallenge" ? "miniChallenges" :
               a.assignmentType === "Project" ? "projects" :
@@ -777,7 +778,7 @@ function AssignmentsSection({
                 >
                   <Link
                     href={a.href}
-                    className="group flex items-center justify-between rounded-md px-3 py-2 text-md font-medium 
+                    className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium 
              bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 transition-all duration-150 
              hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-300 active:bg-blue-200 dark:active:bg-blue-900/50"
                   >

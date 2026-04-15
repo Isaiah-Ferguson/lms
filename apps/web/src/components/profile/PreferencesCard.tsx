@@ -16,8 +16,13 @@ interface PreferencesCardProps {
 
 export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCardProps) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(initialPreferences.emailNotificationsEnabled);
-  const [darkMode, setDarkMode] = useState(initialPreferences.darkModeEnabled);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("darkMode");
+      if (stored !== null) return stored === "true";
+    }
+    return initialPreferences.darkModeEnabled;
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -30,13 +35,8 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
     }
   }, [darkMode]);
 
-  const handleToggle = async (type: "email" | "darkMode", newValue: boolean) => {
-    const updatedEmail = type === "email" ? newValue : emailNotifications;
-    const updatedDarkMode = type === "darkMode" ? newValue : darkMode;
-
-    if (type === "email") setEmailNotifications(newValue);
-    if (type === "darkMode") setDarkMode(newValue);
-
+  const handleToggle = async (newValue: boolean) => {
+    setDarkMode(newValue);
     setSaving(true);
     try {
       const token = getToken();
@@ -44,16 +44,15 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
 
       const updated = await profileApi.updatePreferences(
         {
-          emailNotificationsEnabled: updatedEmail,
-          darkModeEnabled: updatedDarkMode,
+          emailNotificationsEnabled: true,
+          darkModeEnabled: newValue,
         },
         token
       );
 
       onUpdate(updated);
     } catch (err) {
-      if (type === "email") setEmailNotifications(!newValue);
-      if (type === "darkMode") setDarkMode(!newValue);
+      setDarkMode(!newValue);
     } finally {
       setSaving(false);
     }
@@ -66,34 +65,11 @@ export function PreferencesCard({ initialPreferences, onUpdate }: PreferencesCar
           <div className="divide-y divide-gray-100 dark:divide-slate-700">
             <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
               <div>
-                <p className="text-sm font-medium text-gray-800 dark:text-slate-200">Email notifications</p>
-                <p className="text-xs text-gray-500 dark:text-slate-400">Receive updates about assignments and grades</p>
-              </div>
-              <button
-                onClick={() => handleToggle("email", !emailNotifications)}
-                disabled={saving}
-                aria-label={`Toggle email notifications ${emailNotifications ? 'off' : 'on'}`}
-                role="switch"
-                aria-checked={emailNotifications}
-                className={`relative h-5 w-9 rounded-full transition-colors ${
-                  emailNotifications ? "bg-blue-500" : "bg-gray-200"
-                } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
-                    emailNotifications ? "translate-x-4" : ""
-                  }`}
-                />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-              <div>
                 <p className="text-sm font-medium text-gray-800 dark:text-slate-200">Dark mode</p>
                 <p className="text-xs text-gray-500 dark:text-slate-400">Switch to a darker colour scheme</p>
               </div>
               <button
-                onClick={() => handleToggle("darkMode", !darkMode)}
+                onClick={() => handleToggle(!darkMode)}
                 disabled={saving}
                 aria-label={`Toggle dark mode ${darkMode ? 'off' : 'on'}`}
                 role="switch"

@@ -138,6 +138,35 @@ public class AdminParticipantsService : IAdminParticipantsService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UnenrollUsersAsync(EnrollUsersRequestDto dto, CancellationToken cancellationToken = default)
+    {
+        var userIds = dto.UserIds
+            .Select(ParseGuid)
+            .Distinct()
+            .ToList();
+
+        var courseIds = dto.CourseIds
+            .Select(ParseGuid)
+            .Distinct()
+            .ToList();
+
+        if (userIds.Count == 0)
+            throw new ValidationException("At least one user must be selected.");
+        if (courseIds.Count == 0)
+            throw new ValidationException("At least one course must be selected.");
+
+        // Find all existing enrollments to remove
+        var enrollmentsToRemove = await _db.UserCourseEnrollments
+            .Where(e => userIds.Contains(e.UserId) && courseIds.Contains(e.CourseId))
+            .ToListAsync(cancellationToken);
+
+        if (enrollmentsToRemove.Count == 0)
+            return;
+
+        _db.UserCourseEnrollments.RemoveRange(enrollmentsToRemove);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task ToggleUserActiveAsync(string userId, string currentUserId, CancellationToken cancellationToken = default)
     {
         var userGuid = ParseGuid(userId);

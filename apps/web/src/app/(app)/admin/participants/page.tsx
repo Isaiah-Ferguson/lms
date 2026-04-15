@@ -155,6 +155,19 @@ export default function ParticipantsPage() {
     showToast("Enrollment updated.");
   }
 
+  async function handleUnenrolled(userId: string, courseIds: string[]) {
+    const token = getToken();
+    if (!token) {
+      showToast("Session expired. Please sign in again.");
+      return;
+    }
+
+    await adminParticipantsApi.unenrollUsers({ userIds: [userId], courseIds }, token);
+    await loadParticipants();
+    setModal(null);
+    showToast("User unenrolled from courses.");
+  }
+
   async function handleBulkEnrolled(userIds: string[], courseIds: string[]) {
     const token = getToken();
     if (!token) {
@@ -310,11 +323,11 @@ export default function ParticipantsPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {[
-          { label: "Total users",  value: users.length,  color: "text-gray-900" },
-          { label: "Active",       value: activeCount,   color: "text-green-600" },
-          { label: "Students",    value: studentCount,  color: "text-blue-600"  },
-          { label: "Instructors", value: instructorCount, color: "text-amber-600" },
-          { label: "Admins",      value: adminCount,    color: "text-violet-600" },
+          { label: "Total users",  value: users.length,  color: "text-gray-900 dark:text-slate-100" },
+          { label: "Active",       value: activeCount,   color: "text-green-600 dark:text-green-400" },
+          { label: "Students",    value: studentCount,  color: "text-blue-600 dark:text-blue-400"  },
+          { label: "Instructors", value: instructorCount, color: "text-amber-600 dark:text-amber-400" },
+          { label: "Admins",      value: adminCount,    color: "text-violet-600 dark:text-violet-400" },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
             <p className="text-xs font-medium text-gray-600 dark:text-slate-400">{label}</p>
@@ -433,6 +446,7 @@ export default function ParticipantsPage() {
           preselectedUserId={modal.userId}
           onClose={() => setModal(null)}
           onEnrolled={handleEnrolled}
+          onUnenrolled={handleUnenrolled}
         />
       )}
 

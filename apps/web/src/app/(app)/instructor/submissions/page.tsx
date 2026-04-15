@@ -43,6 +43,7 @@ export default function SubmissionQueuePage() {
   const [search, setSearch] = useState("");
   const [years, setYears] = useState<AcademicYear[]>([]);
   const [selectedYearId, setSelectedYearId] = useState("");
+  const [yearLoaded, setYearLoaded] = useState(false);
 
   // Load available years and determine selected year
   useEffect(() => {
@@ -62,6 +63,8 @@ export default function SubmissionQueuePage() {
         setSelectedYearId(preferredYearId);
       } catch {
         // Silently fail - submissions will still load without year filter
+      } finally {
+        setYearLoaded(true);
       }
     }
     void loadYears();
@@ -87,7 +90,7 @@ export default function SubmissionQueuePage() {
     }
   }, [router, courseFilter, statusFilter, selectedYearId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (yearLoaded) load(); }, [load, yearLoaded]);
 
   const filtered = search
     ? items.filter(

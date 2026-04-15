@@ -39,6 +39,18 @@ public class AdminParticipantsController : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("enrollments")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UnenrollUsers(
+        [FromBody] EnrollUsersRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _adminParticipantsService.UnenrollUsersAsync(dto, cancellationToken);
+        return NoContent();
+    }
+
     [HttpPatch("{userId}/toggle-active")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

@@ -19,12 +19,14 @@ interface Props {
   preselectedUserId?: string;
   onClose: () => void;
   onEnrolled: (userId: string, courseIds: string[]) => Promise<void>;
+  onUnenrolled?: (userId: string, courseIds: string[]) => Promise<void>;
 }
 
-export function EnrollUserModal({ users, courses, preselectedUserId, onClose, onEnrolled }: Props) {
+export function EnrollUserModal({ users, courses, preselectedUserId, onClose, onEnrolled, onUnenrolled }: Props) {
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>(preselectedUserId ?? "");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [originalEnrollments, setOriginalEnrollments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,11 +36,20 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
       const user = users.find((u) => u.id === selectedUserId);
       if (user) {
         setSelectedCourses(user.enrollments);
+        setOriginalEnrollments(user.enrollments);
       }
     } else {
       setSelectedCourses([]);
+      setOriginalEnrollments([]);
     }
   }, [selectedUserId, users]);
+
+  // Calculate what changes need to be made
+  const toEnroll = selectedCourses.filter(id => !originalEnrollments.includes(id));
+  const toUnenroll = originalEnrollments.filter(id => !selectedCourses.includes(id));
+  const hasChanges = toEnroll.length > 0 || toUnenroll.length > 0;
+  const canEnroll = toEnroll.length > 0 && toUnenroll.length === 0;
+  const canUnenroll = toUnenroll.length > 0 && toEnroll.length === 0;
 
   const filtered = useMemo(() =>
     users.filter((u) => {
@@ -77,13 +88,21 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedUserId) { setError("Select a user"); return; }
-    if (selectedCourses.length === 0) { setError("Select at least one course"); return; }
+    if (!hasChanges) { setError("No changes to save"); return; }
+    if (toEnroll.length > 0 && toUnenroll.length > 0) {
+      setError("Cannot enroll and unenroll at the same time. Please make only one type of change.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      await onEnrolled(selectedUserId, selectedCourses);
+      if (toEnroll.length > 0) {
+        await onEnrolled(selectedUserId, toEnroll);
+      } else if (toUnenroll.length > 0 && onUnenrolled) {
+        await onUnenrolled(selectedUserId, toUnenroll);
+      }
     } catch {
-      setError("Unable to enroll user right now.");
+      setError(toEnroll.length > 0 ? "Unable to enroll user right now." : "Unable to unenroll user right now.");
     } finally {
       setLoading(false);
     }
@@ -185,19 +204,26 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
                       className={clsx(
                         "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
                         selectedCourses.includes(c.id)
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
+                          ? originalEnrollments.includes(c.id)
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
+                            : "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
                           : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                       )}
                     >
                       <div className={clsx(
                         "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                         selectedCourses.includes(c.id)
-                          ? "border-blue-500 bg-blue-500"
+                          ? originalEnrollments.includes(c.id)
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-emerald-500 bg-emerald-500"
                           : "border-gray-300 dark:border-slate-500"
                       )}>
                         {selectedCourses.includes(c.id) && <Check className="h-2.5 w-2.5 text-white" />}
                       </div>
                       {c.label}
+                      {selectedCourses.includes(c.id) && !originalEnrollments.includes(c.id) && (
+                        <span className="text-xs">(New)</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -210,7 +236,15 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
 
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
-          <Button type="submit" size="sm" loading={loading}>Enroll</Button>
+          {canUnenroll ? (
+            <Button type="submit" size="sm" variant="danger" loading={loading} disabled={!hasChanges}>
+              Unenroll
+            </Button>
+          ) : (
+            <Button type="submit" size="sm" loading={loading} disabled={!hasChanges || toUnenroll.length > 0}>
+              {toEnroll.length > 0 ? "Enroll" : "Save Changes"}
+            </Button>
+          )}
         </div>
       </form>
     </Modal>

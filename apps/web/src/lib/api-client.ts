@@ -517,6 +517,17 @@ export const adminParticipantsApi = {
     );
   },
 
+  unenrollUsers(body: { userIds: string[]; courseIds: string[] }, token: string): Promise<void> {
+    return apiFetch<void>(
+      "/api/admin/participants/enrollments",
+      {
+        method: "DELETE",
+        body: JSON.stringify(body),
+      },
+      token
+    );
+  },
+
   toggleUserActive(userId: string, token: string): Promise<void> {
     return apiFetch<void>(
       `/api/admin/participants/${userId}/toggle-active`,

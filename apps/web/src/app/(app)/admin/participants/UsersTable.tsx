@@ -78,8 +78,9 @@ export function UsersTable({
                     allSelected
                       ? "border-blue-500 bg-blue-500"
                       : someSelected
-                      ? "border-blue-400 bg-blue-100"
-                      : "border-gray-300 bg-white"
+                      ? "border-blue-500 bg-blue-500" 
+                      : "border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+                      
                   )}
                 >
                   {(allSelected || someSelected) && (

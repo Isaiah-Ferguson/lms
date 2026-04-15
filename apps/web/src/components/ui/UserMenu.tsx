@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, User, BarChart2, Settings, LogOut, ChevronDown, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, User, BarChart2, LogOut, ChevronDown, AlertTriangle } from "lucide-react";
 import { clsx } from "clsx";
 import { clearToken } from "@/lib/auth";
 import type { UserInfo } from "@/lib/dashboard-data";
@@ -57,8 +57,6 @@ function getMenuItems(role: string) {
   } else {
     items.push({ label: "Grades", href: "/grades", icon: BarChart2 });
   }
-
-  items.push({ label: "Preferences", href: "/preferences", icon: Settings });
 
   return items;
 }

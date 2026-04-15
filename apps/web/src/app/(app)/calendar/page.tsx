@@ -232,7 +232,7 @@ export default function CalendarPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Calendar</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-100">
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-600">
           Upcoming assignments and announcements across your enrolled courses.
         </p>
       </div>
