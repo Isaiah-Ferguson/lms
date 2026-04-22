@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   LineChart, Line, BarChart, Bar,
@@ -9,14 +8,14 @@ import {
 } from "recharts";
 import { TrendingUp, BookOpen, Calendar, Download } from "lucide-react";
 import { gradesApi, profileApi, ApiError, type StudentGrades, type Enrollment } from "@/lib/api-client";
-import { getToken } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
 
 // ─── component ───────────────────────────────────────────────────────────────
 
 export default function GradesPage() {
-  const router = useRouter();
+  const token = useAuthedToken();
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [data, setData] = useState<StudentGrades | null>(null);
@@ -25,8 +24,7 @@ export default function GradesPage() {
   const [error, setError] = useState<string | null>(null);
   // Load user's enrolled courses
   useEffect(() => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
 
     profileApi.getMyProfile(token)
       .then((profile) => {
@@ -42,11 +40,10 @@ export default function GradesPage() {
       .finally(() => {
         setLoadingEnrollments(false);
       });
-  }, [router]);
+  }, [token]);
 
   const load = useCallback(async (courseId: string) => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {
@@ -57,7 +54,7 @@ export default function GradesPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [token]);
 
   useEffect(() => {
     if (activeCourseId) {

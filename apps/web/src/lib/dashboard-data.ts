@@ -6,17 +6,6 @@ export interface NavItem {
   icon: string; // emoji / lucide name — resolved in the Sidebar component
 }
 
-export interface CourseCard {
-  id: string;
-  title: string;
-  description: string;
-  level: number | null; // null = "Combine" (all levels)
-  yearLabel: string;    // e.g. "2025–26"
-  href: string;
-  badge?: string;       // e.g. "Current", "Upcoming"
-  color: string;        // tailwind bg class for the card accent
-}
-
 export interface UserInfo {
   name: string;
   avatarUrl: string | null; // null → show initials fallback
@@ -26,19 +15,8 @@ export interface UserInfo {
 
 export interface DashboardData {
   nav: NavItem[];
-  cards: CourseCard[];
   currentLevel: number; // 1–4 based on enrolment year
   user: UserInfo;
-}
-
-// ─── Year → Level mapping ─────────────────────────────────────────────────────
-// Academic year is determined by the start year of the cohort.
-// 2025-26 → Level 1, 2026-27 → Level 2, etc.
-
-function levelFromYear(cohortStartYear: number): number {
-  const base = 2025;
-  const level = cohortStartYear - base + 1;
-  return Math.min(Math.max(level, 1), 4);
 }
 
 // ─── API-based data ───────────────────────────────────────────────────────────
@@ -93,7 +71,7 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
 
   // Always show Calendar
   nav.push({ label: "Calendar", href: "/calendar", icon: "calendar" });
-  
+
   // Show Grades only for non-admins (students and instructors)
   if (!data.permissions.canManageYears) {
     nav.push({ label: "Grades", href: "/grades", icon: "grades" });
@@ -122,75 +100,5 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
     role: data.user.role,
   };
 
-  return { nav, cards: [], currentLevel, user };
-}
-
-// ─── Stub data (fallback) ─────────────────────────────────────────────────────
-
-export function getDashboardData(cohortStartYear: number = 2025): DashboardData {
-  const currentLevel = levelFromYear(cohortStartYear);
-
-  const nav: NavItem[] = [
-    { label: "Combine",  href: "/courses/combine",  icon: "grid" },
-    { label: "Level 1",  href: "/courses/level-1",  icon: "1" },
-    { label: "Level 2",  href: "/courses/level-2",  icon: "2" },
-    { label: "Level 3",  href: "/courses/level-3",  icon: "3" },
-    { label: "Level 4",  href: "/courses/level-4",  icon: "4" },
-    { label: "Calendar",     href: "/calendar",            icon: "calendar" },
-    { label: "Grades",       href: "/grades",              icon: "grades"   },
-    { label: "Participants", href: "/admin/participants",  icon: "users"    },
-    { label: "Admin Grades", href: "/admin/grades",        icon: "admingrades" },
-  ];
-
-  const allCards: CourseCard[] = [
-    {
-      id: "level-1",
-      title: "Level 1",
-      description: "Foundations of web development — HTML, CSS, and JavaScript fundamentals.",
-      level: 1,
-      yearLabel: "2025–26",
-      href: "/courses/level-1",
-      color: "bg-blue-500",
-      badge: currentLevel === 1 ? "Current" : currentLevel < 1 ? "Upcoming" : "Completed",
-    },
-    {
-      id: "level-2",
-      title: "Level 2",
-      description: "React, TypeScript, and modern front-end tooling.",
-      level: 2,
-      yearLabel: "2026–27",
-      href: "/courses/level-2",
-      color: "bg-violet-500",
-      badge: currentLevel === 2 ? "Current" : currentLevel < 2 ? "Upcoming" : "Completed",
-    },
-    {
-      id: "level-3",
-      title: "Level 3",
-      description: "Back-end APIs, databases, and cloud deployment.",
-      level: 3,
-      yearLabel: "2027–28",
-      href: "/courses/level-3",
-      color: "bg-emerald-500",
-      badge: currentLevel === 3 ? "Current" : currentLevel < 3 ? "Upcoming" : "Completed",
-    },
-    {
-      id: "level-4",
-      title: "Level 4",
-      description: "Capstone projects, system design, and career readiness.",
-      level: 4,
-      yearLabel: "2028–29",
-      href: "/courses/level-4",
-      color: "bg-orange-500",
-      badge: currentLevel === 4 ? "Current" : currentLevel < 4 ? "Upcoming" : "Completed",
-    },
-  ];
-
-  // Stub user — replace with JWT decode + DB lookup in production
-  const user: UserInfo = {
-    name: "Isaiah Ferguson",
-    avatarUrl: null,
-    role: "Student",
-  };
-
-  return { nav, cards: allCards, currentLevel, user };
+  return { nav, currentLevel, user };
 }

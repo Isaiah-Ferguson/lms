@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ClipboardList, Search, X, Github, FileText,
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { instructorApi, homeApi, ApiError, type SubmissionQueueItem } from "@/lib/api-client";
 import type { AcademicYear } from "@/lib/dashboard-home-data";
-import { getToken } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
@@ -31,7 +31,7 @@ const STATUSES = [
 ];
 
 export default function SubmissionQueuePage() {
-  const router = useRouter();
+  const token = useAuthedToken();
   const searchParams = useSearchParams();
   const queryYearId = searchParams.get("year");
 
@@ -47,12 +47,12 @@ export default function SubmissionQueuePage() {
 
   // Load available years and determine selected year
   useEffect(() => {
-    async function loadYears() {
-      const token = getToken();
-      if (!token) return;
+    if (!token) return;
+    const authedToken = token;
 
+    async function loadYears() {
       try {
-        const data = await homeApi.getDashboard(token);
+        const data = await homeApi.getDashboard(authedToken);
         setYears(data.years);
 
         // Determine which year to use
@@ -68,11 +68,10 @@ export default function SubmissionQueuePage() {
       }
     }
     void loadYears();
-  }, [queryYearId]);
+  }, [queryYearId, token]);
 
   const load = useCallback(async () => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {
@@ -88,7 +87,7 @@ export default function SubmissionQueuePage() {
     } finally {
       setLoading(false);
     }
-  }, [router, courseFilter, statusFilter, selectedYearId]);
+  }, [token, courseFilter, statusFilter, selectedYearId]);
 
   useEffect(() => { if (yearLoaded) load(); }, [load, yearLoaded]);
 

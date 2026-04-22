@@ -109,7 +109,7 @@ export function SubmissionGuidelinesModal({
 // Date Revised (last saved date)
 // Exercise or Lab Name
 // Brief description of what you completed
-// Peer Reviewers: Person 1, Person 2`}
+// Peer Reviewer: Peer name and review`}
                 </pre>
               </div>
             </section>

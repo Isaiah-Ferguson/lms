@@ -18,10 +18,6 @@ export function clearToken(): void {
   Cookies.remove(TOKEN_KEY);
 }
 
-export function isLoggedIn(): boolean {
-  return !!getToken();
-}
-
 export function getUserRole(): string | null {
   const token = getToken();
   if (!token) return null;

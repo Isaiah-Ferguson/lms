@@ -1,8 +1,21 @@
 import Link from "next/link";
-import type { AssignmentSubmissionsRosterData, AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
+import type { AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
 import { formatDateTime } from "@/lib/date-utils";
 
-type RosterRow = AssignmentSubmissionsRosterData["rows"][number];
+export type RosterRow = {
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    email: string;
+  };
+  status: AssignmentRosterStatus;
+  submissionId?: string;
+  submittedAt: string | null;
+  grade: string | null;
+  gradedAt: string | null;
+  gradedBy: string | null;
+};
 
 interface RosterTableProps {
   rows: RosterRow[];

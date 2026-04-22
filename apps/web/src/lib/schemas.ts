@@ -36,18 +36,6 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export const githubSubmitSchema = z.object({
-  repoUrl: z
-    .string()
-    .url("Enter a valid URL")
-    .regex(/github\.com/, "Must be a GitHub repository URL"),
-  branch: z.string().min(1, "Branch is required"),
-  commitHash: z
-    .string()
-    .regex(/^[0-9a-f]{7,40}$/i, "Enter a valid commit hash (7–40 hex chars)"),
-});
-
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
-export type GitHubSubmitFormData = z.infer<typeof githubSubmitSchema>;

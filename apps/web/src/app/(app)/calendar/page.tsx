@@ -10,7 +10,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, EventInput } from "@fullcalendar/core";
 import { Calendar as CalendarIcon, Clock, X } from "lucide-react";
 import { profileApi, courseApi, assignmentsApi, adminParticipantsApi, type Enrollment } from "@/lib/api-client";
-import { getToken, getUserRole } from "@/lib/auth";
+import { getUserRole } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import type { CalendarEvent, CalendarEventType } from "@/lib/calendar-data";
 
 function EventDetailsModal({
@@ -108,6 +109,7 @@ const TYPE_COLOR: Record<CalendarEventType, string> = {
 
 export default function CalendarPage() {
   const router = useRouter();
+  const token = useAuthedToken();
   const [loading, setLoading] = useState(true);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
@@ -116,8 +118,7 @@ export default function CalendarPage() {
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
 
     async function loadCalendarData() {
       try {
@@ -190,7 +191,7 @@ export default function CalendarPage() {
     }
 
     loadCalendarData();
-  }, [router]);
+  }, [token]);
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((e) => {

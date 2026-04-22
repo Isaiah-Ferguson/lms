@@ -10,6 +10,7 @@ import {
 import { instructorApi, ApiError } from "@/lib/api-client";
 import type { SubmissionDetail, ExistingGrade } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import { formatBytes, formatStatus } from "@/lib/utils";
 import { formatDateTime } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +21,7 @@ import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus
 export default function InstructorGradingPage() {
   const params = useParams();
   const router = useRouter();
+  const token = useAuthedToken();
   const submissionId = params.submissionId as string;
 
   const [detail, setDetail] = useState<SubmissionDetail | null>(null);
@@ -40,8 +42,7 @@ export default function InstructorGradingPage() {
   const [returnError, setReturnError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
 
     setLoading(true);
     setLoadError(null);
@@ -61,7 +62,7 @@ export default function InstructorGradingPage() {
     } finally {
       setLoading(false);
     }
-  }, [submissionId, router]);
+  }, [submissionId, token]);
 
   useEffect(() => { load(); }, [load]);
 

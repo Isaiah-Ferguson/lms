@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Search, X, ChevronUp, ChevronDown, Download } from "lucide-react";
 import { gradesApi, homeApi, ApiError, type AdminGrades, type AdminStudentGrade, type StudentGradeRow } from "@/lib/api-client";
-import { getToken } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { COURSES, letterGrade, percentColor } from "@/lib/grade-helpers";
@@ -55,7 +54,7 @@ function SortIcon({ col, active, dir }: { col: SortKey; active: SortKey; dir: "a
 // ─── main component ───────────────────────────────────────────────────────────
 
 export default function AdminGradesPage() {
-  const router = useRouter();
+  const token = useAuthedToken();
   const [activeCourseId, setActiveCourseId] = useState(COURSES[0].id);
   const [data, setData] = useState<AdminGrades | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,8 +65,7 @@ export default function AdminGradesPage() {
   const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
 
   const load = useCallback(async (courseId: string, cohortId: string | null) => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {
@@ -78,11 +76,10 @@ export default function AdminGradesPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [token]);
 
   // Fetch active cohort on mount
   useEffect(() => {
-    const token = getToken();
     if (!token) return;
     homeApi.getDashboard(token)
       .then((dashboard) => {
@@ -94,7 +91,7 @@ export default function AdminGradesPage() {
       .catch(() => {
         // Failed to fetch active cohort, will load all grades
       });
-  }, []);
+  }, [token]);
 
   useEffect(() => { 
     if (activeCohortId !== null) {

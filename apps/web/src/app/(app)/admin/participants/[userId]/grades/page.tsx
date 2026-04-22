@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   LineChart, Line,
@@ -9,12 +9,12 @@ import {
 } from "recharts";
 import { TrendingUp, BookOpen, Calendar, Download, ArrowLeft } from "lucide-react";
 import { gradesApi, homeApi, ApiError, type AdminGrades } from "@/lib/api-client";
-import { getToken } from "@/lib/auth";
+import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { COURSES, letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
 
 export default function StudentGradesPage() {
-  const router = useRouter();
+  const token = useAuthedToken();
   const params = useParams();
   const userId = params.userId as string;
   
@@ -27,7 +27,6 @@ export default function StudentGradesPage() {
   const [studentName, setStudentName] = useState<string>("");
 
   useEffect(() => {
-    const token = getToken();
     if (!token) {
       setCohortLoaded(true);
       return;
@@ -45,11 +44,10 @@ export default function StudentGradesPage() {
       .finally(() => {
         setCohortLoaded(true);
       });
-  }, []);
+  }, [token]);
 
   const load = useCallback(async (courseId: string, cohortId: string | null) => {
-    const token = getToken();
-    if (!token) { router.replace("/login"); return; }
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {
@@ -65,7 +63,7 @@ export default function StudentGradesPage() {
     } finally {
       setLoading(false);
     }
-  }, [router, userId]);
+  }, [token, userId]);
 
   useEffect(() => {
     if (activeCourseId && cohortLoaded) {
