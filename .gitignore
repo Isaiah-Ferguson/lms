@@ -52,6 +52,13 @@ coverage/
 # .NET
 bin/
 obj/
+publish/
+
+# Azure deployment artifacts
+*.zip
+LogFiles/
+deployments/
+deploy/
 *.user
 *.suo
 *.cache
