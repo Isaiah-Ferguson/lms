@@ -22,7 +22,6 @@ Additional architecture and implementation notes live in the `docs/` and `apps/a
 - [`docs/03-API-ENDPOINTS.md`](docs/03-API-ENDPOINTS.md) — REST API reference grouped by feature
 - [`apps/api/HANGFIRE.md`](apps/api/HANGFIRE.md) — Background job configuration and dashboard access
 - [`apps/api/README-DEPLOY.md`](apps/api/README-DEPLOY.md) — Backend deployment to Azure App Service
-- [`.windsurf/workflows/deploy-api-azure.md`](.windsurf/workflows/deploy-api-azure.md) — Step-by-step API deploy workflow
 
 ## Architecture
 
