@@ -7,20 +7,10 @@ import {
   type AssignmentRosterStatus,
 } from "@/lib/assignment-submissions-roster";
 import { FiltersBar, type RosterQuickFilter } from "./components/FiltersBar";
-import { RosterTable } from "./components/RosterTable";
+import { RosterTable, type RosterRow } from "./components/RosterTable";
 import { GradeModal, type GradeModalRow, type GradeResult } from "./components/GradeModal";
 import { getUserRole, getToken } from "@/lib/auth";
 import { instructorApi } from "@/lib/api-client";
-
-type RosterRow = {
-  user: { id: string; name: string; username: string; email: string };
-  status: AssignmentRosterStatus;
-  submissionId?: string;
-  submittedAt: string | null;
-  grade: string | null;
-  gradedAt: string | null;
-  gradedBy: string | null;
-};
 
 interface AssignmentSubmissionsPageProps {
   params: {

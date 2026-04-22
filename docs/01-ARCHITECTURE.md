@@ -21,9 +21,9 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 ┌─────────────────────────────────────────────────────────────┐
 │                   API GATEWAY / BFF                         │
 │              ASP.NET Core Web API (.NET 10)                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │ Auth/JWT     │  │ Rate Limiting│  │ CORS/Logging │       │
-│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│  ┌──────────────┐  ┌────────────-──┐  ┌──────────────┐      │
+│  │   Auth/JWT   │  │ Rate Limiting │  │ CORS/Logging │      │
+│  └──────────────┘  └───────────-───┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -100,23 +100,16 @@ Single repository with clear separation between frontend, backend, and shared co
 4. Client streams from blob URL
 ```
 
-### Future Video Streaming (Post-MVP)
-```
-- Azure Media Services for adaptive bitrate streaming
-- HLS/DASH protocols
-- CDN integration for global delivery
-```
-
 ## Technology Justifications
 
-| Technology | Reason |
-|------------|--------|
-| **Next.js 14 App Router** | SSR/SSG for SEO, React Server Components, built-in routing, TypeScript support |
-| **ASP.NET Core** | High performance, mature ecosystem, excellent async support, EF Core integration |
-| **Azure SQL Server** | Managed service, ACID compliance, AAD integration, pairs naturally with an Azure-hosted API |
-| **Azure Blob Storage** | Cost-effective, SAS tokens for secure access, globally distributed, 99.9% SLA |
-| **JWT** | Stateless auth, works across domains, industry standard, easy to validate |
-| **Hangfire** | .NET native, persistent jobs, retry logic, dashboard; uses SQL Server storage |
+|         Technology        |                                          Reason                                             |
+|---------------------------|---------------------------------------------------------------------------------------------|
+| **Next.js 14 App Router** | SSR/SSG for SEO, React Server Components, built-in routing, TypeScript support.             |
+|      **ASP.NET Core**     | High performance, mature ecosystem, excellent async support, EF Core integration.           |
+|    **Azure SQL Server**   | Managed service, ACID compliance, AAD integration, pairs naturally with an Azure-hosted API |
+|    **Azure Blob Storage** | Cost-effective, SAS tokens for secure access, globally distributed, 99.9% SLA               |
+|          **JWT**          | Stateless auth, works across domains, industry standard, easy to validate                   |
+|        **Hangfire**       | .NET native, persistent jobs, retry logic, dashboard; uses SQL Server storage               |
 
 ## Non-Functional Requirements
 

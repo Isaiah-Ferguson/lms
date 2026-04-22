@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ClipboardList, Search, X, Github, FileText,
-  CheckCircle2, Clock, AlertCircle, RefreshCw,
-} from "lucide-react";
+import { ClipboardList, Search, X, Github, FileText, RefreshCw } from "lucide-react";
 import { instructorApi, homeApi, ApiError, type SubmissionQueueItem } from "@/lib/api-client";
 import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
-import { formatDate, formatDateTime } from "@/lib/date-utils";
+import { formatDateTime } from "@/lib/date-utils";
 
 const COURSES = [
   { id: "",         name: "All Courses" },
