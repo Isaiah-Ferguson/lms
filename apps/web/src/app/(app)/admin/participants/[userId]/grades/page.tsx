@@ -7,68 +7,11 @@ import {
   LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { CheckCircle2, Clock, AlertCircle, TrendingUp, BookOpen, Calendar, Download, ArrowLeft } from "lucide-react";
+import { TrendingUp, BookOpen, Calendar, Download, ArrowLeft } from "lucide-react";
 import { gradesApi, homeApi, ApiError, type AdminGrades } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
-
-type GradeStatus = "Graded" | "Pending" | "Missing";
-
-function statusBadge(status: GradeStatus) {
-  if (status === "Graded")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-        <CheckCircle2 className="h-3 w-3" /> Graded
-      </span>
-    );
-  if (status === "Missing")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
-        <AlertCircle className="h-3 w-3" /> Missing
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-700">
-      <Clock className="h-3 w-3" /> Pending
-    </span>
-  );
-}
-
-function percentColor(p: number | null) {
-  if (p === null) return "text-gray-400";
-  if (p >= 90) return "text-emerald-600";
-  if (p >= 70) return "text-blue-600";
-  return "text-red-600";
-}
-
-function pct(score: number | null, max: number): number | null {
-  if (score === null) return null;
-  return Math.round((score / max) * 100);
-}
-
-function letterGrade(percent: number | null): string {
-  if (percent === null) return "—";
-  if (percent >= 93) return "A";
-  if (percent >= 90) return "A-";
-  if (percent >= 87) return "B+";
-  if (percent >= 83) return "B";
-  if (percent >= 80) return "B-";
-  if (percent >= 77) return "C+";
-  if (percent >= 73) return "C";
-  if (percent >= 70) return "C-";
-  if (percent >= 67) return "D+";
-  if (percent >= 63) return "D";
-  if (percent >= 60) return "D-";
-  return "F";
-}
-
-const COURSES = [
-  { id: "combine", name: "Combine" },
-  { id: "level-1", name: "Level 1" },
-  { id: "level-2", name: "Level 2" },
-  { id: "level-3", name: "Level 3" },
-  { id: "level-4", name: "Level 4" },
-];
+import { COURSES, letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
 
 export default function StudentGradesPage() {
   const router = useRouter();

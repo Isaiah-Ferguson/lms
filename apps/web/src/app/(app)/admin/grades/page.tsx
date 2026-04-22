@@ -11,51 +11,17 @@ import { gradesApi, homeApi, ApiError, type AdminGrades, type AdminStudentGrade,
 import { getToken } from "@/lib/auth";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
-
-const COURSES = [
-  { id: "combine", name: "Combine" },
-  { id: "level-1", name: "Level 1" },
-  { id: "level-2", name: "Level 2" },
-  { id: "level-3", name: "Level 3" },
-  { id: "level-4", name: "Level 4" },
-];
+import { COURSES, letterGrade, percentColor } from "@/lib/grade-helpers";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
-
-function letterGrade(percent: number | null): string {
-  if (percent === null) return "—";
-  if (percent >= 93) return "A";
-  if (percent >= 90) return "A-";
-  if (percent >= 87) return "B+";
-  if (percent >= 83) return "B";
-  if (percent >= 80) return "B-";
-  if (percent >= 77) return "C+";
-  if (percent >= 73) return "C";
-  if (percent >= 70) return "C-";
-  if (percent >= 67) return "D+";
-  if (percent >= 63) return "D";
-  if (percent >= 60) return "D-";
-  return "F";
-}
-
-function pctColor(p: number) {
-  if (p >= 90) return "text-emerald-600";
-  if (p >= 70) return "text-blue-600";
-  return "text-red-600";
-}
 
 function GradeCell({ pct, grade }: { pct: number; grade: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className={`font-semibold ${pctColor(pct)}`}>{pct}%</span>
-      <span className={`text-lg font-bold ${pctColor(pct)}`}>{grade}</span>
+      <span className={`font-semibold ${percentColor(pct)}`}>{pct}%</span>
+      <span className={`text-lg font-bold ${percentColor(pct)}`}>{grade}</span>
     </div>
   );
-}
-
-function pct(score: number | null, max: number): number {
-  if (score === null || max === 0) return 0;
-  return Math.round((score / max) * 100);
 }
 
 function deriveStats(rows: StudentGradeRow[]) {
