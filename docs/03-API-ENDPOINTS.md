@@ -3,15 +3,21 @@
 **Base URL**: `/api`
 
 **Common Response Formats**:
+
+Success responses return the DTO directly (no envelope). Error responses use ASP.NET Core's `ProblemDetails` shape.
+
 ```typescript
-// Success
-{ data: T, message?: string }
+// Success (200 / 201)
+// Body is the DTO itself, e.g. CourseDetailDto, LessonDto, etc.
 
 // Error
-{ title: string, status: number, detail: string }
-
-// Created
-Status: 201 Created, body: { data: T, message?: string }
+{
+  type?: string,
+  title: string,
+  status: number,
+  detail?: string,
+  traceId?: string
+}
 ```
 
 ---
@@ -28,8 +34,9 @@ Status: 201 Created, body: { data: T, message?: string }
   "password": "string"
 }
 ```
-**Response**: `{ token: string, refreshToken: string, user: UserDto }`
+**Response**: `AuthTokenDto` → `{ accessToken: string, expiresIn: number, mustChangePassword: boolean }`
 **Status**: 200 OK
+**Notes**: Only an access token is issued. There is no refresh token flow. The client must re-authenticate after `expiresIn` seconds.
 
 ### POST `/api/auth/register`
 **Description**: Register new user
@@ -493,25 +500,9 @@ Status: 201 Created, body: { data: T, message?: string }
 
 ---
 
-## 12. Debug (`/api/debug`)
-
-### GET `/api/debug/check-email/{email}`
-**Description**: Check if email exists
-**Auth**: Public (debug only)
-**Response**: `{ exists: boolean }`
-**Status**: 200 OK
-
-### GET `/api/debug/all-emails`
-**Description**: Get all user emails
-**Auth**: Public (debug only)
-**Response**: `string[]`
-**Status**: 200 OK
-
----
-
 ## Authentication
 
-All endpoints except `/api/auth/login`, `/api/auth/register`, and debug endpoints require authentication via JWT Bearer token:
+All endpoints except `/api/auth/login` and `/api/auth/register` require authentication via JWT Bearer token:
 
 ```
 Authorization: Bearer <token>

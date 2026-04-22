@@ -83,17 +83,9 @@ public class InstructorService : IInstructorService
                     : submission.GitHubInfo.CommitHash);
         }
 
-        ExistingGradeDto? existingGrade = null;
-        if (submission.Grade is not null)
-        {
-            existingGrade = new ExistingGradeDto(
-                submission.Grade.Id,
-                submission.Grade.TotalScore,
-                submission.Grade.RubricBreakdownJson,
-                submission.Grade.OverallComment,
-                submission.Grade.GradedAt,
-                submission.Grade.InstructorId);
-        }
+        ExistingGradeDto? existingGrade = submission.Grade is null
+            ? null
+            : ToDto(submission.Grade);
 
         return new SubmissionDetailDto(
             submission.Id,
@@ -184,13 +176,7 @@ public class InstructorService : IInstructorService
         // Enqueue background job to send email notification
         _backgroundJobs.EnqueueGradeNotification(submissionId);
 
-        return new ExistingGradeDto(
-            submission.Grade!.Id,
-            submission.Grade.TotalScore,
-            submission.Grade.RubricBreakdownJson,
-            submission.Grade.OverallComment,
-            submission.Grade.GradedAt,
-            submission.Grade.InstructorId);
+        return ToDto(submission.Grade!);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -431,22 +417,7 @@ public class InstructorService : IInstructorService
         var rows = assignments.Select(a =>
         {
             latestByAssignment.TryGetValue(a.Id, out var sub);
-            var maxScore = 100m;
-            var status = sub == null ? "Missing"
-                : sub.Status == SubmissionStatus.Graded ? "Graded"
-                : "Pending";
-
-            return new StudentGradeRowDto(
-                sub?.Id ?? Guid.Empty,
-                a.Id,
-                a.Title,
-                "Assignment",
-                maxScore,
-                sub?.Grade?.TotalScore,
-                status,
-                sub?.Grade?.GradedAt,
-                sub?.Grade?.OverallComment,
-                sub?.Grade?.Instructor?.Name);
+            return ToGradeRow(a, sub);
         }).ToList();
 
         return new StudentGradesDto(course.Id.ToString(), course.Title, rows);
@@ -581,22 +552,7 @@ public class InstructorService : IInstructorService
             var rows = assignments.Select(a =>
             {
                 subsByStudentAndAssignment.TryGetValue((student.Id, a.Id), out var sub);
-                var maxScore = 100m;
-                var status = sub == null ? "Missing"
-                    : sub.Status == SubmissionStatus.Graded ? "Graded"
-                    : "Pending";
-
-                return new StudentGradeRowDto(
-                    sub?.Id ?? Guid.Empty,
-                    a.Id,
-                    a.Title ?? "Untitled Assignment",
-                    "Assignment",
-                    maxScore,
-                    sub?.Grade?.TotalScore,
-                    status,
-                    sub?.Grade?.GradedAt,
-                    sub?.Grade?.OverallComment,
-                    sub?.Grade?.Instructor?.Name);
+                return ToGradeRow(a, sub);
             }).ToList();
 
             return new AdminStudentGradeDto(
@@ -628,14 +584,7 @@ public class InstructorService : IInstructorService
         return new AdminGradesDto(displayId, displayTitle, studentDtos);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET /api/instructor/assignments/{assignmentId}/submissions-roster
-    // ─────────────────────────────────────────────────────────────────────────
     public async Task<AssignmentSubmissionsRosterDto> GetAssignmentSubmissionsRosterAsync(
         Guid assignmentId,
         CancellationToken cancellationToken = default)
@@ -714,6 +663,39 @@ public class InstructorService : IInstructorService
             assignment.Title,
             assignment.DueDate,
             rows);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mappers
+    // ─────────────────────────────────────────────────────────────────────────
+    private const decimal DefaultMaxScore = 100m;
+
+    private static ExistingGradeDto ToDto(Grade grade)
+        => new(
+            grade.Id,
+            grade.TotalScore,
+            grade.RubricBreakdownJson,
+            grade.OverallComment,
+            grade.GradedAt,
+            grade.InstructorId);
+
+    private static StudentGradeRowDto ToGradeRow(Assignment a, Submission? sub)
+    {
+        var status = sub == null
+            ? "Missing"
+            : sub.Status == SubmissionStatus.Graded ? "Graded" : "Pending";
+
+        return new StudentGradeRowDto(
+            sub?.Id ?? Guid.Empty,
+            a.Id,
+            a.Title ?? "Untitled Assignment",
+            "Assignment",
+            DefaultMaxScore,
+            sub?.Grade?.TotalScore,
+            status,
+            sub?.Grade?.GradedAt,
+            sub?.Grade?.OverallComment,
+            sub?.Grade?.Instructor?.Name);
     }
 
     private async Task<string?> ResolveCourseTitleFromSlugAsync(string slug, CancellationToken ct)

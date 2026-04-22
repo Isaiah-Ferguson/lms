@@ -30,25 +30,25 @@ Comprehensive architecture and implementation documentation is available in the 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Next.js 14 Frontend                      │
+│                     Next.js 14 Frontend                     │
 │              (TypeScript, TailwindCSS, shadcn/ui)           │
 └─────────────────────────────────────────────────────────────┘
                             ↓ REST API
 ┌─────────────────────────────────────────────────────────────┐
-│                  ASP.NET Core Web API                        │
-│                      (.NET 10)                               │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │ Controllers  │  │ Application  │  │ Domain       │     │
-│  │              │→ │ (CQRS)       │→ │ Entities     │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                  ASP.NET Core Web API                       │
+│                      (.NET 10)                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │ Controllers  │  │ Application  │  │ Domain       │       │
+│  │              │→ │ (CQRS)       │→ │ Entities     │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  PostgreSQL    │  Azure Blob Storage  │  Hangfire Jobs     │
+│  PostgreSQL    │  Azure Blob Storage  │  Hangfire Jobs      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
@@ -156,15 +156,14 @@ docker-compose up
 docker-compose down
 ```
 
-## 🔐 Default Users
+## 🔐 Initial Admin
 
-After initial seed:
+On first startup, the API seeds a single admin account using values from configuration:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@codestack.com | Admin123! |
-| Instructor | instructor@codestack.com | Instructor123! |
-| Student | student@codestack.com | Student123! |
+- `Seed:AdminEmail`
+- `Seed:AdminPassword`
+
+Set these in your local `appsettings.json` (or via `dotnet user-secrets`) **before** starting the API for the first time. The seeded admin is forced to change their password on first login. If either value is missing, seeding is skipped and no admin is created.
 
 ## 🧪 Testing
 

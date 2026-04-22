@@ -272,17 +272,7 @@ public class SubmissionService : ISubmissionService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new SubmissionResponseDto(
-            submission.Id,
-            submission.AssignmentId,
-            submission.StudentId,
-            submission.AttemptNumber,
-            submission.Type,
-            submission.Status,
-            submission.CreatedAt,
-            submission.FigmaUrl,
-            submission.GitHubRepoUrl,
-            submission.HostedUrl);
+        return ToDto(submission);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -380,17 +370,7 @@ public class SubmissionService : ISubmissionService
             await tx.CommitAsync(cancellationToken);
         }
 
-        return new SubmissionResponseDto(
-            submission.Id,
-            submission.AssignmentId,
-            submission.StudentId,
-            submission.AttemptNumber,
-            submission.Type,
-            submission.Status,
-            submission.CreatedAt,
-            submission.FigmaUrl,
-            submission.GitHubRepoUrl,
-            submission.HostedUrl);
+        return ToDto(submission);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -443,14 +423,7 @@ public class SubmissionService : ISubmissionService
             var downloadUrl = await _blob.GenerateReadSasAsync(
                 artifact.BlobPath, expiry, cancellationToken);
 
-            artifacts.Add(new ArtifactDownloadDto(
-                artifact.Id,
-                artifact.FileName,
-                artifact.ContentType,
-                artifact.Size,
-                artifact.Checksum,
-                downloadUrl,
-                expiresAt));
+            artifacts.Add(ToDto(artifact, downloadUrl, expiresAt));
         }
 
         return new ArtifactListDto(submissionId, artifacts, expiresAt);
@@ -473,7 +446,14 @@ public class SubmissionService : ISubmissionService
         if (!isPrivileged && submission.StudentId != _currentUser.UserId)
             throw new ForbiddenException("You do not have access to this submission.");
 
-        return new SubmissionResponseDto(
+        return ToDto(submission);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mappers
+    // ─────────────────────────────────────────────────────────────────────────
+    private static SubmissionResponseDto ToDto(Submission submission)
+        => new(
             submission.Id,
             submission.AssignmentId,
             submission.StudentId,
@@ -484,7 +464,19 @@ public class SubmissionService : ISubmissionService
             submission.FigmaUrl,
             submission.GitHubRepoUrl,
             submission.HostedUrl);
-    }
+
+    private static ArtifactDownloadDto ToDto(
+        SubmissionArtifact artifact,
+        string downloadUrl,
+        DateTimeOffset expiresAt)
+        => new(
+            artifact.Id,
+            artifact.FileName,
+            artifact.ContentType,
+            artifact.Size,
+            artifact.Checksum,
+            downloadUrl,
+            expiresAt);
 
     private static bool IsValidGitHubUrl(string url)
     {

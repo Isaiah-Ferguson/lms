@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# First, login as instructor to get a valid token
-echo "=== Logging in as instructor ==="
+# Requires TEST_EMAIL and TEST_PASSWORD environment variables.
+#   export TEST_EMAIL="you@example.com"
+#   export TEST_PASSWORD="your-password"
+: "${TEST_EMAIL:?TEST_EMAIL must be set}"
+: "${TEST_PASSWORD:?TEST_PASSWORD must be set}"
+
+# First, login to get a valid token
+echo "=== Logging in ==="
 LOGIN_RESPONSE=$(curl -s -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"instructor@codestack.com","password":"Instructor123!"}')
+  -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}")
 
 TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"accessToken":"[^"]*' | cut -d'"' -f4)
 

@@ -21,23 +21,7 @@ public class LessonsController : ControllerBase
         _logger = logger;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET /api/lessons/{lessonId}/video-token
-    //
-    // Returns a short-lived stream URL for the lesson video.
-    // The client uses this URL directly in a <video> src or HLS.js / dash.js.
-    // Never embed raw blob URLs — always go through this endpoint.
-    //
-    // Response:
-    // {
-    //   "lessonId": "guid",
-    //   "videoSource": "AzureBlob",
-    //   "streamUrl": "https://....blob.core.windows.net/...?sv=...&sig=...",
-    //   "mimeType": "video/mp4",
-    //   "durationSeconds": 1234,
-    //   "expiresAt": "2026-02-21T19:00:00Z"
-    // }
-    // ─────────────────────────────────────────────────────────────────────────
+
     [HttpGet("{lessonId:guid}/video-token")]
     [ProducesResponseType(typeof(VideoTokenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -56,10 +40,6 @@ public class LessonsController : ControllerBase
         return Ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST /api/lessons
-    // Create a new lesson with video URL
-    // ─────────────────────────────────────────────────────────────────────────
     [HttpPost]
     [Authorize(Roles = "Admin,Instructor")]
     [ProducesResponseType(typeof(LessonDto), StatusCodes.Status201Created)]
@@ -79,10 +59,7 @@ public class LessonsController : ControllerBase
         return StatusCode(201, result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // PUT /api/lessons/{lessonId}
-    // Update a lesson's title and/or video URL
-    // ─────────────────────────────────────────────────────────────────────────
+
     [HttpPut("{lessonId:guid}")]
     [Authorize(Roles = "Admin,Instructor")]
     [ProducesResponseType(typeof(LessonDto), StatusCodes.Status200OK)]
@@ -102,10 +79,7 @@ public class LessonsController : ControllerBase
         return Ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // DELETE /api/lessons/{lessonId}
-    // Delete a lesson
-    // ─────────────────────────────────────────────────────────────────────────
+
     [HttpDelete("{lessonId:guid}")]
     [Authorize(Roles = "Admin,Instructor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -122,10 +96,6 @@ public class LessonsController : ControllerBase
         return NoContent();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST /api/lessons/{lessonId}/artifacts
-    // Upload a code file artifact to a lesson
-    // ─────────────────────────────────────────────────────────────────────────
     [HttpPost("{lessonId:guid}/artifacts")]
     [Authorize(Roles = "Admin,Instructor")]
     [ProducesResponseType(typeof(LessonArtifactDto), StatusCodes.Status201Created)]

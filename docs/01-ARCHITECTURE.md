@@ -5,10 +5,10 @@
 CodeStack LMS is a modern learning management system built with a decoupled architecture:
 - **Frontend**: Next.js 14+ (App Router, TypeScript, React Server Components)
 - **Backend**: ASP.NET Core Web API (.NET 10)
-- **Database**: PostgreSQL with EF Core
+- **Database**: Azure SQL Server with EF Core
 - **Storage**: Azure Blob Storage (assignments, submissions, videos)
-- **Authentication**: JWT-based with pluggable provider (future Entra ID)
-- **Background Processing**: Hangfire for async jobs
+- **Authentication**: JWT bearer tokens (access token only — no refresh flow today)
+- **Background Processing**: Hangfire for async email jobs
 
 ## Architecture Layers
 
@@ -44,7 +44,7 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 ┌─────────────────────────────────────────────────────────────┐
 │                 INFRASTRUCTURE LAYER                        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │ PostgreSQL   │  │ Azure Blob   │  │ Hangfire     │       │
+│  │ Azure SQL    │  │ Azure Blob   │  │ Hangfire     │       │
 │  │ (EF Core)    │  │ Storage      │  │ (Jobs)       │       │
 │  └──────────────┘  └──────────────┘  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
@@ -62,11 +62,10 @@ Single repository with clear separation between frontend, backend, and shared co
 
 ### 3. **API-First Design**
 - RESTful API with consistent patterns
-- Versioning support (/api/v1/...)
-- OpenAPI/Swagger documentation
+- OpenAPI/Swagger documentation (dev environment only)
 
 ### 4. **Security-First**
-- JWT tokens with refresh mechanism
+- JWT access tokens (no refresh token today)
 - Role-based authorization (Student, Instructor, Admin)
 - SAS tokens for blob access (short-lived, scoped)
 - HTTPS only, secure headers
@@ -85,13 +84,12 @@ Single repository with clear separation between frontend, backend, and shared co
 
 ### Submission Upload Flow
 ```
-1. Student → POST /api/v1/submissions (metadata only)
-2. API validates, creates DB record, returns submission ID
-3. API → Generate SAS token for upload path
-4. API → Return SAS URL to client
-5. Client → Upload files directly to Azure Blob using SAS
-6. Client → PATCH /api/v1/submissions/{id}/complete
-7. API → Trigger background job for instructor notification
+1. Student → POST /api/submissions/{assignmentId}/request-upload (file metadata)
+2. API validates files, resolves cohort, creates (or reuses) a submission record
+3. API → Generate a per-file write SAS (15-minute expiry) and return the slots
+4. Client → PUT each file directly to Azure Blob using its SAS URL
+5. Client → POST /api/submissions/{submissionId}/complete-upload
+6. API verifies blobs exist, persists SubmissionArtifacts, transitions to ReadyToGrade
 ```
 
 ### Video Streaming Flow (Current MVP)
@@ -115,15 +113,14 @@ Single repository with clear separation between frontend, backend, and shared co
 |------------|--------|
 | **Next.js 14 App Router** | SSR/SSG for SEO, React Server Components, built-in routing, TypeScript support |
 | **ASP.NET Core** | High performance, mature ecosystem, excellent async support, EF Core integration |
-| **PostgreSQL** | ACID compliance, JSON support, full-text search, open-source, proven at scale |
+| **Azure SQL Server** | Managed service, ACID compliance, AAD integration, pairs naturally with an Azure-hosted API |
 | **Azure Blob Storage** | Cost-effective, SAS tokens for secure access, globally distributed, 99.9% SLA |
 | **JWT** | Stateless auth, works across domains, industry standard, easy to validate |
-| **Hangfire** | .NET native, persistent jobs, retry logic, dashboard, supports PostgreSQL |
+| **Hangfire** | .NET native, persistent jobs, retry logic, dashboard; uses SQL Server storage |
 
 ## Non-Functional Requirements
 
 - **Performance**: API response < 200ms (p95), page load < 2s
 - **Availability**: 99.9% uptime (allows ~8h downtime/year)
-- **Security**: OWASP Top 10 compliance, regular dependency updates
+- **Security**: OWASP Top 10 awareness, regular dependency updates
 - **Scalability**: Support 10K concurrent users (MVP: 500)
-- **Maintainability**: 80%+ test coverage, documented APIs

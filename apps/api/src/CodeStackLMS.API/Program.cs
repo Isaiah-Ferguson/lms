@@ -145,10 +145,12 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        await context.Database.MigrateAsync();
-        await ApplicationDbContextSeed.SeedAsync(context);
-
+        var configuration = services.GetRequiredService<IConfiguration>();
         var logger = services.GetRequiredService<ILogger<Program>>();
+
+        await context.Database.MigrateAsync();
+        await ApplicationDbContextSeed.SeedAsync(context, configuration, logger);
+
         logger.LogInformation("Database initialised and seeded successfully");
     }
     catch (Exception ex)

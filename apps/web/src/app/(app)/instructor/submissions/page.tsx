@@ -104,7 +104,6 @@ export default function SubmissionQueuePage() {
   const pendingCount = items.filter(
     (i) => i.status === "ReadyToGrade" || i.status === "Grading"
   ).length;
-  console.log(items)
 
   return (
     <div className="space-y-6">

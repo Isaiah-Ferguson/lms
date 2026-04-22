@@ -21,15 +21,6 @@ public class InstructorController : ControllerBase
         _logger = logger;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET /api/instructor/submissions/{submissionId}
-    //
-    // Returns full submission detail for grading:
-    //  - student info
-    //  - assignment instructions + rubric
-    //  - artifacts (with 30-min read SAS URLs) or GitHub info
-    //  - existing grade if already graded
-    // ─────────────────────────────────────────────────────────────────────────
     [HttpGet("submissions/{submissionId:guid}")]
     [ProducesResponseType(typeof(SubmissionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -44,9 +35,6 @@ public class InstructorController : ControllerBase
         return Ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET /api/instructor/submissions — submission queue
-    // ─────────────────────────────────────────────────────────────────────────
     [HttpGet("submissions")]
     [ProducesResponseType(typeof(SubmissionQueuePageDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSubmissionQueue(

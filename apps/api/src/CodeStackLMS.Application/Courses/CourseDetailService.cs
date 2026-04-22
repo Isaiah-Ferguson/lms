@@ -30,29 +30,17 @@ public class CourseDetailService : ICourseDetailService
         var weeks = course.Modules
             .Where(m => m.WeekNumber.HasValue)
             .OrderBy(m => m.WeekNumber)
-            .Select(m => new CourseWeekDto(
-                m.Id.ToString(),
-                m.WeekNumber!.Value,
-                m.Title,
-                m.DateRange ?? "",
-                m.ZoomUrl ?? "https://codestack.zoom.us/j/93949618291?pwd=dVQ5VkVmZ0JTOWlYR09ub3lLdURvZz09#success",
-                ParseTopics(m.Topics),
-                $"/courses/{courseId}/weeks/{m.WeekNumber}"))
+            .Select(m => ToDto(m, courseId, ParseTopics(m.Topics), DefaultZoomUrl))
             .ToList();
 
         var courseZoomUrl = course.Modules
             .Where(m => m.ZoomUrl != null)
             .OrderBy(m => m.Order)
             .Select(m => m.ZoomUrl!)
-            .FirstOrDefault() ?? "https://codestack.zoom.us/j/93949618291?pwd=dVQ5VkVmZ0JTOWlYR09ub3lLdURvZz09#success";
+            .FirstOrDefault() ?? DefaultZoomUrl;
 
         var announcements = course.Announcements
-            .Select(a => new CourseAnnouncementDto(
-                a.Id.ToString(),
-                a.Title,
-                a.Body,
-                a.Tag,
-                a.AnnouncedAt.ToString("O")))
+            .Select(ToDto)
             .ToList();
 
         var (accentColor, courseMeta) = ResolveCourseStyle(course.Title);
@@ -126,14 +114,7 @@ public class CourseDetailService : ICourseDetailService
         _db.Modules.Add(module);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new CourseWeekDto(
-            module.Id.ToString(),
-            module.WeekNumber.Value,
-            module.Title,
-            module.DateRange ?? "",
-            module.ZoomUrl ?? "",
-            topicLabels,
-            $"/courses/{courseId}/weeks/{module.WeekNumber}");
+        return ToDto(module, courseId, topicLabels, zoomUrlFallback: "");
     }
 
     public async Task<CourseWeekDto> UpdateWeekAsync(
@@ -171,14 +152,7 @@ public class CourseDetailService : ICourseDetailService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new CourseWeekDto(
-            module.Id.ToString(),
-            module.WeekNumber!.Value,
-            module.Title,
-            module.DateRange ?? "",
-            module.ZoomUrl ?? "",
-            topicLabels,
-            $"/courses/{courseId}/weeks/{module.WeekNumber}");
+        return ToDto(module, courseId, topicLabels, zoomUrlFallback: "");
     }
 
     public async Task<CourseAnnouncementDto> CreateAnnouncementAsync(
@@ -209,12 +183,7 @@ public class CourseDetailService : ICourseDetailService
         _db.Announcements.Add(announcement);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new CourseAnnouncementDto(
-            announcement.Id.ToString(),
-            announcement.Title,
-            announcement.Body,
-            announcement.Tag,
-            announcement.AnnouncedAt.ToString("O"));
+        return ToDto(announcement);
     }
 
     public async Task<CourseAnnouncementDto> UpdateAnnouncementAsync(
@@ -248,12 +217,7 @@ public class CourseDetailService : ICourseDetailService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new CourseAnnouncementDto(
-            announcement.Id.ToString(),
-            announcement.Title,
-            announcement.Body,
-            announcement.Tag,
-            announcement.AnnouncedAt.ToString("O"));
+        return ToDto(announcement);
     }
 
     public async Task DeleteAnnouncementAsync(
@@ -279,6 +243,34 @@ public class CourseDetailService : ICourseDetailService
         _db.Announcements.Remove(announcement);
         await _db.SaveChangesAsync(cancellationToken);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mappers
+    // ─────────────────────────────────────────────────────────────────────────
+    private const string DefaultZoomUrl =
+        "https://codestack.zoom.us/j/93949618291?pwd=dVQ5VkVmZ0JTOWlYR09ub3lLdURvZz09#success";
+
+    private static CourseWeekDto ToDto(
+        Domain.Entities.Module module,
+        string courseIdSlug,
+        IReadOnlyList<string> topics,
+        string zoomUrlFallback)
+        => new(
+            module.Id.ToString(),
+            module.WeekNumber!.Value,
+            module.Title,
+            module.DateRange ?? "",
+            module.ZoomUrl ?? zoomUrlFallback,
+            topics,
+            $"/courses/{courseIdSlug}/weeks/{module.WeekNumber}");
+
+    private static CourseAnnouncementDto ToDto(Announcement announcement)
+        => new(
+            announcement.Id.ToString(),
+            announcement.Title,
+            announcement.Body,
+            announcement.Tag,
+            announcement.AnnouncedAt.ToString("O"));
 
     private static List<string> ParseTopics(string? topicsJson)
     {

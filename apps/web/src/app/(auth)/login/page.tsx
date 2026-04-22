@@ -88,8 +88,6 @@ function LoginForm() {
       const destination = tokens.mustChangePassword 
         ? "/change-password" 
         : (returnUrl || "/home");
-      console.log('Login successful - redirecting to:', destination);
-      console.log('returnUrl from params:', returnUrl);
       window.location.href = destination;
     } catch (err) {
       if (err instanceof ApiError) {

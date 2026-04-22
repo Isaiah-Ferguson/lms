@@ -31,14 +31,7 @@ public class HomeService : IHomeService
             .OrderByDescending(c => c.StartDate)
             .ToListAsync(cancellationToken);
 
-        var yearsWithActive = rawYears
-            .Select(c => new HomeAcademicYearDto(
-                c.Id.ToString(),
-                c.Name,
-                c.StartDate.ToString("yyyy-MM-dd"),
-                c.EndDate.ToString("yyyy-MM-dd"),
-                c.IsActive))
-            .ToList();
+        var yearsWithActive = rawYears.Select(ToDto).ToList();
 
         var cohortLevels = await _db.CohortCourses
             .AsNoTracking()
@@ -181,12 +174,7 @@ public class HomeService : IHomeService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new HomeAcademicYearDto(
-            cohort.Id.ToString(),
-            cohort.Name,
-            cohort.StartDate.ToString("yyyy-MM-dd"),
-            cohort.EndDate.ToString("yyyy-MM-dd"),
-            cohort.IsActive);
+        return ToDto(cohort);
     }
 
     public async Task<HomeAcademicYearDto> SetActiveYearAsync(
@@ -211,13 +199,19 @@ public class HomeService : IHomeService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new HomeAcademicYearDto(
-            target.Id.ToString(),
-            target.Name,
-            target.StartDate.ToString("yyyy-MM-dd"),
-            target.EndDate.ToString("yyyy-MM-dd"),
-            true);
+        return ToDto(target);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mappers
+    // ─────────────────────────────────────────────────────────────────────────
+    private static HomeAcademicYearDto ToDto(Domain.Entities.Cohort cohort)
+        => new(
+            cohort.Id.ToString(),
+            cohort.Name,
+            cohort.StartDate.ToString("yyyy-MM-dd"),
+            cohort.EndDate.ToString("yyyy-MM-dd"),
+            cohort.IsActive);
 
     private async Task<string?> ResolveAvatarUrlAsync(string? avatarBlobPath, CancellationToken cancellationToken)
     {

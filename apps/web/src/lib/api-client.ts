@@ -48,55 +48,9 @@ import type {
   Comment,
 } from "@/types";
 
-export type {
-  AuthTokens,
-  LoginRequest,
-  RegisterRequest,
-  CreateUserRequest,
-  ChangePasswordRequest,
-  SubmissionType,
-  SubmissionStatus,
-  FileMeta,
-  FileUploadSlot,
-  UploadUrlResponse,
-  CompletedFile,
-  SubmissionResponse,
-  ArtifactItem,
-  ArtifactListResponse,
-  StudentInfo,
-  AssignmentInfo,
-  ArtifactInfo,
-  GitHubInfo,
-  ExistingGrade,
-  SubmissionDetail,
-  GradeSubmissionRequest,
-  SubmissionQueuePage,
-  SubmissionQueueItem,
-  StudentGradeRow,
-  StudentGrades,
-  AdminStudentGrade,
-  AdminGrades,
-  AssignmentSubmissionsRosterResponse,
-  ProfileUserResponse,
-  Enrollment,
-  ProfileData,
-  AvatarUploadSlotResponse,
-  PreviousNoteExportItem,
-  AdminParticipantUser,
-  AdminParticipantsResponse,
-  HomeDashboardResponse,
-  CourseDetailResponse,
-  CreateAssignmentRequest,
-  UpdateAssignmentRequest,
-  Assignment,
-  AssignmentListItem,
-  StudentSubmissionStatus,
-  LessonArtifact,
-  LessonResponse,
-  CreateLessonRequest,
-  UpdateLessonRequest,
-  Comment,
-};
+// Re-export all types from @/types so callers can import them either from
+// "@/types" or from "@/lib/api-client" — whichever reads best at the call site.
+export type * from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 

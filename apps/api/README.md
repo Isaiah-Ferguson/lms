@@ -21,6 +21,7 @@ Edit `appsettings.json` and `appsettings.Development.json` with your actual valu
 - **Jwt.Secret**: A secure random string (minimum 32 characters)
 - **Email.Username**: Your Gmail address
 - **Email.Password**: Your Gmail app-specific password (not your regular password)
+- **Seed.AdminEmail** / **Seed.AdminPassword**: Credentials for the initial admin account that is seeded on first startup. If either value is missing, seeding is skipped. The seeded admin is created with `MustChangePassword = true`, so you will be prompted to reset on first login.
 
 ### 3. Run Migrations
 

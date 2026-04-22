@@ -23,36 +23,7 @@ public class SubmissionsController : ControllerBase
         _logger = logger;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST /api/submissions/{assignmentId}/request-upload
-    //
-    // Student calls this first. Returns one SAS URL per file (write-only,
-    // 15-minute expiry). The client uploads directly to Azure Blob using
-    // each SAS URL via HTTP PUT, then calls complete-upload.
-    //
-    // Request body:
-    // {
-    //   "type": "Upload",
-    //   "files": [
-    //     { "fileName": "solution.zip", "contentType": "application/zip", "sizeBytes": 204800 }
-    //   ]
-    // }
-    //
-    // Response:
-    // {
-    //   "submissionId": "guid",
-    //   "uploadSlots": [
-    //     {
-    //       "fileName": "solution.zip",
-    //       "blobPath": "submissions/{cohortId}/{assignmentId}/{studentId}/{submissionId}/solution.zip",
-    //       "sasUrl": "https://....blob.core.windows.net/...?sv=...&sig=...",
-    //       "contentType": "application/zip",
-    //       "maxSizeBytes": 104857600
-    //     }
-    //   ],
-    //   "expiresAt": "2026-02-20T17:00:00Z"
-    // }
-    // ─────────────────────────────────────────────────────────────────────────
+
     [HttpPost("{assignmentId:guid}/request-upload")]
     [ProducesResponseType(typeof(UploadUrlResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -76,27 +47,7 @@ public class SubmissionsController : ControllerBase
             result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST /api/submissions/{submissionId}/complete-upload
-    //
-    // Student calls this after all files are uploaded to Azure Blob.
-    // API verifies each blob exists, persists SubmissionArtifacts, and
-    // transitions status: PendingUpload → Processing.
-    // A background job will then move it to ReadyToGrade.
-    //
-    // Request body:
-    // {
-    //   "files": [
-    //     {
-    //       "blobPath": "submissions/.../solution.zip",
-    //       "fileName": "solution.zip",
-    //       "contentType": "application/zip",
-    //       "sizeBytes": 204800,
-    //       "checksum": "sha256:abc123..."
-    //     }
-    //   ]
-    // }
-    // ─────────────────────────────────────────────────────────────────────────
+ 
     [HttpPost("{submissionId:guid}/complete-upload")]
     [ProducesResponseType(typeof(SubmissionResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -117,12 +68,7 @@ public class SubmissionsController : ControllerBase
         return Ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST /api/submissions/{assignmentId}/github-submit
-    //
-    // Student submits a GitHub repository reference.
-    // Body: { "repoUrl": "https://github.com/org/repo", "branch": "main", "commitHash": "abc1234" }
-    // ─────────────────────────────────────────────────────────────────────────
+
     [HttpPost("{assignmentId:guid}/github-submit")]
     [ProducesResponseType(typeof(SubmissionResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

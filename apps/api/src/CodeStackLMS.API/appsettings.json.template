@@ -14,6 +14,10 @@
   "Frontend": {
     "Url": "http://localhost:3000"
   },
+  "Seed": {
+    "AdminEmail": "YOUR_ADMIN_EMAIL",
+    "AdminPassword": "YOUR_STRONG_INITIAL_PASSWORD"
+  },
   "Email": {
     "SmtpHost": "smtp.gmail.com",
     "SmtpPort": 587,

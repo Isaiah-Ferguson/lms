@@ -154,15 +154,7 @@ public class LessonService : ILessonService
         _db.Lessons.Add(lesson);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new LessonDto(
-            lesson.Id,
-            lesson.ModuleId,
-            lesson.Title,
-            lesson.Order,
-            lesson.Type.ToString(),
-            lesson.VideoUrl,
-            lesson.CreatedAt,
-            Array.Empty<LessonArtifactDto>());
+        return ToDto(lesson, Array.Empty<LessonArtifactDto>());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -192,15 +184,7 @@ public class LessonService : ILessonService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return new LessonDto(
-            lesson.Id,
-            lesson.ModuleId,
-            lesson.Title,
-            lesson.Order,
-            lesson.Type.ToString(),
-            lesson.VideoUrl,
-            lesson.CreatedAt,
-            Array.Empty<LessonArtifactDto>());
+        return ToDto(lesson, Array.Empty<LessonArtifactDto>());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -274,12 +258,7 @@ public class LessonService : ILessonService
             TimeSpan.FromMinutes(30),
             cancellationToken);
 
-        return new LessonArtifactDto(
-            artifact.Id,
-            artifact.FileName,
-            artifact.ContentType,
-            artifact.SizeBytes,
-            downloadUrl);
+        return ToDto(artifact, downloadUrl);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -338,12 +317,7 @@ public class LessonService : ILessonService
                             TimeSpan.FromHours(1),
                             cancellationToken);
 
-                        artifactDtos.Add(new LessonArtifactDto(
-                            artifact.Id,
-                            artifact.FileName,
-                            artifact.ContentType,
-                            artifact.SizeBytes,
-                            downloadUrl));
+                        artifactDtos.Add(ToDto(artifact, downloadUrl));
                     }
                     catch (Exception ex)
                     {
@@ -354,17 +328,35 @@ public class LessonService : ILessonService
                 }
             }
 
-            result.Add(new LessonDto(
-                lesson.Id,
-                lesson.ModuleId,
-                lesson.Title,
-                lesson.Order,
-                lesson.Type.ToString(),
-                lesson.VideoUrl,
-                lesson.CreatedAt,
-                artifactDtos));
+            result.Add(ToDto(lesson, artifactDtos));
         }
 
         return result;
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mappers
+    // ─────────────────────────────────────────────────────────────────────────
+    private static LessonDto ToDto(
+        Domain.Entities.Lesson lesson,
+        IReadOnlyList<LessonArtifactDto> artifacts)
+        => new(
+            lesson.Id,
+            lesson.ModuleId,
+            lesson.Title,
+            lesson.Order,
+            lesson.Type.ToString(),
+            lesson.VideoUrl,
+            lesson.CreatedAt,
+            artifacts);
+
+    private static LessonArtifactDto ToDto(
+        Domain.Entities.LessonArtifact artifact,
+        string downloadUrl)
+        => new(
+            artifact.Id,
+            artifact.FileName,
+            artifact.ContentType,
+            artifact.SizeBytes,
+            downloadUrl);
 }
