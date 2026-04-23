@@ -95,8 +95,7 @@ lms/
 │       └── README-DEPLOY.md
 │
 ├── docs/                                 # Architecture documentation
-├── load-tests/                           # Load / performance test scripts
-└── .windsurf/workflows/                  # IDE workflows (e.g. deploy-api-azure)
+└── load-tests/                           # Load / performance test scripts
 ```
 
 ## Getting Started

@@ -59,6 +59,10 @@ publish/
 LogFiles/
 deployments/
 deploy/
+
+# .NET build temp output (dotnet publish tempbuild)
+artifacts/
+tempbuild/
 *.user
 *.suo
 *.cache
