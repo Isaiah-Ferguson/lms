@@ -443,7 +443,7 @@ public class InstructorService : IInstructorService
             parsedCohortId = cid;
 
         // Special case: "combine" means all courses
-        bool isCombined = courseId?.Trim().Equals("combine", StringComparison.OrdinalIgnoreCase) == true;
+        bool isCombined = courseId.Trim().Equals("combine", StringComparison.OrdinalIgnoreCase);
 
         // Resolve course - prefer courses with modules to avoid empty duplicates
         Course? course = null;

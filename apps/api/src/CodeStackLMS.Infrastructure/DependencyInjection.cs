@@ -110,6 +110,7 @@ public static class DependencyInjection
         // ── Background Jobs ───────────────────────────────────────────────────
         services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddScoped<SendGradeNotificationJob>();
+        services.AddScoped<SendSubmissionReturnedNotificationJob>();
 
         return services;
     }
