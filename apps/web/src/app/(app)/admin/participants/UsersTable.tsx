@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check, Pencil, UserPlus, ShieldCheck, ShieldOff, Ban, CheckCircle } from "lucide-react";
 import { clsx } from "clsx";
 import type { ParticipantUser, CourseOption } from "@/lib/admin-participants-data";
+import { parseApiDate } from "@/lib/date-utils";
 
 interface Props {
   users: ParticipantUser[];
@@ -18,7 +19,9 @@ interface Props {
 
 function fmtDate(iso: string | null) {
   if (!iso) return <span className="text-gray-500">Never</span>;
-  return new Date(iso).toLocaleDateString("en-GB", {
+  const date = parseApiDate(iso);
+  if (!date) return <span className="text-gray-500">—</span>;
+  return date.toLocaleDateString("en-GB", {
     day: "numeric", month: "short", year: "numeric",
   });
 }

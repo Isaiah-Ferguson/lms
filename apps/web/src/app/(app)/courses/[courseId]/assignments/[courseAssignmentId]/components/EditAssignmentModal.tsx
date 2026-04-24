@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { assignmentsApi, type Assignment } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { parseApiDate } from "@/lib/date-utils";
 
 interface EditAssignmentModalProps {
   isOpen: boolean;
@@ -37,10 +38,12 @@ export function EditAssignmentModal({
       setAttachmentUrl(assignment.attachmentUrl || "");
       
       // Convert UTC date to local datetime-local format
-      const localDate = new Date(assignment.dueDate);
-      const offset = localDate.getTimezoneOffset() * 60000;
-      const localISOTime = new Date(localDate.getTime() - offset).toISOString().slice(0, 16);
-      setDueDate(localISOTime);
+      const utcDate = parseApiDate(assignment.dueDate);
+      if (utcDate) {
+        const offset = utcDate.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(utcDate.getTime() - offset).toISOString().slice(0, 16);
+        setDueDate(localISOTime);
+      }
     } else {
       setMounted(false);
     }

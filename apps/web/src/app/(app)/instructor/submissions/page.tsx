@@ -9,7 +9,7 @@ import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
-import { formatDateTime } from "@/lib/date-utils";
+import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 
 const COURSES = [
   { id: "",         name: "All Courses" },
@@ -232,6 +232,10 @@ export default function SubmissionQueuePage() {
                   : pct >= 60 ? "text-amber-600"
                   : "text-red-600";
 
+                const submittedAt = parseApiDate(item.submittedAt);
+                const dueDate     = parseApiDate(item.dueDate);
+                const isLate      = !!(submittedAt && dueDate && submittedAt.getTime() > dueDate.getTime());
+
                 return (
                   <tr key={item.submissionId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
                     <td className="px-4 py-3">
@@ -257,7 +261,7 @@ export default function SubmissionQueuePage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <SubmissionStatusBadge status={item.status} />
+                      <SubmissionStatusBadge status={item.status} isLate={isLate} hideLateLabel />
                     </td>
                     <td className="px-4 py-3">
                       {item.totalScore !== null ? (
@@ -269,7 +273,7 @@ export default function SubmissionQueuePage() {
                         <span className="text-gray-400">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">
+                    <td className={`px-4 py-3 text-xs ${isLate ? "font-medium text-red-600 dark:text-red-400" : "text-gray-500 dark:text-slate-400"}`}>
                       {formatDateTime(item.submittedAt)}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">

@@ -27,7 +27,8 @@ public record AssignmentInfoDto(
     Guid Id,
     string Title,
     string Instructions,
-    decimal MaxScore);
+    decimal MaxScore,
+    DateTime DueDate);
 
 public record ArtifactDto(
     Guid Id,

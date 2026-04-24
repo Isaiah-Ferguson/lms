@@ -12,6 +12,13 @@ import { gradesApi, homeApi, ApiError, type AdminGrades } from "@/lib/api-client
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { COURSES, letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
+import { parseApiDate } from "@/lib/date-utils";
+
+function formatGradedAt(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = parseApiDate(iso);
+  return date ? date.toLocaleDateString() : "";
+}
 
 export default function StudentGradesPage() {
   const token = useAuthedToken();
@@ -98,7 +105,7 @@ export default function StudentGradesPage() {
           grade,
           row.status,
           row.gradedBy ?? "",
-          row.gradedAt ? new Date(row.gradedAt).toLocaleDateString() : "",
+          formatGradedAt(row.gradedAt),
           row.overallComment ?? ""
         ];
       }),
@@ -202,7 +209,7 @@ export default function StudentGradesPage() {
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Last Graded</p>
                 <p className="text-base font-semibold text-gray-900">
                   {lastGradedRow?.gradedAt
-                    ? new Date(lastGradedRow.gradedAt).toLocaleDateString()
+                    ? formatGradedAt(lastGradedRow.gradedAt)
                     : "—"}
                 </p>
               </div>
@@ -262,7 +269,7 @@ export default function StudentGradesPage() {
                           {row.gradedBy || "—"}
                         </td>
                         <td className="px-5 py-3 text-gray-500 text-xs">
-                          {row.gradedAt ? new Date(row.gradedAt).toLocaleDateString() : "—"}
+                          {row.gradedAt ? formatGradedAt(row.gradedAt) : "—"}
                         </td>
                         <td className="px-5 py-3 text-xs text-gray-500 max-w-xs truncate">
                           {row.overallComment || "—"}

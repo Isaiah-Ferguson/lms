@@ -11,6 +11,7 @@ export interface AssignmentInfo {
   title: string;
   instructions: string;
   maxScore: number;
+  dueDate: string;
 }
 
 export interface ArtifactInfo {
@@ -78,6 +79,7 @@ export interface SubmissionQueueItem {
   gradedAt: string | null;
   totalScore: number | null;
   maxScore: number;
+  dueDate: string;
 }
 
 export interface StudentGradeRow {

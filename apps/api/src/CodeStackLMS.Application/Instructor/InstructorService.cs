@@ -105,7 +105,8 @@ public class InstructorService : IInstructorService
                 submission.Assignment.Id,
                 submission.Assignment.Title,
                 submission.Assignment.Instructions,
-                100),
+                100,
+                submission.Assignment.DueDate),
             artifacts,
             gitHubInfo,
             existingGrade);
@@ -335,7 +336,8 @@ public class InstructorService : IInstructorService
             s.CreatedAt,
             s.Grade?.GradedAt,
             s.Grade?.TotalScore,
-            100)).ToList();
+            100,
+            s.Assignment.DueDate)).ToList();
 
         return new SubmissionQueuePageDto(items, totalCount, page, pageSize);
     }

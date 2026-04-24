@@ -117,15 +117,15 @@
 │ - EndDate   │
 └─────────────┘
 
-┌─────────────┐
-│ Announcement│
-│             │
-│ - Id        │
-│ - CourseId  │
-│ - Title     │
-│ - Body      │
+┌──────────────┐
+│ Announcement │
+│              │
+│ - Id         │
+│ - CourseId   │
+│ - Title      │
+│ - Body       │
 │ - AnnouncedAt│
-└─────────────┘
+└──────────────┘
 
 ┌─────────────┐
 │UserAdminNote│
@@ -533,27 +533,28 @@ public interface IAuditableEntity
 
 ## Key Relationships
 
-| Relationship | Type | Description |
-|--------------|------|-------------|
-| User → UserCourseEnrollment | 1:N | Student enrolls in multiple courses |
-| Course → UserCourseEnrollment | 1:N | Course has multiple students |
-| Course → Module | 1:N | Course contains multiple modules |
-| Module → Lesson | 1:N | Module contains multiple lessons |
-| Module → Assignment | 1:N | Module contains multiple assignments |
-| Lesson → LessonArtifact | 1:N | Lesson has multiple artifacts/attachments |
-| Assignment → Submission | 1:N | Assignment receives multiple submissions |
-| User → Submission | 1:N | Student submits multiple assignments |
-| Submission → SubmissionArtifact | 1:N | Submission has multiple files |
-| Submission → GitHubSubmissionInfo | 1:0..1 | Submission may have GitHub info |
-| Submission → Grade | 1:0..1 | Each submission gets one grade (optional) |
-| User → Grade | 1:N | Instructor grades multiple submissions |
-| Submission → FeedbackComment | 1:N | Submission has multiple feedback comments |
-| User → FeedbackComment | 1:N | User can comment on multiple submissions |
-| Cohort → CohortCourse | 1:N | Cohort contains multiple courses |
-| Course → CohortCourse | 1:N | Course can be in multiple cohorts |
-| Course → Announcement | 1:N | Course has multiple announcements |
-| User → UserAdminNote | 1:N | User can receive multiple admin notes |
-| User → UserAdminNote (authored) | 1:N | User can author multiple admin notes |
+|           Relationship           | Type |                 Description                  |
+|----------------------------------|------|----------------------------------------------|
+| User → UserCourseEnrollment       | 1:N | Student enrolls in multiple courses          |
+| Course → UserCourseEnrollment     | 1:N | Course has multiple students                 |
+| Course → Module.                  | 1:N | Course contains multiple modules.            |
+| Module → Lesson                   | 1:N | Module contains multiple lessons             |
+| Module → Assignment               | 1:N | Module contains multiple assignments         |
+| Lesson → LessonArtifact           | 1:N | Lesson has multiple artifacts/attachments    |
+| Assignment → Submission           | 1:N | Assignment receives multiple submissions     |
+| User → Submission                 | 1:N | Student submits multiple assignments         |
+| Submission → SubmissionArtifact   | 1:N | Submission has multiple files                |
+| Submission → GitHubSubmissionInfo | 1:0..1 | Submission may have GitHub info           |
+| Submission → Grade                | 1:0..1 | Each submission gets one grade (optional) |
+| User → Grade                      | 1:N | Instructor grades multiple submissions       |
+| Submission → FeedbackComment      | 1:N | Submission has multiple feedback comments    |
+| User → FeedbackComment            | 1:N | User can comment on multiple submissions     |
+| Cohort → CohortCourse             | 1:N | Cohort contains multiple courses             |
+| Course → CohortCourse             | 1:N | Course can be in multiple cohorts            |
+| Course → Announcement.            | 1:N | Course has multiple announcements            |
+| User → UserAdminNote              | 1:N | User can receive multiple admin notes        |
+| User → UserAdminNote (authored)   | 1:N | User can author multiple admin notes         |
+|----------------------------------|------|----------------------------------------------|
 
 ## Database Indexes
 

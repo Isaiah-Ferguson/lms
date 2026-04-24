@@ -23,22 +23,40 @@ const STATUS_CONFIG: Record<
 
 interface SubmissionStatusBadgeProps {
   status: StatusType;
+  /** If true, overrides the base color and (by default) appends a red "LATE" pill. */
+  isLate?: boolean;
+  /** If true, suppresses the trailing "LATE" pill while keeping the red color. */
+  hideLateLabel?: boolean;
 }
 
-export function SubmissionStatusBadge({ status }: SubmissionStatusBadgeProps) {
+export function SubmissionStatusBadge({
+  status,
+  isLate = false,
+  hideLateLabel = false,
+}: SubmissionStatusBadgeProps) {
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.Draft;
   const Icon = cfg.icon;
 
+  const lateBg    = "bg-red-50 dark:bg-red-950/30";
+  const lateColor = "text-red-600 dark:text-red-400";
+
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
-        cfg.bg,
-        cfg.color
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+          isLate ? lateBg   : cfg.bg,
+          isLate ? lateColor : cfg.color
+        )}
+      >
+        <Icon className={cn("h-3.5 w-3.5", status === "Processing" && "animate-spin")} />
+        {cfg.label}
+      </span>
+      {isLate && !hideLateLabel && (
+        <span className="inline-flex items-center rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          Late
+        </span>
       )}
-    >
-      <Icon className={cn("h-3.5 w-3.5", status === "Processing" && "animate-spin")} />
-      {cfg.label}
     </span>
   );
 }

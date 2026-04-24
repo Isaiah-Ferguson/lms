@@ -21,7 +21,8 @@ public record SubmissionQueueItemDto(
     DateTime SubmittedAt,
     DateTime? GradedAt,
     decimal? TotalScore,
-    decimal MaxScore);
+    decimal MaxScore,
+    DateTime DueDate);
 
 // ── Student grade row ─────────────────────────────────────────────────────────
 

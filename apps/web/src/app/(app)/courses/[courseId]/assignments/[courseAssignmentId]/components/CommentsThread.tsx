@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Send } from "lucide-react";
 import { commentsApi } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { parseApiDate } from "@/lib/date-utils";
 
 export interface ThreadMessage {
   id: string;
@@ -24,7 +25,9 @@ interface CommentsThreadProps {
 }
 
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
+  const date = parseApiDate(iso);
+  if (!date) return "";
+  return date.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

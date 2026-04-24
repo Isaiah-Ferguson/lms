@@ -10,7 +10,7 @@ import { ParticipationCard } from "./components/ParticipationCard";
 import { EditAssignmentModal } from "./components/EditAssignmentModal";
 import type { SubmissionState } from "./components/SubmissionCard";
 import type { ParticipationCounts } from "./components/ParticipationCard";
-import { formatDateTime } from "@/lib/date-utils";
+import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 
 interface AssignmentDetailsPageProps {
   params: {
@@ -20,12 +20,25 @@ interface AssignmentDetailsPageProps {
 }
 
 function timeRemaining(iso: string): string {
-  const diff = new Date(iso).getTime() - Date.now();
-  if (diff <= 0) return "Past due";
-  const days = Math.floor(diff / 86_400_000);
-  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  const due = parseApiDate(iso);
+  if (!due) return "";
+
+  const diff = due.getTime() - Date.now();
+  const abs = Math.abs(diff);
+  const days = Math.floor(abs / 86_400_000);
+  const hours = Math.floor((abs % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((abs % 3_600_000) / 60_000);
+
+  if (diff <= 0) {
+    if (days > 0) return `Overdue by ${days}d ${hours}h`;
+    if (hours > 0) return `Overdue by ${hours}h ${minutes}m`;
+    if (minutes > 0) return `Overdue by ${minutes}m`;
+    return "Overdue";
+  }
+
   if (days > 0) return `${days}d ${hours}h remaining`;
-  return `${hours}h remaining`;
+  if (hours > 0) return `${hours}h remaining`;
+  return `${minutes}m remaining`;
 }
 
 
@@ -68,10 +81,12 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
       .then(([a, submission]) => {
         setAssignment(a);
         // Convert UTC date to local datetime-local format
-        const localDate = new Date(a.dueDate);
-        const offset = localDate.getTimezoneOffset() * 60000; // offset in milliseconds
-        const localISOTime = new Date(localDate.getTime() - offset).toISOString().slice(0, 16);
-        setEditDueDate(localISOTime);
+        const utcDate = parseApiDate(a.dueDate);
+        if (utcDate) {
+          const offset = utcDate.getTimezoneOffset() * 60000; // offset in milliseconds
+          const localISOTime = new Date(utcDate.getTime() - offset).toISOString().slice(0, 16);
+          setEditDueDate(localISOTime);
+        }
         setEditAssignmentType(a.assignmentType ?? "Challenge");
 
         // Map API response to SubmissionState

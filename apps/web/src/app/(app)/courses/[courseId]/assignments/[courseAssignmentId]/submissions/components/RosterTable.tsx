@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
-import { formatDateTime } from "@/lib/date-utils";
+import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 
 export type RosterRow = {
   user: {
@@ -23,7 +23,8 @@ interface RosterTableProps {
   onGradeClick: (row: RosterRow) => void;
 }
 
-function statusBadge(status: AssignmentRosterStatus): React.ReactNode {
+function statusBadge(status: AssignmentRosterStatus, isLate: boolean): React.ReactNode {
+  // When late, recolor the pill red so the overdue state is obvious at a glance.
   const map: Record<AssignmentRosterStatus, { label: string; cls: string }> = {
     NotSubmitted: { label: "Not Submitted", cls: "bg-gray-100 text-gray-600" },
     Submitted:    { label: "Submitted",     cls: "bg-blue-100 text-blue-700" },
@@ -31,10 +32,12 @@ function statusBadge(status: AssignmentRosterStatus): React.ReactNode {
     Graded:       { label: "Graded",        cls: "bg-emerald-100 text-emerald-700" },
     Returned:     { label: "Returned",      cls: "bg-red-100 text-red-700" },
   };
-  const { label, cls } = map[status] ?? map.NotSubmitted;
+  const base = map[status] ?? map.NotSubmitted;
+  const cls  = isLate ? "bg-red-100 text-red-700" : base.cls;
+
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>
-      {label}
+      {base.label}
     </span>
   );
 }
@@ -65,7 +68,10 @@ function formatDate(value: string | null): React.ReactNode {
 
 function isPastDue(submittedAt: string | null, dueDate: string | null): boolean {
   if (!submittedAt || !dueDate) return false;
-  return new Date(submittedAt) > new Date(dueDate);
+  const submitted = parseApiDate(submittedAt);
+  const due = parseApiDate(dueDate);
+  if (!submitted || !due) return false;
+  return submitted.getTime() > due.getTime();
 }
 
 export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
@@ -106,19 +112,14 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   {/* Email */}
                   <td className="px-4 py-3 text-xs text-gray-500">{row.user.email}</td>
 
-                  {/* Status */}
-                  <td className="px-4 py-3">{statusBadge(row.status)}</td>
+                  {/* Status — shows Late pill when submitted after due date */}
+                  <td className="px-4 py-3">{statusBadge(row.status, pastDue)}</td>
 
-                  {/* Submitted At — red if past due */}
+                  {/* Submitted At — red text when past due */}
                   <td className="px-4 py-3">
                     {row.submittedAt ? (
                       <span className={pastDue ? "font-medium text-red-600" : "text-gray-600"}>
                         {formatDateTime(row.submittedAt)}
-                        {pastDue && (
-                          <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
-                            Late
-                          </span>
-                        )}
                       </span>
                     ) : (
                       <span className="text-gray-400">—</span>

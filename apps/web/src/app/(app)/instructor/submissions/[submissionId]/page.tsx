@@ -12,7 +12,7 @@ import type { SubmissionDetail, ExistingGrade } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { formatBytes, formatStatus } from "@/lib/utils";
-import { formatDateTime } from "@/lib/date-utils";
+import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -28,8 +28,9 @@ export default function InstructorGradingPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Grading state
-  const [totalScore, setTotalScore] = useState(0);
+  // Grading state — kept as a string so the field can start empty and reject
+  // leading zeros like "075"; parsed to a number only at save time.
+  const [totalScore, setTotalScore] = useState<string>("");
   const [overallComment, setOverallComment] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -52,7 +53,7 @@ export default function InstructorGradingPage() {
 
       if (data.existingGrade) {
         setSavedGrade(data.existingGrade);
-        setTotalScore(data.existingGrade.totalScore);
+        setTotalScore(String(data.existingGrade.totalScore));
         setOverallComment(data.existingGrade.overallComment);
       }
     } catch (err) {
@@ -73,10 +74,11 @@ export default function InstructorGradingPage() {
     setSaveError(null);
     setSaving(true);
     try {
+      const parsedScore = parseInt(totalScore, 10);
       const grade = await instructorApi.gradeSubmission(
         submissionId,
         {
-          TotalScore: totalScore,
+          TotalScore: Number.isFinite(parsedScore) ? parsedScore : 0,
           RubricBreakdownJson: "[]",
           OverallComment: overallComment,
         },
@@ -153,6 +155,11 @@ export default function InstructorGradingPage() {
   const isAlreadyGraded = !!savedGrade;
   const maxScore = 100;
 
+  // Late = submitted (createdAt) after the assignment's due date
+  const submittedAt = parseApiDate(detail.createdAt);
+  const dueDate     = parseApiDate(detail.assignment.dueDate);
+  const isLate      = !!(submittedAt && dueDate && submittedAt.getTime() > dueDate.getTime());
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Top bar */}
@@ -166,7 +173,7 @@ export default function InstructorGradingPage() {
             Back
           </button>
           <div className="flex items-center gap-3">
-            <SubmissionStatusBadge status={detail.status} />
+            <SubmissionStatusBadge status={detail.status} isLate={isLate} />
             <span className="text-xs text-gray-400 dark:text-slate-500">
               Attempt #{detail.attemptNumber}
             </span>
@@ -190,11 +197,22 @@ export default function InstructorGradingPage() {
                 <p className="text-sm text-gray-400 dark:text-slate-500">{detail.student.email}</p>
               </div>
             </div>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
               <div>
                 <dt className="text-gray-400 dark:text-slate-500">Submitted</dt>
-                <dd className="font-medium text-gray-700 dark:text-slate-300">
+                <dd className={`font-medium ${isLate ? "text-red-600 dark:text-red-400" : "text-gray-700 dark:text-slate-300"}`}>
                   {formatDateTime(detail.createdAt)}
+                  {isLate && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white align-middle">
+                      Late
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-gray-400 dark:text-slate-500">Due</dt>
+                <dd className="font-medium text-gray-700 dark:text-slate-300">
+                  {formatDateTime(detail.assignment.dueDate)}
                 </dd>
               </div>
               <div>
@@ -429,18 +447,31 @@ export default function InstructorGradingPage() {
                 Score (out of 100)
               </label>
               <div className="flex items-center gap-2">
+                {/* 
+                              <input
+                type="number"
+                min={0}
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+                placeholder="0"
+                className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-center text-lg font-bold text-gray-900 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+              /> */}
                 <input
-                id="totalScore"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={1}
+                  id="totalScore"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={3}
+                  placeholder="0"
                   value={totalScore}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value) || 0;
-                    setTotalScore(Math.min(Math.max(value, 0), 100));
+                    // Keep digits only, strip leading zeros, clamp to 0–100.
+                    const digits = e.target.value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+                    if (digits === "") { setTotalScore(""); return; }
+                    const n = Math.min(parseInt(digits, 10), 100);
+                    setTotalScore(String(n));
                   }}
-                  className="w-24 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-24 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                 />
                 <span className="text-sm text-gray-400 dark:text-slate-500">/ 100</span>
               </div>
