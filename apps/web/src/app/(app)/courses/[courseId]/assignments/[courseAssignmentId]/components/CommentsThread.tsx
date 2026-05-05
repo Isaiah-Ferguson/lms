@@ -128,7 +128,7 @@ export function CommentsThread({
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     isMe
-                      ? "rounded-tr-sm bg-blue-600 text-white"
+                      ? "rounded-tr-sm bg-brand-600 text-white"
                       : "rounded-tl-sm bg-gray-100 text-gray-800"
                   }`}
                 >
@@ -161,13 +161,13 @@ export function CommentsThread({
             rows={2}
             placeholder="Type a message… (Ctrl+Enter to send)"
             className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm
-              focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+              focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           />
           <button
             onClick={handleSend}
             disabled={!draft.trim()}
-            className="self-end flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2
-              text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+            className="self-end flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2
+              text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-40"
           >
             <Send className="h-3.5 w-3.5" />
             Send

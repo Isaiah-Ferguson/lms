@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { z } from "zod";
 import { authApi, ApiError } from "@/lib/api-client";
@@ -21,6 +21,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
+  const reduceMotion = useReducedMotion();
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -73,8 +74,9 @@ export default function ForgotPasswordPage() {
           {/* Success message */}
           {success && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={reduceMotion ? false : { opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.25 }}
               className="mb-6 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 p-4"
             >
               <div className="flex items-start gap-3">
@@ -109,7 +111,7 @@ export default function ForgotPasswordPage() {
                   className={`h-10 w-full rounded-lg border bg-white dark:bg-slate-900 pl-10 pr-3 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-colors focus:outline-none focus:ring-2 ${
                     errors.email
                       ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                      : "border-gray-300 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      : "border-gray-300 dark:border-slate-600 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
                   }`}
                   {...register("email")}
                 />

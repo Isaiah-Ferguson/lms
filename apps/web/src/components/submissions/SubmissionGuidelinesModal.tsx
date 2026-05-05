@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface SubmissionGuidelinesModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export function SubmissionGuidelinesModal({
   onClose,
   onAccept,
 }: SubmissionGuidelinesModalProps) {
+  const reduceMotion = useReducedMotion();
   const [canAccept, setCanAccept] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -65,10 +66,13 @@ export function SubmissionGuidelinesModal({
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-black/70 px-4 py-6">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
+          exit={reduceMotion ? {} : { opacity: 0, scale: 0.95 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="submission-guidelines-title"
           className="relative max-h-[90vh] w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-800 shadow-2xl flex flex-col"
         >
           {/* Header */}
@@ -78,15 +82,15 @@ export function SubmissionGuidelinesModal({
                 <AlertCircle className="h-5 w-5 text-brand-600 dark:text-brand-400" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Submission Requirements</h2>
+                <h2 id="submission-guidelines-title" className="text-lg font-bold text-gray-900 dark:text-slate-100">Submission Requirements</h2>
                 <p className="text-sm text-gray-500 dark:text-slate-400">Please review before submitting</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-gray-400 dark:text-slate-500 transition hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
-              aria-label="Close"
+              className="rounded-lg p-2 text-gray-400 dark:text-slate-500 transition hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+              aria-label="Close dialog"
             >
               <X className="h-5 w-5" />
             </button>

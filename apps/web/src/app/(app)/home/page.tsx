@@ -168,14 +168,19 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      {/* Modern header with gradient */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-sky-500 p-8 shadow-soft z-0">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-        
+      {/* Dashboard hero header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-sky-500 px-8 py-10 shadow-soft z-0">
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">Welcome back!</h1>
-            <p className="text-brand-50/90 max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+              {permissions.canManageYears ? "Admin" : permissions.canViewAllLevels ? "Instructor" : "Student Dashboard"}
+            </p>
+            <h1 className="text-4xl font-extrabold tracking-tight text-white">
+              {currentUser?.name
+                ? `Welcome back, ${currentUser.name.split(" ")[0]}!`
+                : "Welcome back!"}
+            </h1>
+            <p className="text-brand-50/80 max-w-xl text-sm font-normal">
               {permissions.canManageYears
                 ? "Manage all courses and academic years from your dashboard."
                 : permissions.canViewAllLevels
@@ -214,7 +219,7 @@ export default function HomePage() {
           {levelsByYear.map(({ year, levels: yearLevels, enrolledLevelIds }) => (
             <section key={year.id}>
               <div className="mb-4 flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{year.label}</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{year.label}</h2>
                 {year.isActive && (
                   <span className="inline-flex items-center rounded-full bg-brand-100 dark:bg-brand-900/30 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400">
                     Current Year

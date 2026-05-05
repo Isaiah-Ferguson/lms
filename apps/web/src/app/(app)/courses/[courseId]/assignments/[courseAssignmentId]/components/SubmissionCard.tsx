@@ -284,7 +284,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={figmaUrl}
                 onChange={(e) => setFigmaUrl(e.target.value)}
                 placeholder="https://figma.com/file/..."
-                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-1 focus:ring-brand-500 dark:focus:ring-brand-400"
               />
             </div>
             <div>
@@ -297,7 +297,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={githubRepoUrl}
                 onChange={(e) => setGithubRepoUrl(e.target.value)}
                 placeholder="https://github.com/username/repo"
-                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-1 focus:ring-brand-500 dark:focus:ring-brand-400"
               />
             </div>
             <div>
@@ -310,7 +310,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 value={hostedUrl}
                 onChange={(e) => setHostedUrl(e.target.value)}
                 placeholder="https://your-app.vercel.app"
-                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-1 focus:ring-brand-500 dark:focus:ring-brand-400"
               />
             </div>
             <div>
@@ -323,7 +323,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes or comments about your submission..."
                 rows={3}
-                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
+                className="block w-full rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-1 focus:ring-brand-500 dark:focus:ring-brand-400 resize-none"
               />
             </div>
           </div>
@@ -360,7 +360,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
                 }
               }}
               disabled={uploading || !selectedFile}
-              className="flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
             >
               <Upload className="h-3.5 w-3.5" />
               {uploading ? "Uploading…" : "Upload ZIP"}

@@ -87,3 +87,9 @@ Thumbs.db
 RESET_DATABASE.sql
 SIMPLE_RESET.sql
 reset-database.sh 
+
+/.agents/
+/.impeccable/
+DESIGN.md 
+PRODUCT.md
+skills-lock.json

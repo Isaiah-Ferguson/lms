@@ -34,6 +34,9 @@ function EventDetailsModal({
       onMouseDown={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-detail-title"
         className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -42,19 +45,20 @@ function EventDetailsModal({
             <span
               className={`mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
                 event.type === "assignment"
-                  ? "bg-blue-100 text-blue-700"
+                  ? "bg-brand-100 text-brand-700"
                   : "bg-emerald-100 text-emerald-700"
               }`}
             >
               {event.type === "assignment" ? "Assignment" : "Announcement"}
             </span>
-            <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{event.title}</h2>
+            <h2 id="event-detail-title" className="text-base font-semibold text-gray-900 dark:text-slate-100">{event.title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
+            aria-label="Close dialog"
+            className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
         <div className="space-y-4 p-5 text-sm text-gray-600 dark:text-slate-300">
@@ -86,7 +90,7 @@ function EventDetailsModal({
           {event.href && (
             <a
               href={event.href}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
             >
               View Assignment
             </a>
@@ -252,7 +256,7 @@ export default function CalendarPage() {
                   onClick={() => toggleType(opt.id)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                     active
-                      ? "bg-blue-600 text-white"
+                      ? "bg-brand-600 text-white"
                       : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                   }`}
                 >
@@ -292,7 +296,7 @@ export default function CalendarPage() {
 
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-slate-400">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Assignments
+            <span className="h-2.5 w-2.5 rounded-full bg-brand-600" /> Assignments
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Announcements

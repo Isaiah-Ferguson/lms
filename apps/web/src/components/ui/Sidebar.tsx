@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Grid2X2, Calendar, Hash, Users, GraduationCap, BarChart2, X, ClipboardList } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { NavItem } from "@/lib/dashboard-data";
 import { clsx } from "clsx";
 import { useEffect } from "react";
@@ -31,6 +31,7 @@ function NavIcon({ icon }: { icon: string }) {
 
 export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
 
   // Close sidebar on route change (mobile only)
   useEffect(() => {
@@ -90,9 +91,9 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
           return (
             <motion.div
               key={item.href}
-              initial={{ opacity: 0, x: -20 }}
+              initial={reduceMotion ? false : { opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.2, delay: index * 0.03 }}
             >
               <Link
                 href={item.href}

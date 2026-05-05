@@ -136,7 +136,7 @@ export function ManageYearsModal({
                   placeholder="26-27"
                   value={label}
                   onChange={(event) => setLabel(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-blue-500 focus:ring-2"
+                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-brand-500 focus:ring-2"
                 />
               </label>
               <label className="text-xs font-medium text-gray-600">
@@ -145,7 +145,7 @@ export function ManageYearsModal({
                   type="date"
                   value={startDate}
                   onChange={(event) => setStartDate(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-blue-500 focus:ring-2"
+                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-brand-500 focus:ring-2"
                 />
               </label>
               <label className="text-xs font-medium text-gray-600">
@@ -154,7 +154,7 @@ export function ManageYearsModal({
                   type="date"
                   value={endDate}
                   onChange={(event) => setEndDate(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-blue-500 focus:ring-2"
+                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/30 focus:border-brand-500 focus:ring-2"
                 />
               </label>
             </div>
@@ -198,7 +198,7 @@ export function ManageYearsModal({
                     setCreating(false);
                   }
                 }}
-                className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {creating ? "Creating..." : "Create Year"}
               </button>

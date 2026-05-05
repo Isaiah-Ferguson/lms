@@ -74,7 +74,7 @@ export default function SubmissionGuidelinesPage({ params }: Props) {
 
       {/* Header */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="h-2 w-full bg-blue-600" />
+        <div className="h-2 w-full bg-brand-600" />
         <div className="px-6 py-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-600">
             CodeStack Academy

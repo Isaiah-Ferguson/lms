@@ -12,7 +12,7 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
         type="date"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 rounded-lg border border-gray-300 px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        className="h-10 rounded-lg border border-gray-300 px-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
       />
     </label>
   );

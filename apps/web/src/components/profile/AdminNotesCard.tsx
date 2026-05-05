@@ -107,7 +107,7 @@ export function AdminNotesCard({ userId, userName, adminNotes, canEditAdminNotes
           onChange={(event) => setText(event.target.value)}
           rows={6}
           disabled={!canEditAdminNotes}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/20 focus:border-blue-500 focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none ring-blue-500/20 focus:border-brand-500 focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50"
         />
         <Button size="sm" onClick={handleSave} loading={saving} disabled={!canEditAdminNotes}>
           Save notes

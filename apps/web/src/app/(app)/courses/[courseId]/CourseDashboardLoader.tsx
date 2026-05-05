@@ -9,6 +9,19 @@ interface Props {
   courseId: string;
 }
 
+const ACCENT_GRADIENT_MAP: Record<string, string> = {
+  "bg-brand-500":   "from-brand-600 via-brand-500 to-sky-500",
+  "bg-brand-600":   "from-brand-600 via-brand-500 to-sky-500",
+  "bg-violet-500":  "from-violet-600 via-violet-500 to-purple-500",
+  "bg-violet-600":  "from-violet-600 via-violet-500 to-purple-500",
+  "bg-emerald-500": "from-emerald-600 via-emerald-500 to-teal-500",
+  "bg-emerald-600": "from-emerald-600 via-emerald-500 to-teal-500",
+  "bg-orange-500":  "from-orange-600 via-orange-500 to-amber-500",
+  "bg-orange-600":  "from-orange-600 via-orange-500 to-amber-500",
+  "bg-slate-500":   "from-slate-600 via-slate-500 to-slate-600",
+  "bg-slate-600":   "from-slate-600 via-slate-500 to-slate-600",
+};
+
 function mapResponse(courseId: string, data: CourseDetailResponse): LevelData {
   const weeks: LevelWeek[] = data.weeks.map((w) => ({
     id: w.id,
@@ -33,6 +46,7 @@ function mapResponse(courseId: string, data: CourseDetailResponse): LevelData {
     courseTitle: data.title,
     courseMeta: data.courseMeta,
     accentColor: data.accentColor,
+    gradient: ACCENT_GRADIENT_MAP[data.accentColor] ?? "from-brand-600 via-brand-500 to-sky-500",
     zoomUrl: data.zoomUrl,
     weeks,
     announcements,

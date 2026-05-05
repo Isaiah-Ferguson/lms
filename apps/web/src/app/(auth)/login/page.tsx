@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { BookOpen, GraduationCap, Users, TrendingUp, ArrowRight } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
 import { authApi, ApiError } from "@/lib/api-client";
@@ -18,6 +18,7 @@ import codestackLogo from "@/assets/codestack.png";
 import csaLargeLogo from "@/assets/CSALargeLOGO.png";
 
 function LoginForm() {
+  const reduceMotion = useReducedMotion();
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrlParam = searchParams.get('returnUrl');
@@ -111,9 +112,9 @@ function LoginForm() {
         
         <div className="relative flex flex-col justify-center px-12 xl:px-20 text-white">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
             className="space-y-8"
           >
             {/* Logo */}
@@ -140,9 +141,9 @@ function LoginForm() {
             {/* Features */}
             <div className="space-y-4 pt-4">
               <motion.div 
-                initial={{ opacity: 0, x: -20 }}
+                initial={reduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={reduceMotion ? { duration: 0 } : { delay: 0.2 }}
                 className="flex items-start gap-4"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
@@ -155,9 +156,9 @@ function LoginForm() {
               </motion.div>
 
               <motion.div 
-                initial={{ opacity: 0, x: -20 }}
+                initial={reduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={reduceMotion ? { duration: 0 } : { delay: 0.3 }}
                 className="flex items-start gap-4"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
@@ -170,9 +171,9 @@ function LoginForm() {
               </motion.div>
 
               <motion.div 
-                initial={{ opacity: 0, x: -20 }}
+                initial={reduceMotion ? false : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={reduceMotion ? { duration: 0 } : { delay: 0.4 }}
                 className="flex items-start gap-4"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
@@ -192,9 +193,9 @@ function LoginForm() {
       <div className="flex w-full lg:w-1/2 flex-col bg-white dark:bg-slate-900">
         <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.5 }}
             className="w-full max-w-md mx-auto"
           >
             {/* Mobile logo */}
@@ -246,7 +247,7 @@ function LoginForm() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-blue-600 focus:ring-brand-500 dark:focus:ring-brand-400"
                   />
                   <span className="dark:text-slate-300">Remember me</span>
                 </label>

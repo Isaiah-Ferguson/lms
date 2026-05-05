@@ -117,7 +117,7 @@ export function CreateUserModal({ onClose, onCreated }: Props) {
             id="user-role"
             value={form.role}
             onChange={(e) => set("role", e.target.value as UserRole)}
-            className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+            className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
           >
             <option value="Student">Student</option>
             <option value="Instructor">Instructor</option>

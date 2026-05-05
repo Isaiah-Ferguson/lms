@@ -112,7 +112,7 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
                   )}>
                     {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white">
                     {u.avatarInitials}
                   </div>
                   <div className="flex-1 min-w-0">

@@ -53,7 +53,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
             <BookOpen className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">CodeStack LMS</h1>

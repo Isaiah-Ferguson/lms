@@ -26,7 +26,7 @@ function Avatar({ name, avatarUrl, isOnProbation }: { name: string; avatarUrl: s
       className="h-8 w-8 rounded-full object-cover ring-2 ring-white"
     />
   ) : (
-    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white ring-2 ring-white">
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white ring-2 ring-white">
       {initials}
     </span>
   );
@@ -99,8 +99,8 @@ export function UserMenu({ user }: { user: UserInfo }) {
       {/* Trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none"
-        aria-haspopup="true"
+        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+        aria-haspopup="menu"
         aria-expanded={open}
       >
         <Avatar name={user.name} avatarUrl={user.avatarUrl} isOnProbation={user.isOnProbation} />

@@ -136,7 +136,7 @@ export default function GradesPage() {
               onClick={() => setActiveCourseId(c.courseId)}
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeCourseId === c.courseId
-                  ? "bg-blue-600 text-white shadow-sm"
+                  ? "bg-brand-600 text-white shadow-sm"
                   : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
               }`}
             >
@@ -286,7 +286,7 @@ export default function GradesPage() {
             <div className="flex justify-end">
               <button
                 onClick={exportGrades}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 Export Grades

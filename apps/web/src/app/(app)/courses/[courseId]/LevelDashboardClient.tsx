@@ -50,6 +50,7 @@ export interface LevelData {
   courseTitle: string;       // e.g. "Level 1 — Web Foundations"
   courseMeta: string;        // e.g. "10-week programme · Oct 14 – Dec 27"
   accentColor: string;       // tailwind bg class e.g. "bg-blue-500"
+  gradient: string;          // tailwind bg-gradient-to-br from/via/to classes
   courseId: string;
   zoomUrl: string;
   announcements: LevelAnnouncement[];
@@ -65,10 +66,10 @@ export interface LevelData {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const TAG_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  DayOff: { bg: "bg-red-50", text: "text-red-700", icon: <X className="h-3 w-3" /> },
-  Event: { bg: "bg-blue-50", text: "text-blue-700", icon: <Calendar className="h-3 w-3" /> },
-  Reminder: { bg: "bg-yellow-50", text: "text-yellow-700", icon: <AlertCircle className="h-3 w-3" /> },
-  Info: { bg: "bg-gray-50", text: "text-gray-500", icon: <Info className="h-3 w-3" /> },
+  DayOff: { bg: "bg-red-50 dark:bg-red-950/40", text: "text-red-700 dark:text-red-400", icon: <X className="h-3 w-3" /> },
+  Event: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-400", icon: <Calendar className="h-3 w-3" /> },
+  Reminder: { bg: "bg-yellow-50 dark:bg-yellow-950/40", text: "text-yellow-700 dark:text-yellow-400", icon: <AlertCircle className="h-3 w-3" /> },
+  Info: { bg: "bg-gray-100 dark:bg-slate-700", text: "text-gray-600 dark:text-slate-300", icon: <Info className="h-3 w-3" /> },
 };
 
 function fmtDate(iso: string) {
@@ -83,8 +84,12 @@ function fmtDate(iso: string) {
 function Modal({ title, onClose, children, wide }: {
   title: string; onClose: () => void; children: React.ReactNode; wide?: boolean;
 }) {
+  const titleId = `modal-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onMouseDown={(e) => { if (e.currentTarget === e.target) onClose(); }}
     >
@@ -93,9 +98,13 @@ function Modal({ title, onClose, children, wide }: {
         wide ? "max-w-lg" : "max-w-md"
       )}>
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700">
-            <X className="h-4 w-4" />
+          <h2 id={titleId} className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="rounded-lg p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
         <div className="p-5">{children}</div>
@@ -156,7 +165,7 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
             value={form.body}
             onChange={(e) => { setForm((f) => ({ ...f, body: e.target.value })); setError(""); }}
             placeholder="Announcement details…"
-            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -171,7 +180,7 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
             <select
               value={form.tag ?? "Info"}
               onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value as AnnTag }))}
-              className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+              className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
             >
               <option value="Info">Info</option>
               <option value="Event">Event</option>
@@ -286,17 +295,17 @@ function AnnouncementsCard({
                       <>
                         <button
                           onClick={() => setModal({ mode: "edit", ann })}
-                          title="Edit"
-                          className="rounded p-0.5 text-gray-300 dark:text-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
+                          aria-label={`Edit announcement: ${ann.title}`}
+                          className="rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                         >
-                          <Pencil className="h-3 w-3" />
+                          <Pencil className="h-3 w-3" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(ann.id)}
-                          title="Delete"
-                          className="rounded p-0.5 text-gray-300 dark:text-slate-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 dark:hover:text-red-400"
+                          aria-label={`Delete announcement: ${ann.title}`}
+                          className="rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 dark:hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-3 w-3" aria-hidden="true" />
                         </button>
                       </>
                     )}
@@ -328,7 +337,7 @@ function AnnouncementsCard({
 function ClassLinkCard({ zoomUrl }: { zoomUrl: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/30 p-6 shadow-sm">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-md">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-md">
         <Video className="h-7 w-7 text-white" />
       </div>
       <div className="text-center">
@@ -339,7 +348,7 @@ function ClassLinkCard({ zoomUrl }: { zoomUrl: string }) {
         href={zoomUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
       >
         Join class
         <ExternalLink className="h-3.5 w-3.5" />
@@ -436,7 +445,7 @@ function WeekCreateModal({ defaultWeekNumber, defaultZoomUrl, onClose, onSave, s
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
             placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
-            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
           />
           <p className="text-xs text-gray-500 dark:text-slate-400">Note: Video titles are managed separately in the week details page.</p>
         </div>
@@ -508,7 +517,7 @@ function WeekEditModal({ week, onClose, onSave }: {
             value={form.topicsRaw}
             onChange={(e) => { setForm((f) => ({ ...f, topicsRaw: e.target.value })); setError(""); }}
             placeholder={"Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n..."}
-            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+            className="w-full resize-y rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
           />
           <p className="text-xs text-gray-500 dark:text-slate-400">Note: Video titles are managed separately in the week details page.</p>
         </div>
@@ -567,10 +576,10 @@ function WeekCard({ week, canEdit, onEdit }: {
             {canEdit && (
               <button
                 onClick={() => onEdit(week)}
-                title="Edit week"
-                className="rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                aria-label={`Edit week ${week.weekNumber}`}
+                className="rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               >
-                <Pencil className="h-3 w-3" />
+                <Pencil className="h-3 w-3" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -585,7 +594,7 @@ function WeekCard({ week, canEdit, onEdit }: {
         <ul className="space-y-1.5">
           {week.topics.map((topic, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-slate-300">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
               {topic}
             </li>
           ))}
@@ -673,7 +682,7 @@ function AssignmentForm({ initial, onSave, onCancel, saving }: {
         <select
           value={form.type}
           onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as AssignmentType }))}
-          className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+          className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
         >
           <option value="MiniChallenge">Mini Challenge</option>
           <option value="Challenge">Challenge</option>
@@ -704,7 +713,7 @@ const COL_META: {
   badge: string;
 }[] = [
     { key: "miniChallenges", label: "Mini Challenges", accent: "bg-violet-500", badge: "bg-violet-100 text-violet-700" },
-    { key: "challenges", label: "Challenges", accent: "bg-blue-500", badge: "bg-blue-100 text-blue-700" },
+    { key: "challenges", label: "Challenges", accent: "bg-brand-500", badge: "bg-brand-100 text-brand-700" },
     { key: "projects", label: "Projects", accent: "bg-emerald-500", badge: "bg-emerald-100 text-emerald-700" },
   ];
 
@@ -748,7 +757,7 @@ function AssignmentsSection({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-[30px] font-bold text-gray-900 dark:text-slate-100">Assignments</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Assignments</h2>
         {canEdit && onCreateClick && (
           <button
             onClick={onCreateClick}
@@ -778,9 +787,7 @@ function AssignmentsSection({
                 >
                   <Link
                     href={a.href}
-                    className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium 
-             bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 transition-all duration-150 
-             hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-800 dark:hover:text-blue-300 active:bg-blue-200 dark:active:bg-blue-900/50"
+                    className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium bg-brand-50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-400 transition-all duration-150 hover:bg-brand-100 dark:hover:bg-brand-900/40 hover:text-brand-800 dark:hover:text-brand-300 active:bg-brand-200 dark:active:bg-brand-900/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                   >
                     <span className="flex items-center gap-2">
                       {a.title}
@@ -788,7 +795,7 @@ function AssignmentsSection({
                       {a.weekNumber && (
                         <span
                           className={clsx(
-                            "ml-1.5 rounded-full px-1.5 py-0.5 text-[13px] font-semibold bg-blue-200 text-blue-800",
+                            "ml-1.5 rounded-full px-1.5 py-0.5 text-[13px] font-semibold",
                             badge
                           )}
                         >
@@ -867,12 +874,12 @@ export function LevelDashboardClient({
 
       {/* ── Banner ─────────────────────────────────────────────────────────── */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-        <div className={clsx("h-2 w-full", data.accentColor)} />
+        <div className={clsx("h-2 w-full bg-gradient-to-r", data.gradient)} />
         <div className="px-6 py-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-slate-400">
             CodeStack Academy
           </p>
-          <h1 className="mt-0.5 text-3xl font-bold text-gray-900 dark:text-slate-100">{data.courseTitle}</h1>
+          <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100">{data.courseTitle}</h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">{data.courseMeta}</p>
         </div>
       </div>

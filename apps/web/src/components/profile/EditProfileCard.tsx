@@ -139,7 +139,7 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarUrl} alt={user.name} className="h-20 w-20 rounded-full object-cover ring-2 ring-gray-200" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white ring-2 ring-gray-200">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-xl font-bold text-white ring-2 ring-gray-200">
                 {initials(name || user.name)}
               </div>
             )}

@@ -24,10 +24,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+      "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
 
     const variants = {
-      primary: "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800",
+      primary: "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800",
       secondary:
         "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100",
       ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",

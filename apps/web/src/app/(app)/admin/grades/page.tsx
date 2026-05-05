@@ -172,7 +172,7 @@ export default function AdminGradesPage() {
               onClick={() => { setActiveCourseId(c.id); setSearch(""); }}
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeCourseId === c.id
-                  ? "bg-blue-600 text-white shadow-sm"
+                  ? "bg-brand-600 text-white shadow-sm"
                   : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700"
               }`}
             >
@@ -215,7 +215,7 @@ export default function AdminGradesPage() {
                 placeholder="Search student or email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 py-2 pl-9 pr-4 text-sm shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20"
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 py-2 pl-9 pr-4 text-sm shadow-sm focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-400/20"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
@@ -315,7 +315,7 @@ export default function AdminGradesPage() {
                     link.click();
                     document.body.removeChild(link);
                   }}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
                 >
                   <Download className="h-4 w-4" />
                   Export Grades

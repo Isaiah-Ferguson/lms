@@ -246,10 +246,15 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
 
       {/* Edit Video Modal */}
       {editingVideo && (
-        <div className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-video-title"
+            className="relative w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl"
+          >
             <div className="border-b border-gray-100 dark:border-slate-700 px-6 py-4">
-              <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Edit Video</h2>
+              <h2 id="edit-video-title" className="text-base font-semibold text-gray-900 dark:text-slate-100">Edit Video</h2>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
@@ -261,7 +266,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
                 />
               </div>
               <div>
@@ -274,7 +279,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   placeholder="https://..."
-                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-gray-700 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"
                 />
               </div>
               <div>
@@ -378,7 +383,7 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
               <button
                 onClick={handleSaveEdit}
                 disabled={saving || !editTitle.trim()}
-                className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>

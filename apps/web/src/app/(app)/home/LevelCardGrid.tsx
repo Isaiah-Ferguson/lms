@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { clsx } from "clsx";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { CourseLevel } from "@/lib/dashboard-home-data";
 
 interface LevelCardGridProps {
@@ -13,26 +13,31 @@ interface LevelCardGridProps {
   yearLabel: string;
 }
 
-const ACCENT_BY_LEVEL_KEY: Record<string, { gradient: string; glow: string }> = {
+const ACCENT_BY_LEVEL_KEY: Record<string, { gradient: string; glow: string; label: string }> = {
   combine: { 
     gradient: "from-slate-600 via-slate-500 to-slate-600",
-    glow: "group-hover:shadow-[0_0_30px_rgba(100,116,139,0.4)]"
+    glow: "group-hover:shadow-[0_0_30px_rgba(100,116,139,0.4)]",
+    label: "C"
   },
   "level-1": { 
     gradient: "from-brand-600 via-brand-500 to-sky-500",
-    glow: "group-hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]"
+    glow: "group-hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]",
+    label: "1"
   },
   "level-2": { 
     gradient: "from-violet-600 via-violet-500 to-purple-500",
-    glow: "group-hover:shadow-[0_0_30px_rgba(139,92,246,0.5)]"
+    glow: "group-hover:shadow-[0_0_30px_rgba(139,92,246,0.5)]",
+    label: "2"
   },
   "level-3": { 
     gradient: "from-emerald-600 via-emerald-500 to-teal-500",
-    glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]"
+    glow: "group-hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]",
+    label: "3"
   },
   "level-4": { 
     gradient: "from-orange-600 via-orange-500 to-amber-500",
-    glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+    glow: "group-hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]",
+    label: "4"
   },
 };
 
@@ -42,6 +47,7 @@ export function LevelCardGrid({
   canViewAllLevels,
   yearLabel,
 }: LevelCardGridProps) {
+  const reduceMotion = useReducedMotion();
   const visibleLevels = canViewAllLevels
     ? levels
     : levels.filter((level) => enrolledLevelIds.includes(level.id));
@@ -59,16 +65,17 @@ export function LevelCardGrid({
       {visibleLevels.map((level, index) => {
         const accent = ACCENT_BY_LEVEL_KEY[level.key] ?? { 
           gradient: "from-gray-600 via-gray-500 to-gray-600",
-          glow: "group-hover:shadow-[0_0_30px_rgba(107,114,128,0.4)]"
+          glow: "group-hover:shadow-[0_0_30px_rgba(107,114,128,0.4)]",
+          label: "?"
         };
         const isEnrolled = enrolledLevelIds.includes(level.id);
 
         return (
           <motion.div
             key={level.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.06 }}
           >
             <Link
               href={`/courses/${level.id}`}
@@ -81,10 +88,16 @@ export function LevelCardGrid({
             >
               {/* Gradient header */}
               <div className={clsx(
-                "h-32 w-full bg-gradient-to-br relative overflow-hidden",
+                "h-36 w-full bg-gradient-to-br relative overflow-hidden",
                 accent.gradient
               )}>
                 <div className="absolute inset-0 bg-black/10" />
+                <span
+                  aria-hidden="true"
+                  className="mx-3 text-[7rem] font-black leading-none text-white/10 select-none pointer-events-none"
+                >
+                  {accent.label}
+                </span>
                 <div className="absolute top-3 right-3">
                   <span className={clsx(
                     "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm",
@@ -102,7 +115,7 @@ export function LevelCardGrid({
               <div className="flex flex-1 flex-col gap-3 p-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-slate-400">{yearLabel}</p>
-                  <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                     {level.title}
                   </h2>
                 </div>

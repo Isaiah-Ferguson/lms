@@ -408,7 +408,7 @@ export default function ParticipantsPage() {
                     className={clsx(
                       "h-8 min-w-[2rem] rounded-lg px-2 text-sm font-medium transition-colors",
                       page === currentPage
-                        ? "bg-blue-600 text-white"
+                        ? "bg-brand-600 text-white"
                         : "text-gray-600 hover:bg-gray-100"
                     )}
                   >

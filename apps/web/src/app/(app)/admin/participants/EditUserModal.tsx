@@ -74,7 +74,7 @@ export function EditUserModal({ user, onClose, onSaved }: Props) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as UserStatus)}
-            className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           >
             <option value="Active">Active</option>
             <option value="Disabled">Disabled</option>

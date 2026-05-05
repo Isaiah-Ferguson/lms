@@ -194,19 +194,25 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
     >
-      <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="grade-modal-title"
+        className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl"
+      >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-gray-100 px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Grade Submission</h2>
+            <h2 id="grade-modal-title" className="text-base font-semibold text-gray-900">Grade Submission</h2>
             <p className="mt-0.5 text-sm text-gray-500">{row.name}</p>
             <p className="text-xs text-gray-400">{row.email}</p>
           </div>
           <button
             onClick={onClose}
-            className="ml-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            aria-label="Close dialog"
+            className="ml-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -314,7 +320,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
                 placeholder="0"
-                className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-center text-lg font-bold text-gray-900 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-center text-lg font-bold text-gray-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
               <span className="text-gray-400">/</span>
               <input
@@ -322,7 +328,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
                 min={1}
                 value={outOf}
                 onChange={(e) => setOutOf(e.target.value)}
-                className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm text-gray-600 shadow-sm focus:border-blue-400 focus:outline-none"
+                className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm text-gray-600 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
               {pct !== null && (
                 <span className={`ml-2 text-2xl font-bold ${gradeColor()}`}>
@@ -340,7 +346,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
                   onClick={() => { setScore(String(q)); setOutOf("100"); }}
                   className={`flex items-center gap-0.5 rounded-md border px-2 py-1 text-xs font-medium transition-colors
                     ${score === String(q) && outOf === "100"
-                      ? "border-blue-400 bg-blue-50 text-blue-700"
+                      ? "border-brand-500 bg-brand-50 text-brand-700"
                       : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                 >
@@ -361,7 +367,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
               onChange={(e) => setFeedback(e.target.value)}
               rows={4}
               placeholder="Great work on the component architecture. Consider extracting the auth logic into a custom hook for reusability..."
-              className="block w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+              className="block w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
         </div>
@@ -377,7 +383,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
           <button
             onClick={handleSave}
             disabled={saving || !score.trim()}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-50"
           >
             {saving ? "Saving…" : row.currentGrade ? "Update Grade" : "Save Grade"}
           </button>

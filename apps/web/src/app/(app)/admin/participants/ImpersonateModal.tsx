@@ -41,7 +41,7 @@ export function ImpersonateModal({ user, onClose, onConfirm }: Props) {
 
         {/* Target user */}
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">
             {user.avatarInitials}
           </div>
           <div>
@@ -62,7 +62,7 @@ export function ImpersonateModal({ user, onClose, onConfirm }: Props) {
             placeholder="e.g. Investigating reported issue with course access…"
             value={reason}
             onChange={(e) => { setReason(e.target.value); setError(""); }}
-            className="w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           />
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
