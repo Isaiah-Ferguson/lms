@@ -34,5 +34,8 @@
       "Microsoft.EntityFrameworkCore.Database.Command": "Information"
     }
   },
+    "ApplicationInsights": {
+    "ConnectionString": "InstrumentationKey=4;IngestionEndpoint=https://.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId="
+  },
   "AllowedHosts": "*"
 }

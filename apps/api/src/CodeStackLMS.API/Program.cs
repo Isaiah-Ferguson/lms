@@ -10,6 +10,7 @@ using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddApplicationInsightsTelemetry();
 
 // ── Kestrel Configuration ─────────────────────────────────────────────────────
 builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>

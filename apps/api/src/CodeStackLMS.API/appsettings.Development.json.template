@@ -21,5 +21,8 @@
   "AzureStorage": {
     "ConnectionString": "YOUR_AZURE_STORAGE_CONNECTION_STRING",
     "SubmissionsContainer": "codestacklms"
-  }
+  },
+    "ApplicationInsights": {
+    "ConnectionString": "InstrumentationKey="
+  },
 }
