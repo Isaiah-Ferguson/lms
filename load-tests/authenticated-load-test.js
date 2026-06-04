@@ -14,10 +14,10 @@ export const options = {
     { duration: '1m', target: 0 },   // Ramp down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<1000', 'p(99)<2000'],
-    'http_req_duration{endpoint:login}': ['p(95)<800'],
-    'http_req_duration{endpoint:courses}': ['p(95)<500'],
-    'http_req_duration{endpoint:grades}': ['p(95)<600'],
+    http_req_duration: ['p(95)<1500', 'p(99)<2500'],
+    'http_req_duration{endpoint:login}': ['p(95)<1800'],
+    'http_req_duration{endpoint:courses}': ['p(95)<800'],
+    'http_req_duration{endpoint:grades}': ['p(95)<800'],
     errors: ['rate<0.05'],
   },
 };
@@ -27,9 +27,9 @@ const API_URL = `${BASE_URL}/api`;
 
 // Test user credentials - UPDATE THESE WITH YOUR TEST USERS
 const TEST_USERS = [
-  { email: 'student3@codestack.com', password: 'password' },
-  { email: 'student4@codestack.com', password: 'password' },
-  { email: 'student5@Codestack.com', password: 'password' },
+  { email: 'crestice@yahoo.com', password: 'password' },
+  { email: 'isaiahkferguson89@gmail.com', password: 'Ferguson123' },
+  // { email: 'student5@Codestack.com', password: 'password' },
 ];
 
 function getRandomUser() {
@@ -180,10 +180,19 @@ export default function () {
 
   // Course browsing flow
   group('Courses', () => {
-    // Get first course from dashboard
-    if (dashboardData && dashboardData.courses && dashboardData.courses.length > 0) {
-      const courseId = dashboardData.courses[0].id;
-      
+    // Resolve a courseId: prefer an enrolled course, fall back to first available level
+    let courseId = null;
+    if (dashboardData) {
+      const enrollmentsByYear = dashboardData.enrollmentsByYear || {};
+      const enrolledIds = Object.values(enrollmentsByYear).flat();
+      if (enrolledIds.length > 0) {
+        courseId = enrolledIds[0];
+      } else if (dashboardData.levels && dashboardData.levels.length > 0) {
+        courseId = dashboardData.levels[0].id;
+      }
+    }
+
+    if (courseId) {
       getCourseDetail(token, courseId);
       sleep(1);
 

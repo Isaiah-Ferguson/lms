@@ -53,11 +53,18 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new ValidationException("Invalid email or password.");
 
-        // Update last login timestamp
-        user.LastLoginAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync(cancellationToken);
-
         var token = GenerateJwt(user);
+
+        // Update last login timestamp asynchronously — not needed in auth response path
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                user.LastLoginAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync(CancellationToken.None);
+            }
+            catch { }
+        });
         return new AuthTokenDto(token, TokenExpirySeconds, user.MustChangePassword);
     }
 
