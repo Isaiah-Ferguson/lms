@@ -138,6 +138,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 // ── Database initialisation ───────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())

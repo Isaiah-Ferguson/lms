@@ -23,11 +23,11 @@ export const options = {
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
 
 export default function () {
-  // Test 1: Swagger endpoint (publicly accessible)
-  let res = http.get(`${BASE_URL}/swagger/index.html`);
+  // Test 1: Health endpoint (publicly accessible)
+  let res = http.get(`${BASE_URL}/health`);
   
   check(res, {
-    'swagger endpoint status is 200': (r) => r.status === 200,
+    'health endpoint status is 200': (r) => r.status === 200,
   }) || errorRate.add(1);
 
   sleep(1);
