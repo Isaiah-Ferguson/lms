@@ -16,4 +16,10 @@ public class HangfireBackgroundJobService : IBackgroundJobService
         BackgroundJob.Enqueue<SendSubmissionReturnedNotificationJob>(job => 
             job.ExecuteAsync(submissionId, reason));
     }
+
+    public string EnqueueWeeklyProgressReport(DateTime weekOf)
+    {
+        return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
+            job.ExecuteAsync(weekOf, CancellationToken.None));
+    }
 }

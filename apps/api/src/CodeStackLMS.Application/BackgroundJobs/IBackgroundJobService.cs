@@ -4,4 +4,5 @@ public interface IBackgroundJobService
 {
     void EnqueueGradeNotification(Guid submissionId);
     void EnqueueSubmissionReturnedNotification(Guid submissionId, string reason);
+    string EnqueueWeeklyProgressReport(DateTime weekOf);
 }

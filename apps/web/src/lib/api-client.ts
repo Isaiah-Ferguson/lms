@@ -46,6 +46,9 @@ import type {
   CreateLessonRequest,
   UpdateLessonRequest,
   Comment,
+  ProgressReportSummary,
+  ProgressReportDetail,
+  TriggerReportResponse,
 } from "@/types";
 
 // Re-export all types from @/types so callers can import them either from
@@ -751,6 +754,27 @@ export const commentsApi = {
       method: "POST",
       body: JSON.stringify({ message }),
     }, token),
+};
+
+// ─── Reports API ─────────────────────────────────────────────────────────────
+
+export const reportsApi = {
+  getReports(token: string, weekOf?: string): Promise<ProgressReportSummary[]> {
+    const params = weekOf ? `?weekOf=${encodeURIComponent(weekOf)}` : "";
+    return apiFetch<ProgressReportSummary[]>(`/api/reports${params}`, {}, token);
+  },
+
+  getReport(id: string, token: string): Promise<ProgressReportDetail> {
+    return apiFetch<ProgressReportDetail>(`/api/reports/${id}`, {}, token);
+  },
+
+  publishReport(id: string, token: string): Promise<void> {
+    return apiFetch<void>(`/api/reports/${id}/publish`, { method: "PATCH" }, token);
+  },
+
+  triggerWeeklyRun(token: string): Promise<TriggerReportResponse> {
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger`, { method: "POST" }, token);
+  },
 };
 
 export { ApiError };

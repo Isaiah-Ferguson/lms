@@ -12,10 +12,12 @@ using CodeStackLMS.Application.Instructor;
 using CodeStackLMS.Application.Lessons;
 using CodeStackLMS.Application.Profile;
 using CodeStackLMS.Application.Submissions;
+using CodeStackLMS.Infrastructure.AI;
 using CodeStackLMS.Infrastructure.BackgroundJobs;
 using CodeStackLMS.Infrastructure.Email;
 using CodeStackLMS.Infrastructure.Identity;
 using CodeStackLMS.Infrastructure.Persistence;
+using CodeStackLMS.Infrastructure.Reports;
 using CodeStackLMS.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -107,10 +109,20 @@ public static class DependencyInjection
         services.AddScoped<IAssignmentService, AssignmentService>();
         services.AddScoped<ICommentService, CommentService>();
 
+        // ── Claude / Anthropic ─────────────────────────────────────────────────
+        services.Configure<AnthropicOptions>(opts =>
+            configuration.GetSection(AnthropicOptions.SectionName).Bind(opts));
+
+        services.AddHttpClient<IClaudeClient, ClaudeClient>();
+
         // ── Background Jobs ───────────────────────────────────────────────────
         services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddScoped<SendGradeNotificationJob>();
         services.AddScoped<SendSubmissionReturnedNotificationJob>();
+        services.AddScoped<WeeklyProgressReportJob>();
+
+        // ── Progress Reports ──────────────────────────────────────────────────
+        services.AddScoped<IProgressReportService, ProgressReportService>();
 
         return services;
     }

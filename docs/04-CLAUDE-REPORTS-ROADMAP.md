@@ -1,6 +1,6 @@
 # Roadmap 1 — Claude AI Weekly Progress Reports
 
-**Status**: Planned (not yet implemented)
+**Status**: Phases 1–3 implemented (Phase 4 — attendance — pending Roadmap 2)
 **Goal**: Automatically generate a comprehensive weekly progress report covering **all students** (~50 max), combining grades, academic status (probation), and — eventually — attendance.
 
 ---
@@ -62,21 +62,21 @@ Admin/Instructor reviews → optionally publish / email
 ### Phase 1 — Pipeline proof-of-concept
 - [ ] Create Anthropic account + API key (`console.anthropic.com`).
 - [ ] Store key in .NET user-secrets (local) and Azure App Service app settings (prod) as `Anthropic:ApiKey`. Never commit it.
-- [ ] Add Claude client as an **Infrastructure adapter** (official/community `Anthropic.SDK` NuGet, or raw `HttpClient`).
-- [ ] Define `IProgressReportService` in the **Application** layer; implement in Infrastructure.
-- [ ] Add a `ProgressReport` entity + EF Core migration (studentId, weekOf, status, content, model, generatedAt).
-- [ ] Build prompt from **grades + probation status** for a *single* student; verify output quality manually.
+- [x] Add Claude client as an **Infrastructure adapter** (`ClaudeClient` via raw `HttpClient`).
+- [x] Define `IProgressReportService` in the **Application** layer; implement in Infrastructure.
+- [x] Add a `ProgressReport` entity + EF Core migration (studentId, weekOf, status, content, model, generatedAt).
+- [x] Build prompt from **grades + probation status** for a *single* student; verify output quality manually.
 
 ### Phase 2 — Batch + schedule
-- [ ] Add `WeeklyProgressReportJob` (matches existing Hangfire job pattern in Infrastructure).
-- [ ] Loop over all active students with chunking + retry + per-student failure handling.
-- [ ] Register the recurring job (`RecurringJob.AddOrUpdate(..., Cron.Weekly())`).
+- [x] Add `WeeklyProgressReportJob` (matches existing Hangfire job pattern in Infrastructure).
+- [x] Loop over all active students with chunking + retry + per-student failure handling.
+- [x] Register the recurring job (`RecurringJob.AddOrUpdate(..., Cron.Weekly())`).
 - [ ] Add a run-summary record so admins can see "X generated, Y failed".
 
 ### Phase 3 — Surface in the UI
-- [ ] Admin/instructor endpoint to list + read reports (`/api/reports/...`).
-- [ ] Frontend page to view reports (render Claude's markdown; optionally pair with existing `recharts` charts).
-- [ ] Draft → Published status with a review/approve action.
+- [x] Admin/instructor endpoint to list + read reports (`/api/reports/...`).
+- [x] Frontend page to view reports (render Claude's markdown; optionally pair with existing `recharts` charts).
+- [x] Draft → Published status with a review/approve action.
 - [ ] (Optional) email/notification delivery.
 
 ### Phase 4 — Add attendance (depends on Roadmap 2)

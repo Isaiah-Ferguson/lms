@@ -22,6 +22,7 @@ public interface IApplicationDbContext
     DbSet<GitHubSubmissionInfo> GitHubSubmissionInfos { get; }
     DbSet<Grade> Grades { get; }
     DbSet<FeedbackComment> FeedbackComments { get; }
+    DbSet<ProgressReport> ProgressReports { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     DatabaseFacade Database { get; }

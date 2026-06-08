@@ -5,6 +5,7 @@ using CodeStackLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using CodeStackLMS.Infrastructure.BackgroundJobs;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
@@ -162,6 +163,14 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
+// ── Recurring Jobs ───────────────────────────────────────────────────────────
+RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(
+    "weekly-progress-reports",
+    job => job.ExecuteAsync(
+        DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1),
+        CancellationToken.None),
+    Cron.Weekly(DayOfWeek.Monday, 6));
 
 app.Run();
 

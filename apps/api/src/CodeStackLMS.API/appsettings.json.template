@@ -37,5 +37,10 @@
     "ApplicationInsights": {
     "ConnectionString": "InstrumentationKey=4;IngestionEndpoint=https://.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId="
   },
+  "Anthropic": {
+    "ApiKey": "YOUR_ANTHROPIC_API_KEY",
+    "DefaultModel": "claude-haiku-4-5",
+    "MaxTokens": 1024
+  },
   "AllowedHosts": "*"
 }

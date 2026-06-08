@@ -25,9 +25,10 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
 const API_URL = `${BASE_URL}/api`;
 
 const TEST_USERS = [
-  { email: 'student3@codestack.com', password: 'password' },
-  { email: 'student4@codestack.com', password: 'password' },
-  { email: 'student5@codestack.com', password: 'password' },
+  { email: 'crestice@yahoo.com', password: 'password' },
+  { email: 'isaiahkferguson89@gmail.com', password: 'Ferguson123' },
+  { email: 'jdekok@sjcoe.net', password: 'Jacob12345' },
+  { email: 'jmartinezlopez@sjcoe.net', password: 'Codestack1!' },
 ];
 
 function getRandomUser() {

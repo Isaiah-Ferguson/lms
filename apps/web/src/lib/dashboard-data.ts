@@ -86,6 +86,7 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
   if (data.permissions.canManageYears) {
     nav.push({ label: "Participants", href: "/admin/participants", icon: "users" });
     nav.push({ label: "Admin Grades", href: "/admin/grades", icon: "admingrades" });
+    nav.push({ label: "Reports", href: "/admin/reports", icon: "reports" });
   }
 
   // Determine current level (for "You" badge)
