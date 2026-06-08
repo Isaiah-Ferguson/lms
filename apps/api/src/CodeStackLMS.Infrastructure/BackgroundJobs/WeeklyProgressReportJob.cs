@@ -62,6 +62,7 @@ public class WeeklyProgressReportJob
             .Where(u => u.IsActive && u.Role == UserRole.Student)
             .Include(u => u.Submissions)
                 .ThenInclude(s => s.Assignment)
+                .ThenInclude(a => a.Module)
             .Include(u => u.Submissions)
                 .ThenInclude(s => s.Grade)
             .Include(u => u.CourseEnrollments)
@@ -106,10 +107,9 @@ public class WeeklyProgressReportJob
 
             try
             {
-                var prompt = BuildStudentPrompt(student, weekStart);
-                var content = await _claude.GenerateAsync(StudentSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
-
-                report.Content = content;
+                var activeCourse = GetActiveCourse(student.CourseEnrollments);
+                var prompt = BuildStudentPrompt(student, weekStart, activeCourse);
+                report.Content = await _claude.GenerateAsync(StudentSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
                 report.Status = ProgressReportStatus.Generated;
                 report.GeneratedAt = DateTime.UtcNow;
                 report.FailureReason = null;
@@ -142,7 +142,7 @@ public class WeeklyProgressReportJob
 
         var student = await _db.Users
             .Where(u => u.Id == studentId && u.IsActive && u.Role == UserRole.Student)
-            .Include(u => u.Submissions).ThenInclude(s => s.Assignment)
+            .Include(u => u.Submissions).ThenInclude(s => s.Assignment).ThenInclude(a => a.Module)
             .Include(u => u.Submissions).ThenInclude(s => s.Grade)
             .Include(u => u.CourseEnrollments).ThenInclude(e => e.Course)
             .FirstOrDefaultAsync(cancellationToken);
@@ -173,7 +173,8 @@ public class WeeklyProgressReportJob
 
         try
         {
-            var prompt = BuildStudentPrompt(student, weekStart);
+            var activeCourse = GetActiveCourse(student.CourseEnrollments);
+            var prompt = BuildStudentPrompt(student, weekStart, activeCourse);
             report.Content = await _claude.GenerateAsync(StudentSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
             report.Status = ProgressReportStatus.Generated;
             report.GeneratedAt = DateTime.UtcNow;
@@ -225,8 +226,9 @@ public class WeeklyProgressReportJob
         {
             var students = await _db.Users
                 .Where(u => u.IsActive && u.Role == UserRole.Student)
-                .Include(u => u.Submissions).ThenInclude(s => s.Assignment)
+                .Include(u => u.Submissions).ThenInclude(s => s.Assignment).ThenInclude(a => a.Module)
                 .Include(u => u.Submissions).ThenInclude(s => s.Grade)
+                .Include(u => u.CourseEnrollments).ThenInclude(e => e.Course)
                 .ToListAsync(cancellationToken);
 
             var prompt = BuildClassPrompt(students, weekStart);
@@ -246,14 +248,41 @@ public class WeeklyProgressReportJob
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    private static string BuildStudentPrompt(User student, DateTime weekStart)
+    // ── Level helpers ─────────────────────────────────────────────────────────
+
+    private static int GetCourseLevel(string title)
     {
-        var gradedSubmissions = student.Submissions
+        var t = title.ToLowerInvariant().Trim();
+        if (t.Contains("combine")) return 0;
+        var m = System.Text.RegularExpressions.Regex.Match(t, @"level\s*(\d+)");
+        if (m.Success && int.TryParse(m.Groups[1].Value, out var lvl)) return lvl;
+        return -1;
+    }
+
+    private static Course? GetActiveCourse(IEnumerable<UserCourseEnrollment> enrollments)
+        => enrollments
+            .Select(e => e.Course)
+            .OrderByDescending(c => GetCourseLevel(c.Title))
+            .FirstOrDefault();
+
+    // ── Student prompt ────────────────────────────────────────────────────────
+
+    private static string BuildStudentPrompt(User student, DateTime weekStart, Course? activeCourse)
+    {
+        // Filter all submission data to only the student's highest-level enrolled course.
+        // If no active course is determined, fall back to all submissions.
+        var activeSubmissions = activeCourse is not null
+            ? student.Submissions
+                .Where(s => s.Assignment.Module.CourseId == activeCourse.Id)
+                .ToList()
+            : student.Submissions.ToList();
+
+        var gradedSubmissions = activeSubmissions
             .Where(s => s.Grade != null)
             .OrderByDescending(s => s.CreatedAt)
             .ToList();
 
-        var recentSubmissions = student.Submissions
+        var recentSubmissions = activeSubmissions
             .Where(s => s.CreatedAt >= weekStart.AddDays(-30))
             .OrderByDescending(s => s.CreatedAt)
             .ToList();
@@ -262,23 +291,24 @@ public class WeeklyProgressReportJob
             ? gradedSubmissions.Average(s => (double)s.Grade!.TotalScore)
             : null;
 
-        var lastSubmission = student.Submissions.MaxBy(s => s.CreatedAt);
+        var lastSubmission = activeSubmissions.MaxBy(s => s.CreatedAt);
 
         var scoreHistory = gradedSubmissions
             .Take(5)
             .Select(s => $"  - {s.Assignment.Title}: {s.Grade!.TotalScore}/100")
             .ToList();
 
-        var enrolledCourses = student.CourseEnrollments
+        var allEnrolledCourses = student.CourseEnrollments
             .Select(e => e.Course.Title)
             .ToList();
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"Student: {student.Name}");
         sb.AppendLine($"Week of: {weekStart:yyyy-MM-dd}");
-        sb.AppendLine($"Enrolled courses: {(enrolledCourses.Any() ? string.Join(", ", enrolledCourses) : "None")}");
+        sb.AppendLine($"All enrolled courses: {(allEnrolledCourses.Any() ? string.Join(", ", allEnrolledCourses) : "None")}");
+        sb.AppendLine($"Active course (report scoped to this level): {activeCourse?.Title ?? "Unknown"}");
         sb.AppendLine();
-        sb.AppendLine("=== Academic Performance ===");
+        sb.AppendLine("=== Academic Performance (current level only) ===");
         sb.AppendLine($"Total graded submissions: {gradedSubmissions.Count}");
         sb.AppendLine($"Average score: {(averageScore.HasValue ? $"{averageScore:F1}/100" : "N/A")}");
         sb.AppendLine("Recent scores (most recent first):");
@@ -287,7 +317,7 @@ public class WeeklyProgressReportJob
         else
             sb.AppendLine("  None");
         sb.AppendLine();
-        sb.AppendLine("=== Submission Activity (last 30 days) ===");
+        sb.AppendLine("=== Submission Activity — last 30 days (current level only) ===");
         sb.AppendLine($"Submissions in last 30 days: {recentSubmissions.Count}");
         sb.AppendLine($"Last submission date: {(lastSubmission != null ? lastSubmission.CreatedAt.ToString("yyyy-MM-dd") : "Never")}");
         sb.AppendLine();
@@ -301,8 +331,26 @@ public class WeeklyProgressReportJob
 
     private static string BuildClassPrompt(List<User> students, DateTime weekStart)
     {
-        var allGraded = students
-            .SelectMany(s => s.Submissions.Where(sub => sub.Grade != null))
+        // For each student, scope submissions to their highest-level enrolled course only.
+        var studentData = students.Select(s =>
+        {
+            var activeCourse = GetActiveCourse(s.CourseEnrollments);
+            var activeSubs = activeCourse is not null
+                ? s.Submissions.Where(sub => sub.Assignment.Module.CourseId == activeCourse.Id).ToList()
+                : s.Submissions.ToList();
+            return (Student: s, ActiveCourse: activeCourse, ActiveSubs: activeSubs);
+        }).ToList();
+
+        // Level distribution
+        var levelGroups = studentData
+            .GroupBy(x => x.ActiveCourse?.Title ?? "Unknown")
+            .OrderByDescending(g => GetCourseLevel(g.Key))
+            .Select(g => (Level: g.Key, Count: g.Count()))
+            .ToList();
+
+        // Graded submissions scoped per student
+        var allGraded = studentData
+            .SelectMany(x => x.ActiveSubs.Where(sub => sub.Grade != null))
             .ToList();
 
         double? classAverage = allGraded.Any()
@@ -318,13 +366,13 @@ public class WeeklyProgressReportJob
             ("Below 60 (F)", allGraded.Count(s => s.Grade!.TotalScore < 60)),
         };
 
-        var recentSubmissions = students
-            .SelectMany(s => s.Submissions.Where(sub => sub.CreatedAt >= weekStart.AddDays(-7)))
+        var recentSubmissions = studentData
+            .SelectMany(x => x.ActiveSubs.Where(sub => sub.CreatedAt >= weekStart.AddDays(-7)))
             .ToList();
 
-        var studentsWithNoRecentActivity = students
-            .Where(s => !s.Submissions.Any(sub => sub.CreatedAt >= weekStart.AddDays(-30)))
-            .Select(s => s.Name)
+        var studentsWithNoRecentActivity = studentData
+            .Where(x => !x.ActiveSubs.Any(sub => sub.CreatedAt >= weekStart.AddDays(-30)))
+            .Select(x => $"{x.Student.Name} ({x.ActiveCourse?.Title ?? "no course"})")
             .ToList();
 
         var studentsOnProbation = students
@@ -332,26 +380,32 @@ public class WeeklyProgressReportJob
             .Select(s => $"{s.Name}{(string.IsNullOrWhiteSpace(s.ProbationReason) ? "" : $" ({s.ProbationReason})")}")
             .ToList();
 
-        var topStudents = students
-            .Select(s => new
+        var topStudents = studentData
+            .Select(x => new
             {
-                s.Name,
-                Avg = s.Submissions.Where(sub => sub.Grade != null).Any()
-                    ? s.Submissions.Where(sub => sub.Grade != null).Average(sub => (double)sub.Grade!.TotalScore)
+                x.Student.Name,
+                Level = x.ActiveCourse?.Title ?? "Unknown",
+                Avg = x.ActiveSubs.Where(sub => sub.Grade != null).Any()
+                    ? x.ActiveSubs.Where(sub => sub.Grade != null).Average(sub => (double)sub.Grade!.TotalScore)
                     : (double?)null
             })
             .Where(x => x.Avg.HasValue)
             .OrderByDescending(x => x.Avg)
-            .Take(3)
-            .Select(x => $"{x.Name}: {x.Avg:F1}/100")
+            .Take(5)
+            .Select(x => $"{x.Name} ({x.Level}): {x.Avg:F1}/100")
             .ToList();
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"Week of: {weekStart:yyyy-MM-dd}");
         sb.AppendLine($"Total active students: {students.Count}");
+        sb.AppendLine("Note: each student's data is scoped to their highest enrolled level only.");
         sb.AppendLine();
-        sb.AppendLine("=== Grade Statistics ===");
-        sb.AppendLine($"Total graded submissions (all time): {allGraded.Count}");
+        sb.AppendLine("=== Level Distribution ===");
+        foreach (var (level, count) in levelGroups)
+            sb.AppendLine($"  {level}: {count} student(s)");
+        sb.AppendLine();
+        sb.AppendLine("=== Grade Statistics (per-student, scoped to active level) ===");
+        sb.AppendLine($"Total graded submissions across all students: {allGraded.Count}");
         sb.AppendLine($"Class average score: {(classAverage.HasValue ? $"{classAverage:F1}/100" : "N/A")}");
         sb.AppendLine("Score distribution:");
         foreach (var (range, count) in scoreRanges)
@@ -370,7 +424,7 @@ public class WeeklyProgressReportJob
         foreach (var s in studentsOnProbation)
             sb.AppendLine($"  - {s}");
         sb.AppendLine();
-        sb.AppendLine("=== Top Performers ===");
+        sb.AppendLine("=== Top Performers (scoped to active level) ===");
         if (topStudents.Any())
             foreach (var s in topStudents)
                 sb.AppendLine($"  - {s}");
