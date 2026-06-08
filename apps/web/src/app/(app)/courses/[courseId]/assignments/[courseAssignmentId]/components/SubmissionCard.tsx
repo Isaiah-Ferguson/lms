@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Upload, RefreshCw, Download, X } from "lucide-react";
+import { CheckCircle2, Upload, RefreshCw, Download, X, AlertCircle } from "lucide-react";
 import { submissionsApi, uploadFileToBlobSas } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { SubmissionGuidelinesModal } from "@/components/submissions/SubmissionGuidelinesModal";
@@ -19,6 +19,8 @@ interface SubmissionCardProps {
   courseAssignmentId: string;
   initial: SubmissionState;
 }
+
+const MAX_ZIP_SIZE_MB = 100;
 
 // ── Real 3-step SAS upload ─────────────────────────────────────────────────
 // Step 1: POST /api/submissions/{id}/request-upload  → get SAS URL
@@ -82,7 +84,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showUploader, setShowUploader] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: "success" | "error" } | null>(null);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [guidelinesAccepted, setGuidelinesAccepted] = useState(false);
   const [figmaUrl, setFigmaUrl] = useState("");
@@ -95,7 +97,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
 
   useEffect(() => {
     if (!toast) return;
-    const t = window.setTimeout(() => setToast(null), 4000);
+    const t = window.setTimeout(() => setToast(null), 5000);
     return () => window.clearTimeout(t);
   }, [toast]);
 
@@ -106,6 +108,13 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".zip")) {
       setFileError("Only .zip files are allowed.");
+      return;
+    }
+    if (file.size > MAX_ZIP_SIZE_MB * 1024 * 1024) {
+      const msg = `File is too large (${formatBytes(file.size)}). The maximum allowed size is ${MAX_ZIP_SIZE_MB} MB.`;
+      setFileError(msg);
+      setToast({ message: msg, variant: "error" });
+      if (inputRef.current) inputRef.current.value = "";
       return;
     }
     setSelectedFile(file);
@@ -139,9 +148,18 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
       setGithubRepoUrl("");
       setHostedUrl("");
       setNote("");
-      setToast(`${selectedFile.name} submitted successfully!`);
-    } catch {
-      setFileError("Upload failed. Please try again.");
+      setToast({ message: `${selectedFile.name} submitted successfully!`, variant: "success" });
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "";
+      const isSizeError =
+        errMsg.includes("413") ||
+        errMsg.toLowerCase().includes("too large") ||
+        errMsg.toLowerCase().includes("request entity");
+      const displayMsg = isSizeError
+        ? `File is too large. The maximum allowed size is ${MAX_ZIP_SIZE_MB} MB. Please reduce your ZIP and try again.`
+        : "Upload failed. Please try again.";
+      setFileError(displayMsg);
+      setToast({ message: displayMsg, variant: "error" });
     } finally {
       setUploading(false);
       setProgress(0);
@@ -202,11 +220,17 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm space-y-4">
-      {/* Success toast */}
+      {/* Toast notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-600 dark:bg-green-700 px-5 py-3.5 text-sm font-medium text-white shadow-xl animate-in slide-in-from-bottom-4 duration-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          {toast}
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border px-5 py-3.5 text-sm font-medium text-white shadow-xl animate-in slide-in-from-bottom-4 duration-300 max-w-sm ${
+          toast.variant === "error"
+            ? "border-red-400/40 bg-red-600 dark:bg-red-700"
+            : "border-green-200 dark:border-green-900/50 bg-green-600 dark:bg-green-700"
+        }`}>
+          {toast.variant === "error"
+            ? <AlertCircle className="h-4 w-4 shrink-0" />
+            : <CheckCircle2 className="h-4 w-4 shrink-0" />}
+          <span className="flex-1">{toast.message}</span>
           <button onClick={() => setToast(null)} className="ml-1 opacity-70 hover:opacity-100">
             <X className="h-3.5 w-3.5" />
           </button>
