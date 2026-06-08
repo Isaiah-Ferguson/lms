@@ -791,6 +791,24 @@ export const reportsApi = {
   triggerClassReport(token: string): Promise<TriggerReportResponse> {
     return apiFetch<TriggerReportResponse>(`/api/reports/trigger/class`, { method: "POST" }, token);
   },
+
+  async downloadReport(id: string, token: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/api/reports/${id}/download`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download report.");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const disposition = res.headers.get("Content-Disposition");
+    const match = disposition?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+    a.download = match?.[1]?.replace(/['"]/g, "") ?? `report-${id}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 };
 
 export { ApiError };

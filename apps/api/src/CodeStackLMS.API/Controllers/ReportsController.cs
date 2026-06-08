@@ -1,8 +1,8 @@
+using CodeStackLMS.API.Services;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Reports.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-// StudentOptionDto is in CodeStackLMS.Application.Reports.DTOs
 
 namespace CodeStackLMS.API.Controllers;
 
@@ -12,10 +12,12 @@ namespace CodeStackLMS.API.Controllers;
 public class ReportsController : ControllerBase
 {
     private readonly IProgressReportService _reports;
+    private readonly WordDocumentGenerator _wordGen;
 
-    public ReportsController(IProgressReportService reports)
+    public ReportsController(IProgressReportService reports, WordDocumentGenerator wordGen)
     {
         _reports = reports;
+        _wordGen = wordGen;
     }
 
     [HttpGet]
@@ -60,6 +62,27 @@ public class ReportsController : ControllerBase
     {
         await _reports.PublishReportAsync(id, cancellationToken);
         return NoContent();
+    }
+
+    [HttpGet("{id:guid}/download")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadReport(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var report = await _reports.GetReportAsync(id, cancellationToken);
+        if (report is null) return NotFound();
+
+        var bytes = _wordGen.Generate(report);
+
+        var safeName = report.ReportType == "ClassSummary"
+            ? $"class-report-{report.WeekOf:yyyy-MM-dd}.docx"
+            : $"report-{(report.StudentName ?? "student").Replace(" ", "-")}-{report.WeekOf:yyyy-MM-dd}.docx";
+
+        return File(bytes,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            safeName);
     }
 
     [HttpPost("trigger")]

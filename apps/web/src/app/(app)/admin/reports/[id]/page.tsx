@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Loader2, AlertCircle, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, AlertCircle, FileText, Download } from "lucide-react";
 import { reportsApi, ApiError, type ProgressReportDetail } from "@/lib/api-client";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
@@ -58,6 +58,7 @@ export default function ReportDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!token || !id) return;
@@ -66,6 +67,18 @@ export default function ReportDetailPage() {
       .catch((e) => setError(e instanceof ApiError ? e.detail : "Failed to load report."))
       .finally(() => setLoading(false));
   }, [token, id]);
+
+  const handleDownload = async () => {
+    if (!token || !id || downloading) return;
+    setDownloading(true);
+    try {
+      await reportsApi.downloadReport(id, token);
+    } catch (e) {
+      setPublishMsg(e instanceof ApiError ? e.detail : "Download failed.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handlePublish = async () => {
     if (!token || !id || publishing) return;
@@ -129,23 +142,34 @@ export default function ReportDetailPage() {
             </div>
           </div>
 
-          {report.status === "Generated" && (
+          <div className="flex shrink-0 items-center gap-2">
             <button
-              onClick={handlePublish}
-              disabled={publishing}
-              className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-green-500 hover:bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors disabled:opacity-60"
+              onClick={handleDownload}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm transition-colors disabled:opacity-60"
             >
-              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              Publish
+              {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              Download Word
             </button>
-          )}
 
-          {report.status === "Published" && (
-            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1.5 text-sm font-semibold text-green-700 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4" />
-              Published
-            </span>
-          )}
+            {report.status === "Generated" && (
+              <button
+                onClick={handlePublish}
+                disabled={publishing}
+                className="inline-flex items-center gap-2 rounded-lg bg-green-500 hover:bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors disabled:opacity-60"
+              >
+                {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                Publish
+              </button>
+            )}
+
+            {report.status === "Published" && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1.5 text-sm font-semibold text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4" />
+                Published
+              </span>
+            )}
+          </div>
         </div>
 
         {publishMsg && (

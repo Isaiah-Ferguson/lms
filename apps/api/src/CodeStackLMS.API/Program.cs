@@ -1,5 +1,6 @@
 using System.Text;
 using CodeStackLMS.API.Middleware;
+using CodeStackLMS.API.Services;
 using CodeStackLMS.Infrastructure;
 using CodeStackLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,8 @@ builder.Services.AddControllers()
         opts.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
+
+builder.Services.AddSingleton<WordDocumentGenerator>();
 
 // Configure form options for file uploads
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
