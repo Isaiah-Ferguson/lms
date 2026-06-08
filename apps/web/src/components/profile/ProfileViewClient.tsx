@@ -61,6 +61,7 @@ export function ProfileViewClient({
           <EditProfileCard
             user={data.user}
             canEditProfile={data.permissions.canEditProfile}
+            isAdminView={isAdminViewingAnotherUser}
             onSave={async (updated) => {
               const token = getToken();
               if (!token) {
@@ -75,6 +76,7 @@ export function ProfileViewClient({
                   phoneNumber: updated.phoneNumber,
                   gitHubUsername: updated.gitHubUsername,
                   avatarBlobPath: updated.avatarBlobPath,
+                  ...(isAdminViewingAnotherUser && updated.email ? { email: updated.email } : {}),
                 },
                 token
               );
@@ -84,6 +86,7 @@ export function ProfileViewClient({
                 user: {
                   ...prev.user,
                   name: saved.name,
+                  email: saved.email ?? prev.user.email,
                   town: saved.town,
                   phoneNumber: saved.phoneNumber,
                   gitHubUsername: saved.gitHubUsername,

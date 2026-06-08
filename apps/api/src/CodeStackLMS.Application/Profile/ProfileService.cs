@@ -99,7 +99,8 @@ public class ProfileService : IProfileService
         string town,
         string phoneNumber,
         string gitHubUsername,
-        string? avatarBlobPath,
+        string? avatarBlobPath = null,
+        string? email = null,
         CancellationToken cancellationToken = default)
     {
         if (!Guid.TryParse(userId, out var parsedUserId))
@@ -128,6 +129,20 @@ public class ProfileService : IProfileService
         user.Town = trimmedTown;
         user.PhoneNumber = trimmedPhone;
         user.GitHubUsername = trimmedGitHub;
+
+        if (!string.IsNullOrWhiteSpace(email) && _currentUser.Role == "Admin")
+        {
+            var trimmedEmail = email.Trim().ToLowerInvariant();
+            if (!trimmedEmail.Contains('@'))
+                throw new ValidationException("Email address is invalid.");
+
+            var emailInUse = await _db.Users
+                .AnyAsync(u => u.Email.ToLower() == trimmedEmail && u.Id != parsedUserId, cancellationToken);
+            if (emailInUse)
+                throw new ValidationException("That email address is already in use by another account.");
+
+            user.Email = trimmedEmail;
+        }
         if (!string.IsNullOrEmpty(avatarBlobPath))
         {
             var newAvatarBlobPath = avatarBlobPath.Trim();

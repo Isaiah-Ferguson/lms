@@ -587,7 +587,7 @@ export const profileApi = {
 
   updateProfile(
     userId: string,
-    body: { name: string; town: string; phoneNumber: string; gitHubUsername: string; avatarBlobPath?: string | null },
+    body: { name: string; town: string; phoneNumber: string; gitHubUsername: string; avatarBlobPath?: string | null; email?: string },
     token: string
   ): Promise<ProfileUserResponse> {
     return apiFetch<ProfileUserResponse>(

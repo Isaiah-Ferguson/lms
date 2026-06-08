@@ -12,7 +12,8 @@ import type { ProfileUser } from "@/lib/profile-data";
 interface EditProfileCardProps {
   user: ProfileUser;
   canEditProfile: boolean;
-  onSave: (updated: Pick<ProfileUser, "name" | "town" | "phoneNumber" | "gitHubUsername" | "avatarUrl"> & { avatarBlobPath?: string | null }) => Promise<void>;
+  isAdminView?: boolean;
+  onSave: (updated: Pick<ProfileUser, "name" | "town" | "phoneNumber" | "gitHubUsername" | "avatarUrl"> & { avatarBlobPath?: string | null; email?: string }) => Promise<void>;
 }
 
 function initials(name: string): string {
@@ -24,8 +25,9 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCardProps) {
+export function EditProfileCard({ user, canEditProfile, isAdminView = false, onSave }: EditProfileCardProps) {
   const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
   const [town, setTown] = useState(user.town);
   const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber);
   const [gitHubUsername, setGitHubUsername] = useState(user.gitHubUsername);
@@ -114,6 +116,7 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
         gitHubUsername: gitHubUsername.trim(),
         avatarUrl: nextAvatarUrl,
         avatarBlobPath,
+        ...(isAdminView ? { email: email.trim() } : {}),
       });
 
       setAvatarFile(null);
@@ -178,7 +181,13 @@ export function EditProfileCard({ user, canEditProfile, onSave }: EditProfileCar
               onChange={(event) => setName(event.target.value)}
               disabled={!canEditProfile}
             />
-            <Input label="Email" value={user.email} disabled />
+            <Input
+              label="Email"
+              value={isAdminView ? email : user.email}
+              onChange={isAdminView ? (event) => setEmail(event.target.value) : undefined}
+              disabled={!isAdminView}
+              type="email"
+            />
             <Input
               label="Town"
               value={town}

@@ -58,6 +58,7 @@ public class ProfileController : ControllerBase
             request.PhoneNumber,
             request.GitHubUsername,
             request.AvatarBlobPath,
+            request.Email,
             cancellationToken);
 
         return Ok(updated);
@@ -143,7 +144,8 @@ public sealed record UpdateProfileRequest(
     string Town,
     string PhoneNumber,
     string GitHubUsername,
-    string? AvatarBlobPath = null);
+    string? AvatarBlobPath = null,
+    string? Email = null);
 
 public sealed record GenerateAvatarUploadSlotRequest(
     string FileName,
