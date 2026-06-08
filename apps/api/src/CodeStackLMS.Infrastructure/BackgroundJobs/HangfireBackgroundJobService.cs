@@ -22,4 +22,16 @@ public class HangfireBackgroundJobService : IBackgroundJobService
         return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
             job.ExecuteAsync(weekOf, CancellationToken.None));
     }
+
+    public string EnqueueSingleStudentReport(Guid studentId, DateTime weekOf)
+    {
+        return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
+            job.ExecuteSingleStudentAsync(studentId, weekOf, CancellationToken.None));
+    }
+
+    public string EnqueueClassReport(DateTime weekOf)
+    {
+        return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
+            job.ExecuteClassReportAsync(weekOf, CancellationToken.None));
+    }
 }

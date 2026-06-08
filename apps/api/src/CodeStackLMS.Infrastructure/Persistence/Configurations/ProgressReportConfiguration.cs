@@ -13,7 +13,11 @@ public class ProgressReportConfiguration : IEntityTypeConfiguration<ProgressRepo
         builder.HasKey(r => r.Id);
 
         builder.Property(r => r.StudentId)
-            .IsRequired();
+            .IsRequired(false);
+
+        builder.Property(r => r.ReportType)
+            .IsRequired()
+            .HasConversion<int>();
 
         builder.Property(r => r.WeekOf)
             .IsRequired();
@@ -47,9 +51,8 @@ public class ProgressReportConfiguration : IEntityTypeConfiguration<ProgressRepo
         builder.HasIndex(r => r.WeekOf)
             .HasDatabaseName("IX_ProgressReports_WeekOf");
 
-        builder.HasIndex(r => new { r.StudentId, r.WeekOf })
-            .IsUnique()
-            .HasDatabaseName("IX_ProgressReports_StudentId_WeekOf");
+        builder.HasIndex(r => new { r.StudentId, r.WeekOf, r.ReportType })
+            .HasDatabaseName("IX_ProgressReports_StudentId_WeekOf_ReportType");
 
         // Relationships
         builder.HasOne(r => r.Student)

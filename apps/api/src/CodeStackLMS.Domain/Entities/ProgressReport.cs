@@ -5,7 +5,8 @@ namespace CodeStackLMS.Domain.Entities;
 
 public class ProgressReport : BaseEntity
 {
-    public Guid StudentId { get; set; }
+    public Guid? StudentId { get; set; }
+    public ReportType ReportType { get; set; } = ReportType.StudentProgress;
     public DateTime WeekOf { get; set; }
     public ProgressReportStatus Status { get; set; } = ProgressReportStatus.Pending;
     public string? Content { get; set; }
@@ -14,5 +15,5 @@ public class ProgressReport : BaseEntity
     public string? FailureReason { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public User Student { get; set; } = null!;
+    public User? Student { get; set; }
 }

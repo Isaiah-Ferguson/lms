@@ -49,6 +49,7 @@ import type {
   ProgressReportSummary,
   ProgressReportDetail,
   TriggerReportResponse,
+  StudentOption,
 } from "@/types";
 
 // Re-export all types from @/types so callers can import them either from
@@ -759,9 +760,12 @@ export const commentsApi = {
 // ─── Reports API ─────────────────────────────────────────────────────────────
 
 export const reportsApi = {
-  getReports(token: string, weekOf?: string): Promise<ProgressReportSummary[]> {
-    const params = weekOf ? `?weekOf=${encodeURIComponent(weekOf)}` : "";
-    return apiFetch<ProgressReportSummary[]>(`/api/reports${params}`, {}, token);
+  getReports(token: string, weekOf?: string, reportType?: string): Promise<ProgressReportSummary[]> {
+    const p = new URLSearchParams();
+    if (weekOf) p.set("weekOf", weekOf);
+    if (reportType) p.set("reportType", reportType);
+    const qs = p.toString() ? `?${p.toString()}` : "";
+    return apiFetch<ProgressReportSummary[]>(`/api/reports${qs}`, {}, token);
   },
 
   getReport(id: string, token: string): Promise<ProgressReportDetail> {
@@ -772,8 +776,20 @@ export const reportsApi = {
     return apiFetch<void>(`/api/reports/${id}/publish`, { method: "PATCH" }, token);
   },
 
+  getStudents(token: string): Promise<StudentOption[]> {
+    return apiFetch<StudentOption[]>(`/api/reports/students`, {}, token);
+  },
+
   triggerWeeklyRun(token: string): Promise<TriggerReportResponse> {
     return apiFetch<TriggerReportResponse>(`/api/reports/trigger`, { method: "POST" }, token);
+  },
+
+  triggerStudentReport(studentId: string, token: string): Promise<TriggerReportResponse> {
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/student/${studentId}`, { method: "POST" }, token);
+  },
+
+  triggerClassReport(token: string): Promise<TriggerReportResponse> {
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/class`, { method: "POST" }, token);
   },
 };
 

@@ -19,6 +19,7 @@ public sealed class ProgressReportService : IProgressReportService
 
     public async Task<IEnumerable<ProgressReportSummaryDto>> GetReportsAsync(
         DateTime? weekOf,
+        string? reportType,
         CancellationToken cancellationToken = default)
     {
         var query = _db.ProgressReports
@@ -28,15 +29,20 @@ public sealed class ProgressReportService : IProgressReportService
         if (weekOf.HasValue)
             query = query.Where(r => r.WeekOf.Date == weekOf.Value.Date);
 
+        if (!string.IsNullOrWhiteSpace(reportType) &&
+            Enum.TryParse<ReportType>(reportType, true, out var rt))
+            query = query.Where(r => r.ReportType == rt);
+
         var reports = await query
             .OrderByDescending(r => r.WeekOf)
-            .ThenBy(r => r.Student.Name)
+            .ThenBy(r => r.Student != null ? r.Student.Name : "")
             .ToListAsync(cancellationToken);
 
         return reports.Select(r => new ProgressReportSummaryDto(
             r.Id,
             r.StudentId,
-            r.Student.Name,
+            r.Student?.Name,
+            r.ReportType.ToString(),
             r.WeekOf,
             r.Status.ToString(),
             r.Model,
@@ -57,7 +63,8 @@ public sealed class ProgressReportService : IProgressReportService
         return new ProgressReportDetailDto(
             r.Id,
             r.StudentId,
-            r.Student.Name,
+            r.Student?.Name,
+            r.ReportType.ToString(),
             r.WeekOf,
             r.Status.ToString(),
             r.Content,
@@ -84,5 +91,30 @@ public sealed class ProgressReportService : IProgressReportService
         var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
         var jobId = _jobs.EnqueueWeeklyProgressReport(weekOf);
         return Task.FromResult(jobId);
+    }
+
+    public Task<string> TriggerStudentReportAsync(Guid studentId, CancellationToken cancellationToken = default)
+    {
+        var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
+        var jobId = _jobs.EnqueueSingleStudentReport(studentId, weekOf);
+        return Task.FromResult(jobId);
+    }
+
+    public Task<string> TriggerClassReportAsync(CancellationToken cancellationToken = default)
+    {
+        var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
+        var jobId = _jobs.EnqueueClassReport(weekOf);
+        return Task.FromResult(jobId);
+    }
+
+    public async Task<IEnumerable<StudentOptionDto>> GetStudentsAsync(CancellationToken cancellationToken = default)
+    {
+        var students = await _db.Users
+            .Where(u => u.IsActive && u.Role == UserRole.Student)
+            .OrderBy(u => u.Name)
+            .Select(u => new StudentOptionDto(u.Id, u.Name))
+            .ToListAsync(cancellationToken);
+
+        return students;
     }
 }

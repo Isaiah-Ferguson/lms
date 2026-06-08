@@ -2,6 +2,7 @@ using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Reports.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+// StudentOptionDto is in CodeStackLMS.Application.Reports.DTOs
 
 namespace CodeStackLMS.API.Controllers;
 
@@ -21,10 +22,19 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ProgressReportSummaryDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetReports(
         [FromQuery] DateTime? weekOf,
+        [FromQuery] string? reportType,
         CancellationToken cancellationToken)
     {
-        var results = await _reports.GetReportsAsync(weekOf, cancellationToken);
+        var results = await _reports.GetReportsAsync(weekOf, reportType, cancellationToken);
         return Ok(results);
+    }
+
+    [HttpGet("students")]
+    [ProducesResponseType(typeof(IEnumerable<StudentOptionDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStudents(CancellationToken cancellationToken)
+    {
+        var students = await _reports.GetStudentsAsync(cancellationToken);
+        return Ok(students);
     }
 
     [HttpGet("{id:guid}")]
@@ -59,5 +69,25 @@ public class ReportsController : ControllerBase
     {
         var jobId = await _reports.TriggerWeeklyRunAsync(cancellationToken);
         return Accepted(new { jobId, message = "Weekly progress report job enqueued." });
+    }
+
+    [HttpPost("trigger/student/{studentId:guid}")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
+    public async Task<IActionResult> TriggerStudentReport(
+        [FromRoute] Guid studentId,
+        CancellationToken cancellationToken)
+    {
+        var jobId = await _reports.TriggerStudentReportAsync(studentId, cancellationToken);
+        return Accepted(new { jobId, message = "Student report job enqueued." });
+    }
+
+    [HttpPost("trigger/class")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
+    public async Task<IActionResult> TriggerClassReport(CancellationToken cancellationToken)
+    {
+        var jobId = await _reports.TriggerClassReportAsync(cancellationToken);
+        return Accepted(new { jobId, message = "Class summary report job enqueued." });
     }
 }
