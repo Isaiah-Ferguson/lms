@@ -3,6 +3,7 @@ using Azure.Storage;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.AdminParticipants;
 using CodeStackLMS.Application.Assignments;
+using CodeStackLMS.Application.Attendance;
 using CodeStackLMS.Application.Auth;
 using CodeStackLMS.Application.BackgroundJobs;
 using CodeStackLMS.Application.Comments;
@@ -108,6 +109,7 @@ public static class DependencyInjection
         services.AddScoped<ICourseDetailService, CourseDetailService>();
         services.AddScoped<IAssignmentService, AssignmentService>();
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IAttendanceService, AttendanceService>();
 
         // ── Claude / Anthropic ─────────────────────────────────────────────────
         services.Configure<AnthropicOptions>(opts =>

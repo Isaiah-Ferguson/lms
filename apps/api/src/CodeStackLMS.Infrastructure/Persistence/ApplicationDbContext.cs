@@ -37,6 +37,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<FeedbackComment> FeedbackComments => Set<FeedbackComment>();
     public DbSet<ProgressReport> ProgressReports => Set<ProgressReport>();
+    public DbSet<Attendance> Attendances => Set<Attendance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
