@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
   FileText, RefreshCw, ChevronRight, AlertCircle, CheckCircle2,
@@ -206,6 +206,43 @@ export default function ReportsPage() {
   const [triggering, setTriggering] = useState(false);
   const [triggerMsg, setTriggerMsg] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setIsPolling(false);
+  }, []);
+
+  const silentRefresh = useCallback(async (activeTab: Tab): Promise<boolean> => {
+    if (!token) return false;
+    try {
+      const data = await reportsApi.getReports(
+        token, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"
+      );
+      setReports(data);
+      return data.some(r => r.status === "Pending" || r.status === "Generating");
+    } catch {
+      return false;
+    }
+  }, [token]);
+
+  const startPolling = useCallback((activeTab: Tab) => {
+    stopPolling();
+    setIsPolling(true);
+    let count = 0;
+    pollingRef.current = setInterval(async () => {
+      count++;
+      if (count > 40) { stopPolling(); return; }
+      const stillRunning = await silentRefresh(activeTab);
+      if (!stillRunning) stopPolling();
+    }, 3000);
+  }, [silentRefresh, stopPolling]);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
 
   const load = useCallback(async (activeTab: Tab) => {
     if (!token) return;
@@ -235,7 +272,7 @@ export default function ReportsPage() {
     try {
       const res = await reportsApi.triggerWeeklyRun(token);
       setTriggerMsg(`All-student job enqueued (ID: ${res.jobId}). Reports will appear shortly.`);
-      setTimeout(() => load(tab), 3000);
+      setTimeout(() => startPolling(tab), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -250,7 +287,7 @@ export default function ReportsPage() {
     try {
       const res = await reportsApi.triggerClassReport(token);
       setTriggerMsg(`Class report job enqueued (ID: ${res.jobId}). Report will appear shortly.`);
-      setTimeout(() => load(tab), 3000);
+      setTimeout(() => startPolling(tab), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -267,7 +304,7 @@ export default function ReportsPage() {
       const res = await reportsApi.triggerStudentReport(studentId, token);
       const name = students.find(s => s.id === studentId)?.name ?? studentId;
       setTriggerMsg(`Report for ${name} enqueued (ID: ${res.jobId}). Will appear shortly.`);
-      setTimeout(() => load(tab), 3000);
+      setTimeout(() => startPolling(tab), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -290,12 +327,12 @@ export default function ReportsPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => load(tab)}
+            onClick={() => { stopPolling(); load(tab); }}
             disabled={loading}
             className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            <RefreshCw className={`h-4 w-4 ${loading || isPolling ? "animate-spin" : ""}`} />
+            {isPolling ? "Updating…" : "Refresh"}
           </button>
 
           {tab === "student" && (
