@@ -92,7 +92,7 @@ export function FiltersBar({
         </select>
 
         {/* Count */}
-        <span className="whitespace-nowrap text-xs text-gray-600 dark:text-slate-400">
+        <span className="whitespace-nowrap text-xs text-gray-600 dark:text-slate-800">
           {filteredCount} / {totalCount}
         </span>
       </div>

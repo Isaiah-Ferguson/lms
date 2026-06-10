@@ -133,7 +133,7 @@ function ReportTable({ reports }: { reports: ProgressReportSummary[] }) {
               <h2 className="text-base font-bold text-gray-800 dark:text-slate-200">
                 Week of {formatDate(week)}
               </h2>
-              <span className="text-xs text-gray-400 dark:text-slate-500">
+              <span className="text-xs text-gray-400 dark:text-slate-800">
                 {generated}/{rows.length} generated{failed > 0 ? ` · ${failed} failed` : ""}
               </span>
             </div>
