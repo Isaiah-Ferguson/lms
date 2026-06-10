@@ -9,3 +9,4 @@ export * from "./assignment";
 export * from "./lesson";
 export * from "./comment";
 export * from "./reports";
+export * from "./attendance";

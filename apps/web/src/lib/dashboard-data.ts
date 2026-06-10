@@ -85,6 +85,7 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
   // Admin-only navigation
   if (data.permissions.canManageYears) {
     nav.push({ label: "Participants", href: "/admin/participants", icon: "users" });
+    nav.push({ label: "Attendance", href: "/admin/attendance", icon: "attendance" });
     nav.push({ label: "Admin Grades", href: "/admin/grades", icon: "admingrades" });
     nav.push({ label: "Reports", href: "/admin/reports", icon: "reports" });
   }

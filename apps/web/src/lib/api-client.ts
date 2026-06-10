@@ -50,6 +50,8 @@ import type {
   ProgressReportDetail,
   TriggerReportResponse,
   StudentOption,
+  AttendanceGrid,
+  SaveAttendanceRequest,
 } from "@/types";
 
 // Re-export all types from @/types so callers can import them either from
@@ -808,6 +810,23 @@ export const reportsApi = {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  },
+};
+
+// ─── Attendance API (Admin) ──────────────────────────────────────────────────
+
+export const attendanceApi = {
+  getMonthGrid(courseId: string, year: number, month: number, token: string): Promise<AttendanceGrid> {
+    const qs = new URLSearchParams({ courseId, year: String(year), month: String(month) });
+    return apiFetch<AttendanceGrid>(`/api/admin/attendance?${qs.toString()}`, {}, token);
+  },
+
+  saveAttendance(body: SaveAttendanceRequest, token: string): Promise<void> {
+    return apiFetch<void>(
+      "/api/admin/attendance",
+      { method: "POST", body: JSON.stringify(body) },
+      token
+    );
   },
 };
 
