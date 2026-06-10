@@ -321,7 +321,7 @@ export default function ReportsPage() {
             <FileText className="h-7 w-7 text-brand-500" />
             Progress Reports
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-800">
             AI-generated reports. Review before sharing.
           </p>
         </div>

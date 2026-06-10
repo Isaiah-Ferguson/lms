@@ -179,25 +179,28 @@ export default function AttendancePage() {
             <CalendarCheck className="h-7 w-7 text-brand-500" />
             Attendance
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-800">
             Click a cell to cycle status. Tue/Thu are remote days, M/W/F are in person.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Level selector */}
-          <select
-            value={courseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-            {levels.length === 0 && <option value="">No levels</option>}
-            {levels.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.yearLabel} — {l.label}
-              </option>
-            ))}
-          </select>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-slate-800">
+            Level
+            <select
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              {levels.length === 0 && <option value="">No levels</option>}
+              {levels.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.yearLabel} — {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
           {/* Month nav */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-1">
@@ -232,7 +235,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-slate-700">
         {LEGEND.map((l) => (
           <span key={l.code} className="inline-flex items-center gap-1.5">
             <span className={`inline-flex h-5 w-5 items-center justify-center rounded font-bold ${CODE_STYLE[l.code]}`}>
@@ -301,7 +304,7 @@ export default function AttendancePage() {
                           onClick={() => toggleCell(s.studentId, d.date)}
                           className={`h-7 w-7 rounded text-xs font-bold transition-colors ${
                             code === ""
-                              ? "text-gray-300 hover:bg-gray-100 dark:text-slate-600 dark:hover:bg-slate-800"
+                              ? "text-gray-300 hover:bg-gray-100 dark:text-white-600 dark:hover:bg-slate-800"
                               : CODE_STYLE[code]
                           }`}
                           title={`${s.name} · ${d.date}`}
