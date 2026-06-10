@@ -22,6 +22,7 @@ public class WeeklyProgressReportJob
         ## Summary
         ## Academic Performance
         ## Submission Activity
+        ## Attendance
         ## Probation Status
         ## Recommendations
         Keep the total length under 400 words. Base your narrative only on the data provided — do not invent facts.
@@ -34,6 +35,7 @@ public class WeeklyProgressReportJob
         ## Class Overview
         ## Grade Distribution
         ## Submission & Engagement
+        ## Attendance
         ## Students of Concern
         ## Positive Highlights
         ## Recommendations
@@ -68,6 +70,16 @@ public class WeeklyProgressReportJob
             .Include(u => u.CourseEnrollments)
                 .ThenInclude(e => e.Course)
             .ToListAsync(cancellationToken);
+
+        var attendanceCutoff = DateOnly.FromDateTime(weekStart.AddDays(-30));
+        var attendanceThrough = DateOnly.FromDateTime(weekStart.AddDays(6));
+        var allAttendanceRecords = await _db.Attendances
+            .AsNoTracking()
+            .Where(a => a.Date >= attendanceCutoff && a.Date <= attendanceThrough)
+            .ToListAsync(cancellationToken);
+        var attendanceByStudent = allAttendanceRecords
+            .GroupBy(a => a.StudentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         int generated = 0;
         int failed = 0;
@@ -108,7 +120,8 @@ public class WeeklyProgressReportJob
             try
             {
                 var activeCourse = GetActiveCourse(student.CourseEnrollments);
-                var prompt = BuildStudentPrompt(student, weekStart, activeCourse);
+                attendanceByStudent.TryGetValue(student.Id, out var studentAttendance);
+                var prompt = BuildStudentPrompt(student, weekStart, activeCourse, studentAttendance ?? new List<Attendance>());
                 report.Content = await _claude.GenerateAsync(StudentSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
                 report.Status = ProgressReportStatus.Generated;
                 report.GeneratedAt = DateTime.UtcNow;
@@ -171,10 +184,17 @@ public class WeeklyProgressReportJob
         if (existingReport is null) _db.ProgressReports.Add(report);
         await _db.SaveChangesAsync(cancellationToken);
 
+        var singleCutoff = DateOnly.FromDateTime(weekStart.AddDays(-30));
+        var singleThrough = DateOnly.FromDateTime(weekStart.AddDays(6));
+        var singleStudentAttendance = await _db.Attendances
+            .AsNoTracking()
+            .Where(a => a.StudentId == studentId && a.Date >= singleCutoff && a.Date <= singleThrough)
+            .ToListAsync(cancellationToken);
+
         try
         {
             var activeCourse = GetActiveCourse(student.CourseEnrollments);
-            var prompt = BuildStudentPrompt(student, weekStart, activeCourse);
+            var prompt = BuildStudentPrompt(student, weekStart, activeCourse, singleStudentAttendance);
             report.Content = await _claude.GenerateAsync(StudentSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
             report.Status = ProgressReportStatus.Generated;
             report.GeneratedAt = DateTime.UtcNow;
@@ -231,7 +251,17 @@ public class WeeklyProgressReportJob
                 .Include(u => u.CourseEnrollments).ThenInclude(e => e.Course)
                 .ToListAsync(cancellationToken);
 
-            var prompt = BuildClassPrompt(students, weekStart);
+            var classCutoff = DateOnly.FromDateTime(weekStart.AddDays(-30));
+            var classThrough = DateOnly.FromDateTime(weekStart.AddDays(6));
+            var classAttendanceRecs = await _db.Attendances
+                .AsNoTracking()
+                .Where(a => a.Date >= classCutoff && a.Date <= classThrough)
+                .ToListAsync(cancellationToken);
+            var classAttendanceByStudent = classAttendanceRecs
+                .GroupBy(a => a.StudentId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var prompt = BuildClassPrompt(students, weekStart, classAttendanceByStudent);
             report.Content = await _claude.GenerateAsync(ClassSystemPrompt, prompt, _options.DefaultModel, cancellationToken);
             report.Status = ProgressReportStatus.Generated;
             report.GeneratedAt = DateTime.UtcNow;
@@ -267,7 +297,7 @@ public class WeeklyProgressReportJob
 
     // ── Student prompt ────────────────────────────────────────────────────────
 
-    private static string BuildStudentPrompt(User student, DateTime weekStart, Course? activeCourse)
+    private static string BuildStudentPrompt(User student, DateTime weekStart, Course? activeCourse, List<Attendance> recentAttendance)
     {
         // Filter all submission data to only the student's highest-level enrolled course.
         // If no active course is determined, fall back to all submissions.
@@ -321,6 +351,39 @@ public class WeeklyProgressReportJob
         sb.AppendLine($"Submissions in last 30 days: {recentSubmissions.Count}");
         sb.AppendLine($"Last submission date: {(lastSubmission != null ? lastSubmission.CreatedAt.ToString("yyyy-MM-dd") : "Never")}");
         sb.AppendLine();
+        sb.AppendLine("=== Attendance (last 30 days, current level only) ===");
+        var courseAttendance = activeCourse is not null
+            ? recentAttendance.Where(a => a.CourseId == activeCourse.Id).ToList()
+            : recentAttendance;
+        int attPresent   = courseAttendance.Count(a => a.Status == AttendanceStatus.Present);
+        int attLate      = courseAttendance.Count(a => a.Status == AttendanceStatus.Late);
+        int attExcused   = courseAttendance.Count(a => a.Status == AttendanceStatus.Excused);
+        int attUnexcused = courseAttendance.Count(a => a.Status == AttendanceStatus.Unexcused);
+        int attZoom      = courseAttendance.Count(a => a.Status == AttendanceStatus.Zoom);
+        int attTotal     = courseAttendance.Count;
+        int attAttended  = attPresent + attLate + attZoom;
+        if (attTotal == 0)
+        {
+            sb.AppendLine("No attendance data recorded for this period.");
+        }
+        else
+        {
+            double attRate = (double)attAttended / attTotal * 100;
+            int inPersonTotal    = courseAttendance.Count(a => a.SessionType == SessionType.InPerson);
+            int inPersonAttended = courseAttendance.Count(a => a.SessionType == SessionType.InPerson && (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late || a.Status == AttendanceStatus.Zoom));
+            int remoteTotal      = courseAttendance.Count(a => a.SessionType == SessionType.Remote);
+            int remoteAttended   = courseAttendance.Count(a => a.SessionType == SessionType.Remote && (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late || a.Status == AttendanceStatus.Zoom));
+            sb.AppendLine($"Total class days marked: {attTotal}");
+            sb.AppendLine($"Present (P): {attPresent}  |  Late (L): {attLate}  |  Excused (E): {attExcused}  |  Unexcused (U): {attUnexcused}  |  Zoom (Z): {attZoom}");
+            sb.AppendLine($"Attendance rate (P+L+Z = attended): {attRate:F1}%");
+            if (inPersonTotal > 0)
+                sb.AppendLine($"In-person days: {inPersonAttended}/{inPersonTotal} attended");
+            if (remoteTotal > 0)
+                sb.AppendLine($"Remote days: {remoteAttended}/{remoteTotal} attended");
+            if (attUnexcused >= 3)
+                sb.AppendLine($"ALERT: {attUnexcused} unexcused absence(s) — may require follow-up.");
+        }
+        sb.AppendLine();
         sb.AppendLine("=== Probation Status ===");
         sb.AppendLine($"On probation: {(student.IsOnProbation ? "YES" : "No")}");
         if (student.IsOnProbation && !string.IsNullOrWhiteSpace(student.ProbationReason))
@@ -329,7 +392,7 @@ public class WeeklyProgressReportJob
         return sb.ToString();
     }
 
-    private static string BuildClassPrompt(List<User> students, DateTime weekStart)
+    private static string BuildClassPrompt(List<User> students, DateTime weekStart, Dictionary<Guid, List<Attendance>> attendanceByStudent)
     {
         // For each student, scope submissions to their highest-level enrolled course only.
         var studentData = students.Select(s =>
@@ -423,6 +486,49 @@ public class WeeklyProgressReportJob
         sb.AppendLine($"Students on probation: {studentsOnProbation.Count}");
         foreach (var s in studentsOnProbation)
             sb.AppendLine($"  - {s}");
+        sb.AppendLine();
+        sb.AppendLine("=== Attendance (last 30 days, scoped to active level) ===");
+        var attendanceSummaries = studentData.Select(x =>
+        {
+            var recs = attendanceByStudent.TryGetValue(x.Student.Id, out var a) ? a : new List<Attendance>();
+            var scoped = x.ActiveCourse is not null
+                ? recs.Where(r => r.CourseId == x.ActiveCourse.Id).ToList()
+                : recs;
+            int total    = scoped.Count;
+            int attended = scoped.Count(r => r.Status == AttendanceStatus.Present || r.Status == AttendanceStatus.Late || r.Status == AttendanceStatus.Zoom);
+            int unexcused = scoped.Count(r => r.Status == AttendanceStatus.Unexcused);
+            double rate  = total > 0 ? (double)attended / total * 100 : -1;
+            return (Name: x.Student.Name, Level: x.ActiveCourse?.Title ?? "Unknown", Total: total, Attended: attended, Unexcused: unexcused, Rate: rate);
+        }).ToList();
+        var withData = attendanceSummaries.Where(x => x.Total > 0).ToList();
+        if (withData.Count == 0)
+        {
+            sb.AppendLine("No attendance data recorded for this period.");
+        }
+        else
+        {
+            double classAttRate = withData.Average(x => x.Rate);
+            int attExcellent  = withData.Count(x => x.Rate >= 90);
+            int attGood       = withData.Count(x => x.Rate >= 75 && x.Rate < 90);
+            int attConcerning = withData.Count(x => x.Rate < 75);
+            var multiUnexcused = withData
+                .Where(x => x.Unexcused >= 2)
+                .OrderByDescending(x => x.Unexcused)
+                .Take(10)
+                .ToList();
+            sb.AppendLine($"Class average attendance rate: {classAttRate:F1}%");
+            sb.AppendLine($"Distribution — Excellent (≥90%): {attExcellent}  |  Good (75-89%): {attGood}  |  Concerning (<75%): {attConcerning}");
+            if (multiUnexcused.Count > 0)
+            {
+                sb.AppendLine($"Students with 2+ unexcused absences ({multiUnexcused.Count}):");
+                foreach (var x in multiUnexcused)
+                    sb.AppendLine($"  - {x.Name} ({x.Level}): {x.Unexcused} unexcused, {x.Rate:F1}% overall");
+            }
+            else
+            {
+                sb.AppendLine("No students with multiple unexcused absences.");
+            }
+        }
         sb.AppendLine();
         sb.AppendLine("=== Top Performers (scoped to active level) ===");
         if (topStudents.Any())
