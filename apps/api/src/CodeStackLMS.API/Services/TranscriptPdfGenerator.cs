@@ -144,15 +144,44 @@ public sealed class TranscriptPdfGenerator
                 col.Item().Row(r =>
                 {
                     r.RelativeItem().Text("Cumulative GPA").Bold();
-                    r.ConstantItem(60).AlignRight().Text(t.OverallGpa.ToString("0.00"))
+                    r.ConstantItem(70).AlignRight().Text(t.OverallGpa.ToString("0.00"))
                         .FontSize(13).Bold().FontColor(AccentColor);
                 });
                 col.Item().PaddingTop(4).Row(r =>
                 {
                     r.RelativeItem().Text("Assignments Graded").FontColor(MutedColor);
-                    r.ConstantItem(60).AlignRight().Text($"{t.TotalGradedCount} / {t.TotalCount}")
+                    r.ConstantItem(70).AlignRight().Text($"{t.TotalGradedCount} / {t.TotalCount}")
                         .FontColor(MutedColor);
                 });
+
+                if (t.ClassRank.HasValue && t.ClassSize.HasValue)
+                {
+                    col.Item().PaddingTop(4).Row(r =>
+                    {
+                        r.RelativeItem().Text("Class Rank").Bold();
+                        r.ConstantItem(70).AlignRight().Text($"{t.ClassRank} of {t.ClassSize}").Bold();
+                    });
+                }
+
+                if (t.ClassSize.HasValue)
+                {
+                    col.Item().PaddingTop(4).Row(r =>
+                    {
+                        r.RelativeItem().Text("Class Size").FontColor(MutedColor);
+                        r.ConstantItem(70).AlignRight().Text(t.ClassSize.ToString())
+                            .FontColor(MutedColor);
+                    });
+                }
+
+                if (!string.IsNullOrWhiteSpace(t.CohortName))
+                {
+                    col.Item().PaddingTop(4).Row(r =>
+                    {
+                        r.RelativeItem().Text("Cohort").FontColor(MutedColor);
+                        r.ConstantItem(110).AlignRight().Text(t.CohortName)
+                            .FontColor(MutedColor);
+                    });
+                }
             });
         });
     }

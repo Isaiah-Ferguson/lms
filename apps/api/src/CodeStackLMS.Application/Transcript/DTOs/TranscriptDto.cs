@@ -8,6 +8,9 @@ public record TranscriptDto(
     double OverallGpa,
     int TotalGradedCount,
     int TotalCount,
+    string? CohortName,
+    int? ClassSize,
+    int? ClassRank,
     DateTime GeneratedAt);
 
 public record TranscriptCourseDto(
