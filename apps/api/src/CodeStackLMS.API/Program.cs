@@ -30,6 +30,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddSingleton<WordDocumentGenerator>();
+builder.Services.AddSingleton<TranscriptPdfGenerator>();
 
 // Configure form options for file uploads
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, FileDown, Loader2 } from "lucide-react";
 import { GradesSummaryCard } from "@/components/profile/GradesSummaryCard";
 import { EditProfileCard } from "@/components/profile/EditProfileCard";
 import { EnrollmentList } from "@/components/profile/EnrollmentList";
@@ -11,7 +11,7 @@ import { AdminNotesCard } from "@/components/profile/AdminNotesCard";
 import { ProbationToggleCard } from "@/components/profile/ProbationToggleCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { ProbationBanner } from "@/components/profile/ProbationBanner";
-import { profileApi } from "@/lib/api-client";
+import { profileApi, transcriptApi, ApiError } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import type { ProfileData } from "@/lib/profile-data";
 
@@ -30,6 +30,26 @@ export function ProfileViewClient({
 }: ProfileViewClientProps) {
   const router = useRouter();
   const [data, setData] = useState<ProfileData>(initialData);
+  const [downloadingTranscript, setDownloadingTranscript] = useState(false);
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
+
+  const handleDownloadTranscript = async () => {
+    if (downloadingTranscript) return;
+    setTranscriptError(null);
+    const token = getToken();
+    if (!token) {
+      setTranscriptError("You must be signed in to download a transcript.");
+      return;
+    }
+    setDownloadingTranscript(true);
+    try {
+      await transcriptApi.download(data.user.id, token);
+    } catch (err) {
+      setTranscriptError(err instanceof ApiError ? err.detail : "Could not download transcript.");
+    } finally {
+      setDownloadingTranscript(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -39,13 +59,34 @@ export function ProfileViewClient({
           <p className="mt-1 text-sm text-gray-500 dark:text-slate-200">{subtitle}</p>
         </div>
 
-        {isAdminViewingAnotherUser && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 dark:bg-violet-900/30 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Viewing as Admin
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleDownloadTranscript}
+            disabled={downloadingTranscript}
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-60"
+          >
+            {downloadingTranscript ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <FileDown className="h-4 w-4" aria-hidden="true" />
+            )}
+            {downloadingTranscript ? "Preparing…" : "Get Transcript"}
+          </button>
+
+          {isAdminViewingAnotherUser && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 dark:bg-violet-900/30 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Viewing as Admin
+            </span>
+          )}
+        </div>
       </header>
+
+      {transcriptError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+          {transcriptError}
+        </div>
+      )}
 
       {data.user.isOnProbation && (
         <ProbationBanner reason={data.user.probationReason} />

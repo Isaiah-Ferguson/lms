@@ -813,6 +813,28 @@ export const reportsApi = {
   },
 };
 
+// ─── Transcript API ───────────────────────────────────────────────────────────
+
+export const transcriptApi = {
+  async download(userId: string, token: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/api/transcript/${userId}/download`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download transcript.");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const disposition = res.headers.get("Content-Disposition");
+    const match = disposition?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+    a.download = match?.[1]?.replace(/['"]/g, "") ?? `transcript-${userId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+};
+
 // ─── Attendance API (Admin) ──────────────────────────────────────────────────
 
 export const attendanceApi = {

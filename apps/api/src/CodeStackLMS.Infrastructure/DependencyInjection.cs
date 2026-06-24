@@ -13,6 +13,7 @@ using CodeStackLMS.Application.Instructor;
 using CodeStackLMS.Application.Lessons;
 using CodeStackLMS.Application.Profile;
 using CodeStackLMS.Application.Submissions;
+using CodeStackLMS.Application.Transcript;
 using CodeStackLMS.Infrastructure.AI;
 using CodeStackLMS.Infrastructure.BackgroundJobs;
 using CodeStackLMS.Infrastructure.Email;
@@ -103,6 +104,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminParticipantsService, AdminParticipantsService>();
         services.AddScoped<IHomeService, HomeService>();
         services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<ITranscriptService, TranscriptService>();
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IInstructorService, InstructorService>();
         services.AddScoped<ILessonService, LessonService>();
