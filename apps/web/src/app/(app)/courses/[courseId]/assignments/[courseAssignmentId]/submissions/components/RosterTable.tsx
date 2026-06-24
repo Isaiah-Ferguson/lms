@@ -26,14 +26,14 @@ interface RosterTableProps {
 function statusBadge(status: AssignmentRosterStatus, isLate: boolean): React.ReactNode {
   // When late, recolor the pill red so the overdue state is obvious at a glance.
   const map: Record<AssignmentRosterStatus, { label: string; cls: string }> = {
-    NotSubmitted: { label: "Not Submitted", cls: "bg-gray-100 text-gray-600" },
-    Submitted:    { label: "Submitted",     cls: "bg-blue-100 text-blue-700" },
-    NeedsGrading: { label: "Needs Grading", cls: "bg-amber-100 text-amber-700" },
-    Graded:       { label: "Graded",        cls: "bg-emerald-100 text-emerald-700" },
-    Returned:     { label: "Returned",      cls: "bg-red-100 text-red-700" },
+    NotSubmitted: { label: "Not Submitted", cls: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" },
+    Submitted:    { label: "Submitted",     cls: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300" },
+    NeedsGrading: { label: "Needs Grading", cls: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" },
+    Graded:       { label: "Graded",        cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" },
+    Returned:     { label: "Returned",      cls: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300" },
   };
   const base = map[status] ?? map.NotSubmitted;
-  const cls  = isLate ? "bg-red-100 text-red-700" : base.cls;
+  const cls  = isLate ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300" : base.cls;
 
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>
@@ -43,7 +43,7 @@ function statusBadge(status: AssignmentRosterStatus, isLate: boolean): React.Rea
 }
 
 function gradeDisplay(grade: string | null): React.ReactNode {
-  if (!grade) return <span className="text-gray-400">—</span>;
+  if (!grade) return <span className="text-gray-400 dark:text-gray-500">—</span>;
   // colour by percentage
   const pctMatch = grade.match(/(\d+)\s*(?:\/\s*(\d+)|%)/);
   let pct: number | null = null;
@@ -53,16 +53,16 @@ function gradeDisplay(grade: string | null): React.ReactNode {
     pct = Math.round((num / den) * 100);
   }
   const cls =
-    pct === null ? "text-gray-700" :
-    pct >= 90    ? "text-emerald-700 font-semibold" :
-    pct >= 75    ? "text-blue-700 font-semibold" :
-    pct >= 60    ? "text-amber-700 font-semibold" :
-                   "text-red-700 font-semibold";
+    pct === null ? "text-gray-700 dark:text-gray-300" :
+    pct >= 90    ? "text-emerald-700 font-semibold dark:text-emerald-400" :
+    pct >= 75    ? "text-blue-700 font-semibold dark:text-blue-400" :
+    pct >= 60    ? "text-amber-700 font-semibold dark:text-amber-400" :
+                   "text-red-700 font-semibold dark:text-red-400";
   return <span className={cls}>{grade}</span>;
 }
 
 function formatDate(value: string | null): React.ReactNode {
-  if (!value) return <span className="text-gray-400">—</span>;
+  if (!value) return <span className="text-gray-400 dark:text-gray-500">—</span>;
   return formatDateTime(value);
 }
 
@@ -76,10 +76,10 @@ function isPastDue(submittedAt: string | null, dueDate: string | null): boolean 
 
 export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="px-4 py-3 font-semibold">Student</th>
               <th className="px-4 py-3 font-semibold">Email</th>
@@ -90,10 +90,10 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
               <th className="px-4 py-3 font-semibold">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                   No students match the current filters.
                 </td>
               </tr>
@@ -102,15 +102,15 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
             {rows.map((row) => {
               const pastDue = isPastDue(row.submittedAt, dueDate);
               return (
-                <tr key={row.user.id} className="align-middle hover:bg-gray-50/60">
+                <tr key={row.user.id} className="align-middle hover:bg-gray-50/60 dark:hover:bg-gray-800/60">
                   {/* Student */}
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{row.user.name}</p>
-                    <p className="text-xs text-gray-400">@{row.user.username}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{row.user.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">@{row.user.username}</p>
                   </td>
 
                   {/* Email */}
-                  <td className="px-4 py-3 text-xs text-gray-500">{row.user.email}</td>
+                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{row.user.email}</td>
 
                   {/* Status — shows Late pill when submitted after due date */}
                   <td className="px-4 py-3">{statusBadge(row.status, pastDue)}</td>
@@ -118,11 +118,11 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   {/* Submitted At — red text when past due */}
                   <td className="px-4 py-3">
                     {row.submittedAt ? (
-                      <span className={pastDue ? "font-medium text-red-600" : "text-gray-600"}>
+                      <span className={pastDue ? "font-medium text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-300"}>
                         {formatDateTime(row.submittedAt)}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-400 dark:text-gray-500">—</span>
                     )}
                   </td>
 
@@ -130,15 +130,15 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   <td className="px-4 py-3">{gradeDisplay(row.grade)}</td>
 
                   {/* Graded By */}
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                     {row.gradedBy ? (
                       <span>{row.gradedBy}
                         {row.gradedAt && (
-                          <span className="block text-gray-400">{formatDate(row.gradedAt)}</span>
+                          <span className="block text-gray-400 dark:text-gray-500">{formatDate(row.gradedAt)}</span>
                         )}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-400 dark:text-gray-500">—</span>
                     )}
                   </td>
 
@@ -153,8 +153,8 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                               ${row.status === "NeedsGrading"
                                 ? "bg-amber-500 text-white hover:bg-amber-600"
                                 : row.status === "Graded"
-                                  ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                                  : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                  ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                  : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50"
                               }`}
                           >
                             {row.status === "Graded" ? "Edit Grade" : "Grade"}
@@ -162,13 +162,13 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                         )}
                         <Link
                           href={`/instructor/submissions/${row.submissionId}`}
-                          className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           View Details
                         </Link>
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400">—</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
                     )}
                   </td>
                 </tr>

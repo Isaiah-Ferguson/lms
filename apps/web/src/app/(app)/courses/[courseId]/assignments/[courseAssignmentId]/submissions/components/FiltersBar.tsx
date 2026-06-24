@@ -40,9 +40,9 @@ export function FiltersBar({
   counts,
 }: FiltersBarProps) {
   return (
-    <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div>
-        <label htmlFor="submission-search" className="mb-1 block text-xs font-medium text-gray-500">
+        <label htmlFor="submission-search" className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
           Search students
         </label>
         <input
@@ -51,7 +51,7 @@ export function FiltersBar({
           value={searchQuery}
           onChange={(event) => onSearchQueryChange(event.target.value)}
           placeholder="Name, username, or email"
-          className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+          className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
         />
       </div>
 
@@ -66,7 +66,7 @@ export function FiltersBar({
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                 active
                   ? "border-blue-600 bg-brand-600 text-white"
-                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               }`}
             >
               {getFilterLabel(filter)} ({counts[filter]})

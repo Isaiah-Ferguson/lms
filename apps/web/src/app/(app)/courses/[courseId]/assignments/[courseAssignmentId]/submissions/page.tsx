@@ -142,12 +142,12 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
         </Link>
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-400">
           You do not have permission to view submissions.
         </div>
       </div>
@@ -159,12 +159,12 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-7xl space-y-5">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
         </Link>
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
           Loading submissions...
         </div>
       </div>
@@ -176,12 +176,12 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-7xl space-y-5">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
         </Link>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-600">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       </div>
@@ -192,38 +192,38 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
     <div className="mx-auto max-w-7xl space-y-5">
       <Link
         href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to assignment
       </Link>
 
       {/* Header */}
-      <header className="rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-900">Submissions Roster</h1>
-        <p className="mt-1 text-sm text-gray-500">{assignmentTitle}</p>
+      <header className="rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Submissions Roster</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{assignmentTitle}</p>
 
         {/* Summary stat pills */}
         <div className="mt-4 flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
-            <Users className="h-4 w-4 text-gray-500" />
-            <span className="font-semibold text-gray-800">{counts.All}</span>
-            <span className="text-gray-500">participants</span>
+          <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800">
+            <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <span className="font-semibold text-gray-800 dark:text-gray-100">{counts.All}</span>
+            <span className="text-gray-500 dark:text-gray-400">participants</span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm">
-            <CheckSquare className="h-4 w-4 text-blue-500" />
-            <span className="font-semibold text-blue-800">{counts.Submitted + counts.NeedsGrading + counts.Graded}</span>
-            <span className="text-blue-600">submitted</span>
+          <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm dark:border-blue-900/50 dark:bg-blue-950/30">
+            <CheckSquare className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+            <span className="font-semibold text-blue-800 dark:text-blue-300">{counts.Submitted + counts.NeedsGrading + counts.Graded}</span>
+            <span className="text-blue-600 dark:text-blue-400">submitted</span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-sm">
-            <Clock className="h-4 w-4 text-amber-500" />
-            <span className="font-semibold text-amber-800">{counts.NeedsGrading}</span>
-            <span className="text-amber-600">needs grading</span>
+          <div className="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-sm dark:border-amber-900/50 dark:bg-amber-950/30">
+            <Clock className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+            <span className="font-semibold text-amber-800 dark:text-amber-300">{counts.NeedsGrading}</span>
+            <span className="text-amber-600 dark:text-amber-400">needs grading</span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm">
-            <CheckSquare className="h-4 w-4 text-emerald-500" />
-            <span className="font-semibold text-emerald-800">{counts.Graded}</span>
-            <span className="text-emerald-600">graded</span>
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/30">
+            <CheckSquare className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+            <span className="font-semibold text-emerald-800 dark:text-emerald-300">{counts.Graded}</span>
+            <span className="text-emerald-600 dark:text-emerald-400">graded</span>
           </div>
         </div>
       </header>

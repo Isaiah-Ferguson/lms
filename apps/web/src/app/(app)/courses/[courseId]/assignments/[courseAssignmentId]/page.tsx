@@ -178,7 +178,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-600 hover:text-gray-700 dark:hover:text-slate-300"
         >
           <ArrowLeft className="h-4 w-4" /> Back to course
         </Link>
@@ -194,7 +194,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     <div className="mx-auto max-w-6xl space-y-6">
       <Link
         href={`/courses/${params.courseId}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-600 hover:text-gray-700 dark:hover:text-slate-300"
       >
         <ArrowLeft className="h-4 w-4" /> Back to course
       </Link>
