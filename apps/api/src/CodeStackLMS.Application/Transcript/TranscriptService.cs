@@ -44,11 +44,33 @@ public class TranscriptService : ITranscriptService
             .Include(s => s.Grade)
             .ToListAsync(cancellationToken);
 
-        var courses = submissions
-            .GroupBy(s => new { s.Assignment.Module.Course.Id, s.Assignment.Module.Course.Title })
-            .Select(g =>
+        // Every course the student is enrolled in should appear, even when it has no
+        // graded work yet. Key by title so duplicate Course rows (same title) merge.
+        var enrolledTitles = await _db.UserCourseEnrollments
+            .AsNoTracking()
+            .Where(e => e.UserId == parsedUserId)
+            .Join(
+                _db.Courses.AsNoTracking(),
+                e => e.CourseId,
+                c => c.Id,
+                (e, c) => c.Title)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var submissionsByCourseTitle = submissions
+            .GroupBy(s => s.Assignment.Module.Course.Title)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var courseTitles = enrolledTitles
+            .Union(submissionsByCourseTitle.Keys)
+            .Distinct();
+
+        var courses = courseTitles
+            .Select(title =>
             {
-                var courseSubmissions = g.ToList();
+                var courseSubmissions = submissionsByCourseTitle.TryGetValue(title, out var subs)
+                    ? subs
+                    : new List<Submission>();
                 var graded = courseSubmissions.Where(s => s.Grade != null).ToList();
                 var percent = graded.Count == 0
                     ? 0
@@ -56,7 +78,7 @@ public class TranscriptService : ITranscriptService
                 var letter = CalculateLetterGrade(percent);
 
                 return new TranscriptCourseDto(
-                    g.Key.Title,
+                    title,
                     graded.Count == 0 ? "—" : letter,
                     percent,
                     graded.Count == 0 ? 0 : GpaPoints(letter),
