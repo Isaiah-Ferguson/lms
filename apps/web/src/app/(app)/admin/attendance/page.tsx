@@ -73,11 +73,16 @@ export default function AttendancePage() {
     (async () => {
       try {
         const data = await adminParticipantsApi.getParticipants(token);
-        const opts = data.courses.map((c) => ({
-          id: c.id,
-          label: c.label,
-          yearLabel: c.yearLabel,
-        }));
+        // Only show levels for the active cohort. If no cohort is active, fall
+        // back to all levels so the page is never empty.
+        const hasActive = data.courses.some((c) => c.yearActive);
+        const opts = data.courses
+          .filter((c) => !hasActive || c.yearActive)
+          .map((c) => ({
+            id: c.id,
+            label: c.label,
+            yearLabel: c.yearLabel,
+          }));
         setLevels(opts);
         if (opts.length > 0) setCourseId((prev) => prev || opts[0].id);
       } catch (e) {

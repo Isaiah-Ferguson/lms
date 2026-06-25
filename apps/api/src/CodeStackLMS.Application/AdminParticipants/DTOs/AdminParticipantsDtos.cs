@@ -19,7 +19,7 @@ public record ParticipantUserDto(
     string AvatarInitials,
     string? AvatarUrl);
 
-public record CourseOptionDto(string Id, string Label, string YearId, string YearLabel);
+public record CourseOptionDto(string Id, string Label, string YearId, string YearLabel, bool YearActive);
 
 public record AdminParticipantsPermissionsDto(bool CanManageUsers);
 

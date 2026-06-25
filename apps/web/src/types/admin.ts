@@ -15,7 +15,7 @@ export interface AdminParticipantUser {
 
 export interface AdminParticipantsResponse {
   users: AdminParticipantUser[];
-  courses: Array<{ id: string; label: string; yearId: string; yearLabel: string }>;
+  courses: Array<{ id: string; label: string; yearId: string; yearLabel: string; yearActive: boolean }>;
   permissions: {
     canManageUsers: boolean;
   };

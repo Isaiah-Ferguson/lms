@@ -39,7 +39,8 @@ public class AdminParticipantsService : IAdminParticipantsService
                 cc.Course.Id.ToString(),
                 cc.Course.Title,
                 cc.Cohort.Id.ToString(),
-                cc.Cohort.Name))
+                cc.Cohort.Name,
+                cc.Cohort.IsActive))
             .ToList();
         var rawEnrollments = await _db.UserCourseEnrollments
             .AsNoTracking()
