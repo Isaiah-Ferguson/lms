@@ -17,21 +17,21 @@ public class HangfireBackgroundJobService : IBackgroundJobService
             job.ExecuteAsync(submissionId, reason));
     }
 
-    public string EnqueueWeeklyProgressReport(DateTime weekOf)
+    public string EnqueueWeeklyProgressReport(DateTime weekOf, Guid? cohortId)
     {
         return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
-            job.ExecuteAsync(weekOf, CancellationToken.None));
+            job.ExecuteAsync(weekOf, cohortId, CancellationToken.None));
     }
 
-    public string EnqueueSingleStudentReport(Guid studentId, DateTime weekOf)
+    public string EnqueueSingleStudentReport(Guid studentId, DateTime weekOf, Guid? cohortId)
     {
         return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
-            job.ExecuteSingleStudentAsync(studentId, weekOf, CancellationToken.None));
+            job.ExecuteSingleStudentAsync(studentId, weekOf, cohortId, CancellationToken.None));
     }
 
-    public string EnqueueClassReport(DateTime weekOf)
+    public string EnqueueClassReport(DateTime weekOf, Guid? cohortId)
     {
         return BackgroundJob.Enqueue<WeeklyProgressReportJob>(job =>
-            job.ExecuteClassReportAsync(weekOf, CancellationToken.None));
+            job.ExecuteClassReportAsync(weekOf, cohortId, CancellationToken.None));
     }
 }

@@ -25,9 +25,10 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetReports(
         [FromQuery] DateTime? weekOf,
         [FromQuery] string? reportType,
+        [FromQuery] Guid? cohortId,
         CancellationToken cancellationToken)
     {
-        var results = await _reports.GetReportsAsync(weekOf, reportType, cancellationToken);
+        var results = await _reports.GetReportsAsync(weekOf, reportType, cohortId, cancellationToken);
         return Ok(results);
     }
 
@@ -88,9 +89,11 @@ public class ReportsController : ControllerBase
     [HttpPost("trigger")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> TriggerWeeklyRun(CancellationToken cancellationToken)
+    public async Task<IActionResult> TriggerWeeklyRun(
+        [FromQuery] Guid? cohortId,
+        CancellationToken cancellationToken)
     {
-        var jobId = await _reports.TriggerWeeklyRunAsync(cancellationToken);
+        var jobId = await _reports.TriggerWeeklyRunAsync(cohortId, cancellationToken);
         return Accepted(new { jobId, message = "Weekly progress report job enqueued." });
     }
 
@@ -99,18 +102,21 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
     public async Task<IActionResult> TriggerStudentReport(
         [FromRoute] Guid studentId,
+        [FromQuery] Guid? cohortId,
         CancellationToken cancellationToken)
     {
-        var jobId = await _reports.TriggerStudentReportAsync(studentId, cancellationToken);
+        var jobId = await _reports.TriggerStudentReportAsync(studentId, cohortId, cancellationToken);
         return Accepted(new { jobId, message = "Student report job enqueued." });
     }
 
     [HttpPost("trigger/class")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> TriggerClassReport(CancellationToken cancellationToken)
+    public async Task<IActionResult> TriggerClassReport(
+        [FromQuery] Guid? cohortId,
+        CancellationToken cancellationToken)
     {
-        var jobId = await _reports.TriggerClassReportAsync(cancellationToken);
+        var jobId = await _reports.TriggerClassReportAsync(cohortId, cancellationToken);
         return Accepted(new { jobId, message = "Class summary report job enqueued." });
     }
 }

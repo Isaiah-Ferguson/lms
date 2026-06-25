@@ -7,9 +7,10 @@ import {
   Clock, Loader2, XCircle, Users, BarChart2, Search, X,
 } from "lucide-react";
 import {
-  reportsApi, ApiError,
+  reportsApi, homeApi, ApiError,
   type ProgressReportSummary, type ProgressReportStatus, type StudentOption,
 } from "@/lib/api-client";
+import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate } from "@/lib/date-utils";
@@ -207,7 +208,22 @@ export default function ReportsPage() {
   const [triggerMsg, setTriggerMsg] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
+  const [years, setYears] = useState<AcademicYear[]>([]);
+  const [cohortId, setCohortId] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Load the list of years and default to the active one. "" means no cohort
+  // scope (show everything) — used as a fallback when none can be resolved.
+  useEffect(() => {
+    if (!token) return;
+    homeApi.getDashboard(token)
+      .then((d) => {
+        setYears(d.years);
+        const active = d.years.find((y) => y.isActive) ?? d.years[0];
+        setCohortId(active?.id ?? "");
+      })
+      .catch(() => setCohortId(""));
+  }, [token]);
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -217,11 +233,11 @@ export default function ReportsPage() {
     setIsPolling(false);
   }, []);
 
-  const silentRefresh = useCallback(async (activeTab: Tab): Promise<boolean> => {
+  const silentRefresh = useCallback(async (activeTab: Tab, cohort: string | null): Promise<boolean> => {
     if (!token) return false;
     try {
       const data = await reportsApi.getReports(
-        token, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"
+        token, cohort || undefined, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"
       );
       setReports(data);
       return data.some(r => r.status === "Pending" || r.status === "Generating");
@@ -230,27 +246,27 @@ export default function ReportsPage() {
     }
   }, [token]);
 
-  const startPolling = useCallback((activeTab: Tab) => {
+  const startPolling = useCallback((activeTab: Tab, cohort: string | null) => {
     stopPolling();
     setIsPolling(true);
     let count = 0;
     pollingRef.current = setInterval(async () => {
       count++;
       if (count > 40) { stopPolling(); return; }
-      const stillRunning = await silentRefresh(activeTab);
+      const stillRunning = await silentRefresh(activeTab, cohort);
       if (!stillRunning) stopPolling();
     }, 3000);
   }, [silentRefresh, stopPolling]);
 
   useEffect(() => () => stopPolling(), [stopPolling]);
 
-  const load = useCallback(async (activeTab: Tab) => {
+  const load = useCallback(async (activeTab: Tab, cohort: string | null) => {
     if (!token) return;
     setLoading(true);
     setError(null);
     try {
       const [data, studentList] = await Promise.all([
-        reportsApi.getReports(token, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"),
+        reportsApi.getReports(token, cohort || undefined, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"),
         activeTab === "student" ? reportsApi.getStudents(token) : Promise.resolve(students),
       ]);
       setReports(data);
@@ -263,16 +279,16 @@ export default function ReportsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  useEffect(() => { load(tab); }, [load, tab]);
+  useEffect(() => { if (cohortId !== null) load(tab, cohortId); }, [load, tab, cohortId]);
 
   const handleTriggerAll = async () => {
     if (!token || triggering) return;
     setTriggering(true);
     setTriggerMsg(null);
     try {
-      const res = await reportsApi.triggerWeeklyRun(token);
+      const res = await reportsApi.triggerWeeklyRun(token, cohortId || undefined);
       setTriggerMsg(`All-student job enqueued (ID: ${res.jobId}). Reports will appear shortly.`);
-      setTimeout(() => startPolling(tab), 1500);
+      setTimeout(() => startPolling(tab, cohortId), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -285,9 +301,9 @@ export default function ReportsPage() {
     setTriggering(true);
     setTriggerMsg(null);
     try {
-      const res = await reportsApi.triggerClassReport(token);
+      const res = await reportsApi.triggerClassReport(token, cohortId || undefined);
       setTriggerMsg(`Class report job enqueued (ID: ${res.jobId}). Report will appear shortly.`);
-      setTimeout(() => startPolling(tab), 1500);
+      setTimeout(() => startPolling(tab, cohortId), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -301,10 +317,10 @@ export default function ReportsPage() {
     setShowPicker(false);
     setTriggerMsg(null);
     try {
-      const res = await reportsApi.triggerStudentReport(studentId, token);
+      const res = await reportsApi.triggerStudentReport(studentId, token, cohortId || undefined);
       const name = students.find(s => s.id === studentId)?.name ?? studentId;
       setTriggerMsg(`Report for ${name} enqueued (ID: ${res.jobId}). Will appear shortly.`);
-      setTimeout(() => startPolling(tab), 1500);
+      setTimeout(() => startPolling(tab, cohortId), 1500);
     } catch (e) {
       setTriggerMsg(e instanceof ApiError ? e.detail : "Failed to trigger run.");
     } finally {
@@ -326,8 +342,24 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {years.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label htmlFor="reports-year" className="text-sm font-medium text-gray-500 dark:text-slate-400">Year</label>
+              <select
+                id="reports-year"
+                value={cohortId ?? ""}
+                onChange={(e) => setCohortId(e.target.value)}
+                className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-400/20"
+              >
+                {years.map((y) => (
+                  <option key={y.id} value={y.id}>{y.label}{y.isActive ? " (active)" : ""}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button
-            onClick={() => { stopPolling(); load(tab); }}
+            onClick={() => { stopPolling(); load(tab, cohortId); }}
             disabled={loading}
             className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
           >

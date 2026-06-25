@@ -20,6 +20,7 @@ public sealed class ProgressReportService : IProgressReportService
     public async Task<IEnumerable<ProgressReportSummaryDto>> GetReportsAsync(
         DateTime? weekOf,
         string? reportType,
+        Guid? cohortId,
         CancellationToken cancellationToken = default)
     {
         var query = _db.ProgressReports
@@ -28,6 +29,9 @@ public sealed class ProgressReportService : IProgressReportService
 
         if (weekOf.HasValue)
             query = query.Where(r => r.WeekOf.Date == weekOf.Value.Date);
+
+        if (cohortId.HasValue)
+            query = query.Where(r => r.CohortId == cohortId.Value);
 
         if (!string.IsNullOrWhiteSpace(reportType) &&
             Enum.TryParse<ReportType>(reportType, true, out var rt))
@@ -42,6 +46,7 @@ public sealed class ProgressReportService : IProgressReportService
             r.Id,
             r.StudentId,
             r.Student?.Name,
+            r.CohortId,
             r.ReportType.ToString(),
             r.WeekOf,
             r.Status.ToString(),
@@ -86,24 +91,24 @@ public sealed class ProgressReportService : IProgressReportService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<string> TriggerWeeklyRunAsync(CancellationToken cancellationToken = default)
+    public Task<string> TriggerWeeklyRunAsync(Guid? cohortId, CancellationToken cancellationToken = default)
     {
         var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
-        var jobId = _jobs.EnqueueWeeklyProgressReport(weekOf);
+        var jobId = _jobs.EnqueueWeeklyProgressReport(weekOf, cohortId);
         return Task.FromResult(jobId);
     }
 
-    public Task<string> TriggerStudentReportAsync(Guid studentId, CancellationToken cancellationToken = default)
+    public Task<string> TriggerStudentReportAsync(Guid studentId, Guid? cohortId, CancellationToken cancellationToken = default)
     {
         var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
-        var jobId = _jobs.EnqueueSingleStudentReport(studentId, weekOf);
+        var jobId = _jobs.EnqueueSingleStudentReport(studentId, weekOf, cohortId);
         return Task.FromResult(jobId);
     }
 
-    public Task<string> TriggerClassReportAsync(CancellationToken cancellationToken = default)
+    public Task<string> TriggerClassReportAsync(Guid? cohortId, CancellationToken cancellationToken = default)
     {
         var weekOf = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1);
-        var jobId = _jobs.EnqueueClassReport(weekOf);
+        var jobId = _jobs.EnqueueClassReport(weekOf, cohortId);
         return Task.FromResult(jobId);
     }
 

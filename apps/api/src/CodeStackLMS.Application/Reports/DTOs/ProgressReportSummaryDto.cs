@@ -4,6 +4,7 @@ public sealed record ProgressReportSummaryDto(
     Guid Id,
     Guid? StudentId,
     string? StudentName,
+    Guid? CohortId,
     string ReportType,
     DateTime WeekOf,
     string Status,

@@ -5,6 +5,7 @@ export interface ProgressReportSummary {
   id: string;
   studentId: string | null;
   studentName: string | null;
+  cohortId: string | null;
   reportType: ReportType;
   weekOf: string;
   status: ProgressReportStatus;

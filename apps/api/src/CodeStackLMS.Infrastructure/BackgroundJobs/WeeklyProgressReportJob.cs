@@ -54,14 +54,24 @@ public class WeeklyProgressReportJob
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(DateTime weekOf, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(DateTime weekOf, Guid? cohortId, CancellationToken cancellationToken)
     {
         var weekStart = weekOf.Date.AddDays(-(int)weekOf.DayOfWeek + 1);
 
-        _logger.LogInformation("WeeklyProgressReportJob starting for week of {WeekOf}", weekStart);
+        var (resolvedCohortId, cohortCourseIds) = await ResolveCohortScopeAsync(cohortId, cancellationToken);
 
-        var students = await _db.Users
-            .Where(u => u.IsActive && u.Role == UserRole.Student)
+        _logger.LogInformation(
+            "WeeklyProgressReportJob starting for week of {WeekOf}, cohort {CohortId}",
+            weekStart, resolvedCohortId);
+
+        var studentsQuery = _db.Users
+            .Where(u => u.IsActive && u.Role == UserRole.Student);
+
+        if (cohortCourseIds is not null)
+            studentsQuery = studentsQuery.Where(u =>
+                u.CourseEnrollments.Any(e => cohortCourseIds.Contains(e.CourseId)));
+
+        var students = await studentsQuery
             .Include(u => u.Submissions)
                 .ThenInclude(s => s.Assignment)
                 .ThenInclude(a => a.Module)
@@ -90,7 +100,9 @@ public class WeeklyProgressReportJob
 
             var existingReport = await _db.ProgressReports
                 .FirstOrDefaultAsync(
-                    r => r.StudentId == student.Id && r.WeekOf.Date == weekStart.Date,
+                    r => r.StudentId == student.Id && r.WeekOf.Date == weekStart.Date
+                      && r.ReportType == ReportType.StudentProgress
+                      && r.CohortId == resolvedCohortId,
                     cancellationToken);
 
             if (existingReport?.Status == ProgressReportStatus.Generated
@@ -104,6 +116,7 @@ public class WeeklyProgressReportJob
             {
                 Id = Guid.NewGuid(),
                 StudentId = student.Id,
+                CohortId = resolvedCohortId,
                 ReportType = ReportType.StudentProgress,
                 WeekOf = weekStart,
                 CreatedAt = DateTime.UtcNow,
@@ -149,9 +162,11 @@ public class WeeklyProgressReportJob
             generated, failed);
     }
 
-    public async Task ExecuteSingleStudentAsync(Guid studentId, DateTime weekOf, CancellationToken cancellationToken)
+    public async Task ExecuteSingleStudentAsync(Guid studentId, DateTime weekOf, Guid? cohortId, CancellationToken cancellationToken)
     {
         var weekStart = weekOf.Date.AddDays(-(int)weekOf.DayOfWeek + 1);
+
+        var (resolvedCohortId, _) = await ResolveCohortScopeAsync(cohortId, cancellationToken);
 
         var student = await _db.Users
             .Where(u => u.Id == studentId && u.IsActive && u.Role == UserRole.Student)
@@ -168,12 +183,14 @@ public class WeeklyProgressReportJob
 
         var existingReport = await _db.ProgressReports.FirstOrDefaultAsync(
             r => r.StudentId == studentId && r.WeekOf.Date == weekStart.Date
-              && r.ReportType == ReportType.StudentProgress, cancellationToken);
+              && r.ReportType == ReportType.StudentProgress
+              && r.CohortId == resolvedCohortId, cancellationToken);
 
         var report = existingReport ?? new ProgressReport
         {
             Id = Guid.NewGuid(),
             StudentId = student.Id,
+            CohortId = resolvedCohortId,
             ReportType = ReportType.StudentProgress,
             WeekOf = weekStart,
             CreatedAt = DateTime.UtcNow,
@@ -211,15 +228,20 @@ public class WeeklyProgressReportJob
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task ExecuteClassReportAsync(DateTime weekOf, CancellationToken cancellationToken)
+    public async Task ExecuteClassReportAsync(DateTime weekOf, Guid? cohortId, CancellationToken cancellationToken)
     {
         var weekStart = weekOf.Date.AddDays(-(int)weekOf.DayOfWeek + 1);
 
-        _logger.LogInformation("ExecuteClassReportAsync starting for week of {WeekOf}", weekStart);
+        var (resolvedCohortId, cohortCourseIds) = await ResolveCohortScopeAsync(cohortId, cancellationToken);
+
+        _logger.LogInformation(
+            "ExecuteClassReportAsync starting for week of {WeekOf}, cohort {CohortId}",
+            weekStart, resolvedCohortId);
 
         var existingReport = await _db.ProgressReports.FirstOrDefaultAsync(
             r => r.StudentId == null && r.WeekOf.Date == weekStart.Date
-              && r.ReportType == ReportType.ClassSummary, cancellationToken);
+              && r.ReportType == ReportType.ClassSummary
+              && r.CohortId == resolvedCohortId, cancellationToken);
 
         if (existingReport?.Status == ProgressReportStatus.Generated
             || existingReport?.Status == ProgressReportStatus.Published)
@@ -232,6 +254,7 @@ public class WeeklyProgressReportJob
         {
             Id = Guid.NewGuid(),
             StudentId = null,
+            CohortId = resolvedCohortId,
             ReportType = ReportType.ClassSummary,
             WeekOf = weekStart,
             CreatedAt = DateTime.UtcNow,
@@ -244,8 +267,14 @@ public class WeeklyProgressReportJob
 
         try
         {
-            var students = await _db.Users
-                .Where(u => u.IsActive && u.Role == UserRole.Student)
+            var studentsQuery = _db.Users
+                .Where(u => u.IsActive && u.Role == UserRole.Student);
+
+            if (cohortCourseIds is not null)
+                studentsQuery = studentsQuery.Where(u =>
+                    u.CourseEnrollments.Any(e => cohortCourseIds.Contains(e.CourseId)));
+
+            var students = await studentsQuery
                 .Include(u => u.Submissions).ThenInclude(s => s.Assignment).ThenInclude(a => a.Module)
                 .Include(u => u.Submissions).ThenInclude(s => s.Grade)
                 .Include(u => u.CourseEnrollments).ThenInclude(e => e.Course)
@@ -276,6 +305,40 @@ public class WeeklyProgressReportJob
         }
 
         await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    // ── Cohort scoping ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Resolves the cohort to generate reports for. When <paramref name="cohortId"/>
+    /// is null, the currently active cohort is used. Returns the resolved cohort id
+    /// (null only when no cohort exists at all) and the set of course ids belonging
+    /// to it (null means "no cohort scope — include all students").
+    /// </summary>
+    private async Task<(Guid? CohortId, List<Guid>? CourseIds)> ResolveCohortScopeAsync(
+        Guid? cohortId, CancellationToken cancellationToken)
+    {
+        var resolved = cohortId;
+        if (resolved is null)
+        {
+            resolved = await _db.Cohorts
+                .AsNoTracking()
+                .Where(c => c.IsActive)
+                .OrderByDescending(c => c.StartDate)
+                .Select(c => (Guid?)c.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        if (resolved is null)
+            return (null, null);
+
+        var courseIds = await _db.CohortCourses
+            .AsNoTracking()
+            .Where(cc => cc.CohortId == resolved.Value)
+            .Select(cc => cc.CourseId)
+            .ToListAsync(cancellationToken);
+
+        return (resolved, courseIds);
     }
 
     // ── Level helpers ─────────────────────────────────────────────────────────

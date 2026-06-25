@@ -762,8 +762,9 @@ export const commentsApi = {
 // ─── Reports API ─────────────────────────────────────────────────────────────
 
 export const reportsApi = {
-  getReports(token: string, weekOf?: string, reportType?: string): Promise<ProgressReportSummary[]> {
+  getReports(token: string, cohortId?: string, weekOf?: string, reportType?: string): Promise<ProgressReportSummary[]> {
     const p = new URLSearchParams();
+    if (cohortId) p.set("cohortId", cohortId);
     if (weekOf) p.set("weekOf", weekOf);
     if (reportType) p.set("reportType", reportType);
     const qs = p.toString() ? `?${p.toString()}` : "";
@@ -782,16 +783,19 @@ export const reportsApi = {
     return apiFetch<StudentOption[]>(`/api/reports/students`, {}, token);
   },
 
-  triggerWeeklyRun(token: string): Promise<TriggerReportResponse> {
-    return apiFetch<TriggerReportResponse>(`/api/reports/trigger`, { method: "POST" }, token);
+  triggerWeeklyRun(token: string, cohortId?: string): Promise<TriggerReportResponse> {
+    const qs = cohortId ? `?cohortId=${cohortId}` : "";
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger${qs}`, { method: "POST" }, token);
   },
 
-  triggerStudentReport(studentId: string, token: string): Promise<TriggerReportResponse> {
-    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/student/${studentId}`, { method: "POST" }, token);
+  triggerStudentReport(studentId: string, token: string, cohortId?: string): Promise<TriggerReportResponse> {
+    const qs = cohortId ? `?cohortId=${cohortId}` : "";
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/student/${studentId}${qs}`, { method: "POST" }, token);
   },
 
-  triggerClassReport(token: string): Promise<TriggerReportResponse> {
-    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/class`, { method: "POST" }, token);
+  triggerClassReport(token: string, cohortId?: string): Promise<TriggerReportResponse> {
+    const qs = cohortId ? `?cohortId=${cohortId}` : "";
+    return apiFetch<TriggerReportResponse>(`/api/reports/trigger/class${qs}`, { method: "POST" }, token);
   },
 
   async downloadReport(id: string, token: string): Promise<void> {

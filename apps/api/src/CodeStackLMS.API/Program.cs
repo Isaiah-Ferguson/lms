@@ -173,6 +173,7 @@ RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(
     "weekly-progress-reports",
     job => job.ExecuteAsync(
         DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1),
+        null,
         CancellationToken.None),
     Cron.Weekly(DayOfWeek.Monday, 6));
 

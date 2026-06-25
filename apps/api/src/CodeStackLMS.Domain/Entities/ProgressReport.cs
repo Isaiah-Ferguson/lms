@@ -6,6 +6,7 @@ namespace CodeStackLMS.Domain.Entities;
 public class ProgressReport : BaseEntity
 {
     public Guid? StudentId { get; set; }
+    public Guid? CohortId { get; set; }
     public ReportType ReportType { get; set; } = ReportType.StudentProgress;
     public DateTime WeekOf { get; set; }
     public ProgressReportStatus Status { get; set; } = ProgressReportStatus.Pending;
@@ -16,4 +17,5 @@ public class ProgressReport : BaseEntity
     public DateTime CreatedAt { get; set; }
 
     public User? Student { get; set; }
+    public Cohort? Cohort { get; set; }
 }
