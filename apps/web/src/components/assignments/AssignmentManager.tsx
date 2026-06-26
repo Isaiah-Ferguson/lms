@@ -110,17 +110,17 @@ export function AssignmentManager({
 
       {/* Create view */}
       {currentView === "create" && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 space-y-4">
           {/* Module selector — only shown when no moduleId is pre-supplied */}
           {!fixedModuleId && modules.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Week / Module
               </label>
               <select
                 value={selectedModuleId}
                 onChange={(e) => setSelectedModuleId(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
               >
                 {modules.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -139,14 +139,14 @@ export function AssignmentManager({
               onCancel={handleCancel}
             />
           ) : (
-            <p className="text-sm text-gray-500">Loading modules…</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Loading modules…</p>
           )}
         </div>
       )}
 
       {/* Edit view */}
       {currentView === "edit" && selectedAssignment && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 space-y-4">
           <CreateAssignmentForm
             moduleId={selectedAssignment.moduleId}
             moduleTitle={activeModuleTitle}
