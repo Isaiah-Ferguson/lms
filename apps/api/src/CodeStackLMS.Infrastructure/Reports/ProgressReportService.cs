@@ -112,10 +112,38 @@ public sealed class ProgressReportService : IProgressReportService
         return Task.FromResult(jobId);
     }
 
-    public async Task<IEnumerable<StudentOptionDto>> GetStudentsAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<StudentOptionDto>> GetStudentsAsync(Guid? cohortId = null, CancellationToken cancellationToken = default)
     {
-        var students = await _db.Users
-            .Where(u => u.IsActive && u.Role == UserRole.Student)
+        var query = _db.Users
+            .Where(u => u.IsActive && u.Role == UserRole.Student);
+
+        // Resolve the cohort to scope to: the requested one, or the active cohort
+        // when none was supplied. Students are scoped via the courses that belong
+        // to the cohort. If no cohort can be resolved, fall back to all students.
+        var resolvedCohortId = cohortId;
+        if (resolvedCohortId is null)
+        {
+            resolvedCohortId = await _db.Cohorts
+                .AsNoTracking()
+                .Where(c => c.IsActive)
+                .OrderByDescending(c => c.StartDate)
+                .Select(c => (Guid?)c.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        if (resolvedCohortId is not null)
+        {
+            var cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == resolvedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+
+            query = query.Where(u =>
+                u.CourseEnrollments.Any(e => cohortCourseIds.Contains(e.CourseId)));
+        }
+
+        var students = await query
             .OrderBy(u => u.Name)
             .Select(u => new StudentOptionDto(u.Id, u.Name))
             .ToListAsync(cancellationToken);

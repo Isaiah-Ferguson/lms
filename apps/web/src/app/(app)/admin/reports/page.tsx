@@ -267,7 +267,7 @@ export default function ReportsPage() {
     try {
       const [data, studentList] = await Promise.all([
         reportsApi.getReports(token, cohort || undefined, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"),
-        activeTab === "student" ? reportsApi.getStudents(token) : Promise.resolve(students),
+        activeTab === "student" ? reportsApi.getStudents(token, cohort || undefined) : Promise.resolve(students),
       ]);
       setReports(data);
       if (activeTab === "student") setStudents(studentList as StudentOption[]);

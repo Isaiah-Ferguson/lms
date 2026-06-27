@@ -34,9 +34,11 @@ public class ReportsController : ControllerBase
 
     [HttpGet("students")]
     [ProducesResponseType(typeof(IEnumerable<StudentOptionDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStudents(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStudents(
+        [FromQuery] Guid? cohortId,
+        CancellationToken cancellationToken)
     {
-        var students = await _reports.GetStudentsAsync(cancellationToken);
+        var students = await _reports.GetStudentsAsync(cohortId, cancellationToken);
         return Ok(students);
     }
 

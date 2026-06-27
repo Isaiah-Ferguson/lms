@@ -795,8 +795,9 @@ export const reportsApi = {
     return apiFetch<void>(`/api/reports/${id}/publish`, { method: "PATCH" }, token);
   },
 
-  getStudents(token: string): Promise<StudentOption[]> {
-    return apiFetch<StudentOption[]>(`/api/reports/students`, {}, token);
+  getStudents(token: string, cohortId?: string): Promise<StudentOption[]> {
+    const qs = cohortId ? `?cohortId=${cohortId}` : "";
+    return apiFetch<StudentOption[]>(`/api/reports/students${qs}`, {}, token);
   },
 
   triggerWeeklyRun(token: string, cohortId?: string): Promise<TriggerReportResponse> {

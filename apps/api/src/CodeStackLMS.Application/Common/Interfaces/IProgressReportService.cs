@@ -10,5 +10,5 @@ public interface IProgressReportService
     Task<string> TriggerWeeklyRunAsync(Guid? cohortId, CancellationToken cancellationToken = default);
     Task<string> TriggerStudentReportAsync(Guid studentId, Guid? cohortId, CancellationToken cancellationToken = default);
     Task<string> TriggerClassReportAsync(Guid? cohortId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<StudentOptionDto>> GetStudentsAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<StudentOptionDto>> GetStudentsAsync(Guid? cohortId = null, CancellationToken cancellationToken = default);
 }
