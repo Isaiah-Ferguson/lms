@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { courseApi, ApiError, type CourseDetailResponse } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
-import { LevelDashboardClient, type LevelData, type LevelWeek, type LevelAnnouncement } from "./LevelDashboardClient";
+import { LevelDashboardClient } from "./LevelDashboardClient";
+import type { LevelData, LevelWeek, LevelAnnouncement } from "./components/level-dashboard-types";
 
 interface Props {
   courseId: string;

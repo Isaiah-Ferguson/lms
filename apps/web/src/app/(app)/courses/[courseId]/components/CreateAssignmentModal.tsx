@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { assignmentsApi } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
-import type { LevelWeek } from "../LevelDashboardClient";
+import type { LevelWeek } from "./level-dashboard-types";
 
 interface CreateAssignmentModalProps {
   isOpen: boolean;
