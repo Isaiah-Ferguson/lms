@@ -19,6 +19,18 @@ import { EditLevelModal } from "./EditLevelModal";
 // Prevent caching to ensure fresh user data
 export const dynamic = 'force-dynamic';
 
+// Levels render in a fixed order; anything unknown sorts to the end.
+const LEVEL_ORDER = ["combine", "level-1", "level-2", "level-3", "level-4"];
+function sortLevelsByKey(levels: CourseLevel[]): CourseLevel[] {
+  return [...levels].sort((a, b) => {
+    const indexA = LEVEL_ORDER.indexOf(a.key);
+    const indexB = LEVEL_ORDER.indexOf(b.key);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+}
+
 export default function HomePage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -122,18 +134,8 @@ export default function HomePage() {
       .filter((year) => (enrollmentsByYear[year.id] ?? []).length > 0)
       .sort((a, b) => b.label.localeCompare(a.label)); // Newest first
 
-    const order = ["combine", "level-1", "level-2", "level-3", "level-4"];
-
     return enrolledYears.map((year) => {
-      const yearLevels = levels
-        .filter((level) => level.yearId === year.id)
-        .sort((a, b) => {
-          const indexA = order.indexOf(a.key);
-          const indexB = order.indexOf(b.key);
-          if (indexA === -1) return 1;
-          if (indexB === -1) return -1;
-          return indexA - indexB;
-        });
+      const yearLevels = sortLevelsByKey(levels.filter((level) => level.yearId === year.id));
 
       return {
         year,
@@ -144,18 +146,10 @@ export default function HomePage() {
   }, [levels, years, enrollmentsByYear, permissions.canViewAllLevels]);
 
   // For admins: single year view
-  const levelsForSelectedYear = useMemo(() => {
-    const filtered = levels.filter((level) => level.yearId === selectedYearId);
-    
-    const order = ["combine", "level-1", "level-2", "level-3", "level-4"];
-    return filtered.sort((a, b) => {
-      const indexA = order.indexOf(a.key);
-      const indexB = order.indexOf(b.key);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
-  }, [levels, selectedYearId]);
+  const levelsForSelectedYear = useMemo(
+    () => sortLevelsByKey(levels.filter((level) => level.yearId === selectedYearId)),
+    [levels, selectedYearId]
+  );
 
   const enrolledLevelIdsForSelectedYear = enrollmentsByYear[selectedYearId] ?? [];
   const selectedYear = years.find((year) => year.id === selectedYearId);

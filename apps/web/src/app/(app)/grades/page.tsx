@@ -11,6 +11,7 @@ import { gradesApi, profileApi, ApiError, type StudentGrades, type Enrollment } 
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
+import { downloadCsv } from "@/lib/utils";
 
 // ─── component ───────────────────────────────────────────────────────────────
 
@@ -97,19 +98,7 @@ export default function GradesPage() {
       ["Course Total", graded.reduce((sum, r) => sum + (r.totalScore ?? 0), 0).toFixed(1), graded.reduce((sum, r) => sum + r.maxScore, 0).toString(), letterGrade(overallPct), `${graded.length} of ${rows.length} graded`, "", "", `${overallPct}% overall`]
     ];
 
-    const csvContent = csvRows.map(row => 
-      row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(",")
-    ).join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `${data.courseName}_Grades.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(`${data.courseName}_Grades.csv`, csvRows);
   };
 
   const percentOverTime = graded.map((r) => ({

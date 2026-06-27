@@ -11,6 +11,7 @@ import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { COURSES, letterGrade, percentColor } from "@/lib/grade-helpers";
+import { downloadCsv } from "@/lib/utils";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -302,18 +303,7 @@ export default function AdminGradesPage() {
                       });
                     });
                     
-                    const csvContent = csvRows.map(row => 
-                      row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(",")
-                    ).join("\n");
-                    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-                    const link = document.createElement("a");
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", `${data.courseName}_Detailed_Grades.csv`);
-                    link.style.visibility = "hidden";
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    downloadCsv(`${data.courseName}_Detailed_Grades.csv`, csvRows);
                   }}
                   className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
                 >

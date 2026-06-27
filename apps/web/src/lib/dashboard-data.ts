@@ -1,3 +1,5 @@
+import { API_BASE } from "@/lib/utils";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface NavItem {
@@ -20,8 +22,6 @@ export interface DashboardData {
 }
 
 // ─── API-based data ───────────────────────────────────────────────────────────
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 export async function getDashboardDataFromApi(token: string): Promise<DashboardData> {
   const response = await fetch(`${API_BASE}/api/home/dashboard`, {

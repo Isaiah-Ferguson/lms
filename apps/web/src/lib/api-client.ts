@@ -4,35 +4,22 @@ import type {
   RegisterRequest,
   CreateUserRequest,
   ChangePasswordRequest,
-  SubmissionType,
-  SubmissionStatus,
   FileMeta,
-  FileUploadSlot,
   UploadUrlResponse,
   CompletedFile,
   SubmissionResponse,
-  ArtifactItem,
   ArtifactListResponse,
-  StudentInfo,
-  AssignmentInfo,
-  ArtifactInfo,
-  GitHubInfo,
   ExistingGrade,
   SubmissionDetail,
   GradeSubmissionRequest,
   SubmissionQueuePage,
-  SubmissionQueueItem,
-  StudentGradeRow,
   StudentGrades,
-  AdminStudentGrade,
   AdminGrades,
   AssignmentSubmissionsRosterResponse,
   ProfileUserResponse,
-  Enrollment,
   ProfileData,
   AvatarUploadSlotResponse,
   PreviousNoteExportItem,
-  AdminParticipantUser,
   AdminParticipantsResponse,
   HomeDashboardResponse,
   CourseDetailResponse,
@@ -58,7 +45,7 @@ import type {
 // "@/types" or from "@/lib/api-client" — whichever reads best at the call site.
 export type * from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+import { API_BASE, downloadBlob, extractFileName } from "@/lib/utils";
 
 // ─── Core fetch wrapper ───────────────────────────────────────────────────────
 
@@ -576,9 +563,10 @@ export const adminParticipantsApi = {
       );
     }
 
-    const disposition = res.headers.get("content-disposition") ?? "";
-    const match = disposition.match(/filename="?([^";]+)"?/i);
-    const fileName = match?.[1] ?? `previous-admin-notes-${new Date().toISOString().slice(0, 10)}.docx`;
+    const fileName = extractFileName(
+      res.headers.get("content-disposition"),
+      `previous-admin-notes-${new Date().toISOString().slice(0, 10)}.docx`
+    );
 
     return {
       blob: await res.blob(),
@@ -831,17 +819,8 @@ export const reportsApi = {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download report.");
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const disposition = res.headers.get("Content-Disposition");
-    const match = disposition?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-    a.download = match?.[1]?.replace(/['"]/g, "") ?? `report-${id}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const fileName = extractFileName(res.headers.get("Content-Disposition"), `report-${id}.docx`);
+    downloadBlob(await res.blob(), fileName);
   },
 };
 
@@ -853,17 +832,8 @@ export const transcriptApi = {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download transcript.");
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const disposition = res.headers.get("Content-Disposition");
-    const match = disposition?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-    a.download = match?.[1]?.replace(/['"]/g, "") ?? `transcript-${userId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const fileName = extractFileName(res.headers.get("Content-Disposition"), `transcript-${userId}.pdf`);
+    downloadBlob(await res.blob(), fileName);
   },
 };
 

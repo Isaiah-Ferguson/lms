@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { adminParticipantsApi, ApiError } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { downloadBlob } from "@/lib/utils";
+import { formatDateTime } from "@/lib/date-utils";
 import type { AdminNotes } from "@/lib/profile-data";
 
 interface AdminNotesCardProps {
@@ -13,16 +15,6 @@ interface AdminNotesCardProps {
   adminNotes: AdminNotes;
   canEditAdminNotes: boolean;
   onSave: (text: string) => void;
-}
-
-function formatDateTime(dateIso: string): string {
-  return new Date(dateIso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function AdminNotesCard({ userId, userName, adminNotes, canEditAdminNotes, onSave }: AdminNotesCardProps) {
@@ -57,14 +49,7 @@ export function AdminNotesCard({ userId, userName, adminNotes, canEditAdminNotes
         token
       );
 
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, fileName);
     } catch (error) {
       setExportError(error instanceof ApiError ? error.detail : "Failed to export previous notes.");
     } finally {

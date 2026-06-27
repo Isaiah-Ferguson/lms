@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { ApiError, profileApi, uploadFileToBlobSas } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
+import { getInitials } from "@/lib/utils";
 import type { ProfileUser } from "@/lib/profile-data";
 
 interface EditProfileCardProps {
@@ -14,15 +15,6 @@ interface EditProfileCardProps {
   canEditProfile: boolean;
   isAdminView?: boolean;
   onSave: (updated: Pick<ProfileUser, "name" | "town" | "phoneNumber" | "gitHubUsername" | "avatarUrl"> & { avatarBlobPath?: string | null; email?: string }) => Promise<void>;
-}
-
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 }
 
 export function EditProfileCard({ user, canEditProfile, isAdminView = false, onSave }: EditProfileCardProps) {
@@ -143,7 +135,7 @@ export function EditProfileCard({ user, canEditProfile, isAdminView = false, onS
               <img src={avatarUrl} alt={user.name} className="h-20 w-20 rounded-full object-cover ring-2 ring-gray-200" />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-xl font-bold text-white ring-2 ring-gray-200">
-                {initials(name || user.name)}
+                {getInitials(name || user.name)}
               </div>
             )}
             <label htmlFor="avatar-upload" className="sr-only">

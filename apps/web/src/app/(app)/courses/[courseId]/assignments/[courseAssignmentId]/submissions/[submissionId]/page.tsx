@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { instructorApi, type SubmissionDetail } from "@/lib/api-client";
 import { getToken, getUserRole } from "@/lib/auth";
 import { formatDateTime } from "@/lib/date-utils";
+import { downloadFromUrl } from "@/lib/utils";
 
 interface SubmissionGradingPageProps {
   params: {
@@ -79,18 +80,7 @@ export default function SubmissionGradingPage({ params }: SubmissionGradingPageP
 
   async function handleDownload(url: string, fileName: string) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Download failed");
-      
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      await downloadFromUrl(url, fileName);
     } catch (err) {
       alert("Failed to download file: " + (err instanceof Error ? err.message : "Unknown error"));
     }

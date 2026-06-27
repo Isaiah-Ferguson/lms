@@ -5,7 +5,7 @@ import { Check, Users } from "lucide-react";
 import { Modal } from "./Modal";
 import { Button } from "@/components/ui/Button";
 import { clsx } from "clsx";
-import type { ParticipantUser, CourseOption } from "@/lib/admin-participants-data";
+import { groupCoursesByYear, type ParticipantUser, type CourseOption } from "@/lib/admin-participants-data";
 
 interface Props {
   users: ParticipantUser[];
@@ -21,19 +21,7 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
   const [loading, setLoading]               = useState(false);
   const [error, setError]                   = useState("");
 
-  const coursesByYear = useMemo(() => {
-    const map = new Map<string, { yearId: string; yearLabel: string; courses: CourseOption[] }>();
-    for (const course of courses) {
-      if (!map.has(course.yearId)) {
-        map.set(course.yearId, { yearId: course.yearId, yearLabel: course.yearLabel, courses: [] });
-      }
-      map.get(course.yearId)!.courses.push(course);
-    }
-    // Sort years with newest first
-    return Array.from(map.values()).sort((a, b) => 
-      b.yearLabel.localeCompare(a.yearLabel)
-    );
-  }, [courses]);
+  const coursesByYear = useMemo(() => groupCoursesByYear(courses), [courses]);
 
   function toggleUser(id: string) {
     setCheckedUsers((prev) =>

@@ -6,6 +6,7 @@ import { submissionsApi, uploadFileToBlobSas } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { SubmissionGuidelinesModal } from "@/components/submissions/SubmissionGuidelinesModal";
 import { formatDateTime } from "@/lib/date-utils";
+import { formatBytes, downloadFromUrl } from "@/lib/utils";
 
 export interface SubmissionState {
   status: "NotSubmitted" | "Submitted" | "Returned";
@@ -70,12 +71,6 @@ async function uploadZip(
   return { submissionId: uploadResp.submissionId };
 }
 // ──────────────────────────────────────────────────────────────────────────
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardProps) {
   const [state, setState] = useState<SubmissionState>(initial);
@@ -187,18 +182,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
 
       // Download the first artifact (ZIP file)
       const artifact = artifactList.artifacts[0];
-      const response = await fetch(artifact.downloadUrl);
-      if (!response.ok) throw new Error("Download failed");
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = artifact.fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      await downloadFromUrl(artifact.downloadUrl, artifact.fileName);
     } catch (err) {
       setDownloadError("Failed to download: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {

@@ -11,7 +11,7 @@ import { instructorApi, ApiError } from "@/lib/api-client";
 import type { SubmissionDetail, ExistingGrade } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { useAuthedToken } from "@/lib/use-authed-token";
-import { formatBytes, formatStatus } from "@/lib/utils";
+import { ensureProtocol, formatBytes, formatStatus } from "@/lib/utils";
 import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
@@ -115,15 +115,6 @@ export default function InstructorGradingPage() {
     } finally {
       setReturning(false);
     }
-  }
-
-  // Ensure URL has protocol
-  function ensureProtocol(url: string | null): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-    return `https://${url}`;
   }
 
   // ── Loading / error states ─────────────────────────────────────────────────

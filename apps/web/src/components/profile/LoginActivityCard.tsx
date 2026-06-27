@@ -1,18 +1,9 @@
 import { ProfileCard } from "@/components/profile/ProfileCard";
+import { formatDateTime } from "@/lib/date-utils";
 import type { LoginActivity } from "@/lib/profile-data";
 
 interface LoginActivityCardProps {
   loginActivity: LoginActivity;
-}
-
-function formatDateTime(dateIso: string): string {
-  return new Date(dateIso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function LoginActivityCard({ loginActivity }: LoginActivityCardProps) {

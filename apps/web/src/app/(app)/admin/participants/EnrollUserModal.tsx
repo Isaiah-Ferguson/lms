@@ -5,13 +5,7 @@ import { Search, Check } from "lucide-react";
 import { Modal } from "./Modal";
 import { Button } from "@/components/ui/Button";
 import { clsx } from "clsx";
-import type { ParticipantUser, CourseOption } from "@/lib/admin-participants-data";
-
-interface CoursesByYear {
-  yearId: string;
-  yearLabel: string;
-  courses: CourseOption[];
-}
+import { groupCoursesByYear, type ParticipantUser, type CourseOption } from "@/lib/admin-participants-data";
 
 interface Props {
   users: ParticipantUser[];
@@ -64,19 +58,7 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
     [users, search]
   );
 
-  const coursesByYear = useMemo((): CoursesByYear[] => {
-    const map = new Map<string, CoursesByYear>();
-    for (const course of courses) {
-      if (!map.has(course.yearId)) {
-        map.set(course.yearId, { yearId: course.yearId, yearLabel: course.yearLabel, courses: [] });
-      }
-      map.get(course.yearId)!.courses.push(course);
-    }
-    // Sort years with newest first
-    return Array.from(map.values()).sort((a, b) => 
-      b.yearLabel.localeCompare(a.yearLabel)
-    );
-  }, [courses]);
+  const coursesByYear = useMemo(() => groupCoursesByYear(courses), [courses]);
 
   function toggleCourse(id: string) {
     setSelectedCourses((prev) =>

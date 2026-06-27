@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { API_BASE } from "@/lib/utils";
 
 export interface ProfileUser {
   id: string;
@@ -71,8 +72,6 @@ export interface ProfileData {
   adminNotes?: AdminNotes;
   permissions: ProfilePermissions;
 }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 async function fetchProfile(path: string): Promise<ProfileData | null> {
   const token = (await cookies()).get("cslms_token")?.value;

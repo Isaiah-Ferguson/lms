@@ -7,6 +7,7 @@ import type { AssignmentRosterStatus } from "@/lib/assignment-submissions-roster
 import { instructorApi, type ArtifactInfo } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { formatDateTime } from "@/lib/date-utils";
+import { downloadFromUrl, ensureProtocol } from "@/lib/utils";
 
 export interface GradeModalRow {
   userId: string;
@@ -173,30 +174,10 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
 
   async function handleDownload(url: string, fileName: string) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Download failed");
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      await downloadFromUrl(url, fileName);
     } catch (err) {
       alert("Failed to download file: " + (err instanceof Error ? err.message : "Unknown error"));
     }
-  }
-
-  // Ensure URL has protocol
-  function ensureProtocol(url: string | null): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-    return `https://${url}`;
   }
 
   return createPortal(

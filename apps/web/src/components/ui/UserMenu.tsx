@@ -6,17 +6,13 @@ import { useRouter } from "next/navigation";
 import { LayoutDashboard, User, BarChart2, LogOut, ChevronDown, AlertTriangle } from "lucide-react";
 import { clsx } from "clsx";
 import { clearToken } from "@/lib/auth";
+import { getInitials } from "@/lib/utils";
 import type { UserInfo } from "@/lib/dashboard-data";
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 function Avatar({ name, avatarUrl, isOnProbation }: { name: string; avatarUrl: string | null; isOnProbation?: boolean }) {
-  const initials = name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const initials = getInitials(name);
 
   const base = avatarUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
