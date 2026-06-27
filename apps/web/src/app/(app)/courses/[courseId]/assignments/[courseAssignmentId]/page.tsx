@@ -73,19 +73,24 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
     const token = getToken();
     if (!token) { setError("Session expired"); setLoading(false); return; }
 
-    // Fetch assignment data
-    Promise.all([
-      assignmentsApi.getAssignment(params.courseAssignmentId, token),
-      assignmentsApi.getMySubmission(params.courseAssignmentId, token),
-    ])
-      .then(([a, submission]) => {
+    // Ignore results that arrive after the params change or the component unmounts.
+    let ignore = false;
+
+    // Core: assignment + the current user's submission (fetched together).
+    async function loadCore(token: string) {
+      try {
+        const [a, submission] = await Promise.all([
+          assignmentsApi.getAssignment(params.courseAssignmentId, token),
+          assignmentsApi.getMySubmission(params.courseAssignmentId, token),
+        ]);
+        if (ignore) return;
+
         setAssignment(a);
         // Convert UTC date to local datetime-local format
         const utcDate = parseApiDate(a.dueDate);
         if (utcDate) {
           const offset = utcDate.getTimezoneOffset() * 60000; // offset in milliseconds
-          const localISOTime = new Date(utcDate.getTime() - offset).toISOString().slice(0, 16);
-          setEditDueDate(localISOTime);
+          setEditDueDate(new Date(utcDate.getTime() - offset).toISOString().slice(0, 16));
         }
         setEditAssignmentType(a.assignmentType ?? "Challenge");
 
@@ -99,42 +104,50 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             submissionId: submission.submissionId,
           });
         }
-      })
-      .catch(() => setError("Assignment not found."))
-      .finally(() => setLoading(false));
+      } catch {
+        if (!ignore) setError("Assignment not found.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
 
-    // Fetch student's grade for this assignment
-    gradesApi.getMyGrades(params.courseId, token)
-      .then((grades) => {
+    // The current user's grade for this assignment (may not exist yet).
+    async function loadGrade(token: string) {
+      try {
+        const grades = await gradesApi.getMyGrades(params.courseId, token);
+        if (ignore) return;
         const gradeRow = grades.rows.find(r => r.assignmentId === params.courseAssignmentId);
         if (gradeRow) {
-          setStudentGrade({
-            totalScore: gradeRow.totalScore,
-            maxScore: gradeRow.maxScore,
-          });
+          setStudentGrade({ totalScore: gradeRow.totalScore, maxScore: gradeRow.maxScore });
         }
-      })
-      .catch(() => {
+      } catch {
         // Grade not available yet
-      });
-
-    // Fetch participation counts (only for instructors)
-    if (isInstructor) {
-      instructorApi.getAssignmentSubmissionsRoster(params.courseAssignmentId, token)
-        .then((roster) => {
-          const participants = roster.rows.length;
-          const submitted = roster.rows.filter(row => row.submissionId !== null).length;
-          const needsGrading = roster.rows.filter(row =>
-            row.submissionId !== null && (row.status === "NeedsGrading" || row.status === "Submitted")
-          ).length;
-          setParticipationCounts({ participants, submitted, needsGrading });
-        })
-        .catch((err) => {
-          // Set to zero on error
-          setParticipationCounts({ participants: 0, submitted: 0, needsGrading: 0 });
-        });
+      }
     }
-  }, [params.courseAssignmentId, isInstructor]);
+
+    // Participation counts (instructors only).
+    async function loadRoster(token: string) {
+      try {
+        const roster = await instructorApi.getAssignmentSubmissionsRoster(params.courseAssignmentId, token);
+        if (ignore) return;
+        const participants = roster.rows.length;
+        const submitted = roster.rows.filter(row => row.submissionId !== null).length;
+        const needsGrading = roster.rows.filter(row =>
+          row.submissionId !== null && (row.status === "NeedsGrading" || row.status === "Submitted")
+        ).length;
+        setParticipationCounts({ participants, submitted, needsGrading });
+      } catch {
+        if (!ignore) setParticipationCounts({ participants: 0, submitted: 0, needsGrading: 0 });
+      }
+    }
+
+    // Fire all three in parallel — same concurrency as the previous .then() version.
+    void loadCore(token);
+    void loadGrade(token);
+    if (isInstructor) void loadRoster(token);
+
+    return () => { ignore = true; };
+  }, [params.courseAssignmentId, params.courseId, isInstructor]);
 
   async function handleSaveDueDate(e: React.FormEvent) {
     e.preventDefault();

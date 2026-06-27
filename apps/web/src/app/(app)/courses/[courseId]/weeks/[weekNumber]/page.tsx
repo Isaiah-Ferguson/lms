@@ -43,20 +43,26 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
       setLoading(false);
       return;
     }
-    
+
+    // Ignore results that arrive after the course/week changes or unmount, so a
+    // slow course-detail fetch can't set a different week's data.
+    let ignore = false;
+
     setLoading(true);
     courseApi.getCourseDetail(params.courseId, token).then((res) => {
+      if (ignore) return;
       setRealCourseId(res.id);
       setCourseTitle(res.title);
-      
+
       // Match week by weekNumber
       const match = res.weeks.find((w) => w.weekNumber === parsedWeekNumber);
       if (match) {
         setRealModuleId(match.id);
         setRealModuleTitle(match.title);
-        
+
         // Fetch real lessons for this module
         lessonsApi.getModuleLessons(match.id, token).then((lessons) => {
+          if (ignore) return;
           const mappedVideos: WeekVideo[] = lessons.map((lesson, index) => ({
             id: lesson.id,
             title: lesson.title,
@@ -68,17 +74,19 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
               downloadUrl: artifact.downloadUrl,
             })),
           }));
-          
+
           setVideos(mappedVideos);
           if (mappedVideos.length > 0) {
             setSelectedVideoId(mappedVideos[0].id);
           }
           setLoading(false);
-        }).catch(() => setLoading(false));
+        }).catch(() => { if (!ignore) setLoading(false); });
       } else {
         setLoading(false);
       }
-    }).catch(() => setLoading(false));
+    }).catch(() => { if (!ignore) setLoading(false); });
+
+    return () => { ignore = true; };
   }, [params.courseId, parsedWeekNumber]);
 
   const selectedVideo = useMemo(() => {

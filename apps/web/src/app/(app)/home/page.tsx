@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   type AcademicYear,
@@ -52,6 +52,10 @@ export default function HomePage() {
   const [isManageYearsOpen, setIsManageYearsOpen] = useState(false);
   const [editingLevel, setEditingLevel] = useState<CourseLevel | null>(null);
 
+  // Bumped on each loadDashboard() so a stale response (e.g. from rapid year
+  // switching via the URL param) can't overwrite a newer one.
+  const dashboardReqRef = useRef(0);
+
   async function loadDashboard(opts?: { preserveSelectedYear?: string }) {
     const token = getToken();
     if (!token) {
@@ -60,8 +64,10 @@ export default function HomePage() {
       return;
     }
 
+    const reqId = ++dashboardReqRef.current;
     try {
       const data = await homeApi.getDashboard(token);
+      if (reqId !== dashboardReqRef.current) return; // superseded by a newer load
 
       setYears(data.years);
       setLevels(data.levels);
@@ -77,9 +83,10 @@ export default function HomePage() {
       const activeYearId = data.years.find((year) => year.isActive)?.id ?? data.years[0]?.id ?? "";
       setSelectedYearId(preferred ?? activeYearId);
     } catch (loadError) {
+      if (reqId !== dashboardReqRef.current) return;
       setError(loadError instanceof ApiError ? loadError.detail : "Unable to load dashboard data.");
     } finally {
-      setLoading(false);
+      if (reqId === dashboardReqRef.current) setLoading(false);
     }
   }
 

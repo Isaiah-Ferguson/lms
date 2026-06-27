@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ClipboardList, Search, X, Github, FileText, RefreshCw } from "lucide-react";
@@ -67,8 +67,14 @@ export default function SubmissionQueuePage() {
     void loadYears();
   }, [queryYearId, token]);
 
+  // Bumped on each load() so only the most recent request applies its result —
+  // guards against out-of-order responses when filters change quickly (or the
+  // Refresh button races the filter-driven effect).
+  const loadReqRef = useRef(0);
+
   const load = useCallback(async () => {
     if (!token) return;
+    const reqId = ++loadReqRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -78,11 +84,13 @@ export default function SubmissionQueuePage() {
         statusFilter || undefined,
         selectedYearId || undefined
       );
+      if (reqId !== loadReqRef.current) return; // superseded by a newer load
       setItems(data.items || []);
     } catch (err) {
+      if (reqId !== loadReqRef.current) return;
       setError(err instanceof ApiError ? err.detail : "Failed to load submissions.");
     } finally {
-      setLoading(false);
+      if (reqId === loadReqRef.current) setLoading(false);
     }
   }, [token, courseFilter, statusFilter, selectedYearId]);
 
