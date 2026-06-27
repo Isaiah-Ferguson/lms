@@ -415,12 +415,29 @@ public class InstructorService : IInstructorService
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
             parsedCohortId = cid;
 
+        // Each cohort gets its OWN duplicate set of course rows per level, so resolve
+        // the selected cohort's course IDs up front and prefer that cohort's own row.
+        List<Guid>? cohortCourseIds = null;
+        if (parsedCohortId.HasValue)
+        {
+            cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+        }
+
         // Resolve course - prefer courses with modules to avoid empty duplicates
         Course? course = null;
         if (Guid.TryParse(courseId, out var pid))
+        {
             course = await _db.Courses.AsNoTracking()
                 .Include(c => c.Modules)
                 .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+
+            if (course != null && cohortCourseIds != null && !cohortCourseIds.Contains(course.Id))
+                return new StudentGradesDto(course.Id.ToString(), course.Title, []);
+        }
         else
         {
             var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
@@ -430,6 +447,11 @@ public class InstructorService : IInstructorService
                     .Where(c => c.Title == resolvedTitle)
                     .Include(c => c.Modules)
                     .ToListAsync(cancellationToken);
+
+                // Restrict to the selected cohort's course row(s) when filtering by cohort.
+                if (cohortCourseIds != null)
+                    courses = courses.Where(c => cohortCourseIds.Contains(c.Id)).ToList();
+
                 course = courses.FirstOrDefault(c => c.Modules.Any())
                          ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
             }
@@ -437,20 +459,6 @@ public class InstructorService : IInstructorService
 
         if (course == null)
             return new StudentGradesDto(courseId, courseId, []);
-
-        // If cohortId is provided, verify the course belongs to that cohort
-        if (parsedCohortId.HasValue)
-        {
-            var courseInCohort = await _db.CohortCourses
-                .AsNoTracking()
-                .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
-
-            // If the course doesn't belong to this cohort, return empty results
-            if (!courseInCohort)
-            {
-                return new StudentGradesDto(course.Id.ToString(), course.Title, []);
-            }
-        }
 
         // Get all assignments in this course
         var assignments = await _db.Assignments
@@ -502,16 +510,34 @@ public class InstructorService : IInstructorService
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
             parsedCohortId = cid;
 
-        // Resolve course - prefer courses with modules to avoid empty duplicates.
-        // Note: "combine" is a real level/course (resolved by slug), NOT an "all courses"
-        // aggregate. Treating it as an aggregate caused every level's assignments to show
-        // under the Combine tab for cohorts mapped to multiple courses.
+        // Each cohort gets its OWN duplicate set of course rows per level (see
+        // HomeService.CreateAcademicYear). Fetch the selected cohort's course IDs up
+        // front so course resolution can prefer THAT cohort's row rather than some
+        // other cohort's same-titled row.
+        List<Guid>? cohortCourseIds = null;
+        if (parsedCohortId.HasValue)
+        {
+            cohortCourseIds = await _db.CohortCourses
+                .AsNoTracking()
+                .Where(cc => cc.CohortId == parsedCohortId.Value)
+                .Select(cc => cc.CourseId)
+                .ToListAsync(cancellationToken);
+        }
+
+        // Resolve course. "combine" is a real level/course (resolved by slug), NOT an
+        // "all courses" aggregate. When a cohort is selected, resolve to that cohort's
+        // own course row so we don't pick a different cohort's duplicate (which would
+        // fail the cohort check and return empty grades).
         Course? course = null;
         if (Guid.TryParse(courseId, out var pid))
         {
             course = await _db.Courses.AsNoTracking()
                 .Include(c => c.Modules)
                 .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
+
+            // Honor the cohort gate for an explicit course id.
+            if (course != null && cohortCourseIds != null && !cohortCourseIds.Contains(course.Id))
+                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
         }
         else
         {
@@ -522,6 +548,11 @@ public class InstructorService : IInstructorService
                     .Where(c => c.Title == resolvedTitle)
                     .Include(c => c.Modules)
                     .ToListAsync(cancellationToken);
+
+                // Restrict to the selected cohort's course row(s) when filtering by cohort.
+                if (cohortCourseIds != null)
+                    courses = courses.Where(c => cohortCourseIds.Contains(c.Id)).ToList();
+
                 course = courses.FirstOrDefault(c => c.Modules.Any())
                          ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
             }
@@ -529,19 +560,6 @@ public class InstructorService : IInstructorService
 
         if (course == null)
             return new AdminGradesDto(courseId, courseId, []);
-
-        // If filtering by cohort, verify the course belongs to that cohort
-        if (parsedCohortId.HasValue)
-        {
-            var courseInCohort = await _db.CohortCourses
-                .AsNoTracking()
-                .AnyAsync(cc => cc.CohortId == parsedCohortId.Value && cc.CourseId == course.Id, cancellationToken);
-
-            if (!courseInCohort)
-            {
-                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
-            }
-        }
 
         // Assignments for this course only
         var assignments = await _db.Assignments
