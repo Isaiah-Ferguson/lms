@@ -125,7 +125,7 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
           const participants = roster.rows.length;
           const submitted = roster.rows.filter(row => row.submissionId !== null).length;
           const needsGrading = roster.rows.filter(row =>
-            row.submissionId !== null && (row.status === "Submitted" || row.status === "Processing")
+            row.submissionId !== null && (row.status === "NeedsGrading" || row.status === "Submitted")
           ).length;
           setParticipationCounts({ participants, submitted, needsGrading });
         })
