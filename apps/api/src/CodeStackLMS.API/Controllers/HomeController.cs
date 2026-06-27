@@ -58,6 +58,22 @@ public class HomeController : ControllerBase
         var year = await _homeService.SetActiveYearAsync(yearId, cancellationToken);
         return Ok(year);
     }
+
+    [HttpPost("levels/{courseId}/description")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(HomeCourseLevelDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateLevelDescription(
+        [FromRoute] string courseId,
+        [FromBody] UpdateLevelRequest request,
+        CancellationToken cancellationToken)
+    {
+        var level = await _homeService.UpdateLevelDescriptionAsync(
+            courseId, request.Description, cancellationToken);
+        return Ok(level);
+    }
 }
 
 public sealed record CreateYearRequest(
@@ -65,3 +81,5 @@ public sealed record CreateYearRequest(
     string StartDate,
     string EndDate,
     bool SetActive);
+
+public sealed record UpdateLevelRequest(string Description);

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Pencil, Sparkles } from "lucide-react";
 import { clsx } from "clsx";
 import { motion, useReducedMotion } from "framer-motion";
 import type { CourseLevel } from "@/lib/dashboard-home-data";
@@ -11,6 +11,9 @@ interface LevelCardGridProps {
   enrolledLevelIds: string[];
   canViewAllLevels: boolean;
   yearLabel: string;
+  /** When true, admins see an edit button to change each level's description. */
+  canEdit?: boolean;
+  onEditLevel?: (level: CourseLevel) => void;
 }
 
 const ACCENT_BY_LEVEL_KEY: Record<string, { gradient: string; glow: string; label: string }> = {
@@ -46,6 +49,8 @@ export function LevelCardGrid({
   enrolledLevelIds,
   canViewAllLevels,
   yearLabel,
+  canEdit = false,
+  onEditLevel,
 }: LevelCardGridProps) {
   const reduceMotion = useReducedMotion();
   const visibleLevels = canViewAllLevels
@@ -101,14 +106,29 @@ export function LevelCardGrid({
                 <div className="absolute top-3 right-3">
                   <span className={clsx(
                     "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm",
-                    isEnrolled 
-                      ? "bg-white/20 text-white border border-white/30" 
+                    isEnrolled
+                      ? "bg-white/20 text-white border border-white/30"
                       : "bg-white/10 text-white/80 border border-white/20"
                   )}>
                     {isEnrolled && <Sparkles className="h-3 w-3" />}
                     {canViewAllLevels ? (isEnrolled ? "Enrolled" : "Available") : "Enrolled"}
                   </span>
                 </div>
+                {canEdit && (
+                  <button
+                    type="button"
+                    aria-label={`Edit ${level.title} description`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onEditLevel?.(level);
+                    }}
+                    className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/30"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    Edit
+                  </button>
+                )}
               </div>
 
               {/* Content */}

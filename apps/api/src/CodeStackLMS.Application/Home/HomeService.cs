@@ -149,12 +149,21 @@ public class HomeService : IHomeService
 
         _db.Cohorts.Add(cohort);
 
+        // Carry level descriptions forward from the most recently created cohort
+        // so edits made on the dashboard become the template for new years.
+        // Falls back to the built-in defaults for the first cohort (or any level
+        // the previous cohort happens to be missing).
+        var inheritedDescriptions = await GetLatestLevelDescriptionsAsync(cancellationToken);
+
         var defaultLevels = DefaultLevelConfig
             .Select(cfg => new Course
             {
                 Id = Guid.NewGuid(),
                 Title = cfg.Title,
-                Description = cfg.Description,
+                Description = inheritedDescriptions.TryGetValue(cfg.Title.Trim(), out var inherited)
+                    && !string.IsNullOrWhiteSpace(inherited)
+                        ? inherited
+                        : cfg.Description,
                 CreatedAt = DateTime.UtcNow,
             })
             .ToList();
@@ -226,6 +235,76 @@ public class HomeService : IHomeService
             avatarBlobPath,
             TimeSpan.FromDays(1),
             cancellationToken);
+    }
+
+    public async Task<HomeCourseLevelDto> UpdateLevelDescriptionAsync(
+        string courseId,
+        string description,
+        CancellationToken cancellationToken = default)
+    {
+        if (_currentUser.Role != "Admin")
+            throw new ForbiddenException();
+
+        if (!Guid.TryParse(courseId, out var parsedCourseId))
+            throw new ValidationException("Invalid course id.");
+
+        var course = await _db.Courses
+            .FirstOrDefaultAsync(c => c.Id == parsedCourseId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Course), parsedCourseId);
+
+        // Edits apply only to this cohort/year's course row — descriptions are
+        // stored per-cohort, so this does not affect other years.
+        course.Description = description?.Trim() ?? string.Empty;
+        course.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var cohortId = await _db.CohortCourses
+            .AsNoTracking()
+            .Where(cc => cc.CourseId == parsedCourseId)
+            .Select(cc => cc.CohortId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return new HomeCourseLevelDto(
+            course.Id.ToString(),
+            cohortId.ToString(),
+            ResolveLevelKey(course.Title, course.Id),
+            course.Title,
+            string.IsNullOrWhiteSpace(course.Description)
+                ? "Level content and schedule details will be available soon."
+                : course.Description,
+            false);
+    }
+
+    // Returns the level descriptions of the most recently created cohort, keyed
+    // by course title. Empty when no cohort exists yet (first-ever year).
+    private async Task<Dictionary<string, string>> GetLatestLevelDescriptionsAsync(
+        CancellationToken cancellationToken)
+    {
+        var latestCohortId = await _db.Cohorts
+            .AsNoTracking()
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => (Guid?)c.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (latestCohortId is null)
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        var levels = await _db.CohortCourses
+            .AsNoTracking()
+            .Where(cc => cc.CohortId == latestCohortId)
+            .Join(
+                _db.Courses.AsNoTracking(),
+                cc => cc.CourseId,
+                course => course.Id,
+                (cc, course) => new { course.Title, course.Description })
+            .ToListAsync(cancellationToken);
+
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var level in levels)
+            map[level.Title.Trim()] = level.Description;
+
+        return map;
     }
 
     private static readonly IReadOnlyList<(string Title, string Description)> DefaultLevelConfig =

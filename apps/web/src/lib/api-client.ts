@@ -663,6 +663,18 @@ export const homeApi = {
       token
     );
   },
+
+  updateLevelDescription(
+    courseId: string,
+    description: string,
+    token: string
+  ): Promise<HomeDashboardResponse["levels"][number]> {
+    return apiFetch<HomeDashboardResponse["levels"][number]>(
+      `/api/home/levels/${courseId}/description`,
+      { method: "POST", body: JSON.stringify({ Description: description }) },
+      token
+    );
+  },
 };
 
 export const courseApi = {

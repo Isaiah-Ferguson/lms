@@ -14,6 +14,7 @@ import { getToken } from "@/lib/auth";
 import { YearSelector } from "./YearSelector";
 import { ManageYearsModal } from "./ManageYearsModal";
 import { LevelCardGrid } from "./LevelCardGrid";
+import { EditLevelModal } from "./EditLevelModal";
 
 // Prevent caching to ensure fresh user data
 export const dynamic = 'force-dynamic';
@@ -37,6 +38,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isManageYearsOpen, setIsManageYearsOpen] = useState(false);
+  const [editingLevel, setEditingLevel] = useState<CourseLevel | null>(null);
 
   async function loadDashboard(opts?: { preserveSelectedYear?: string }) {
     const token = getToken();
@@ -246,6 +248,8 @@ export default function HomePage() {
             enrolledLevelIds={enrolledLevelIdsForSelectedYear}
             canViewAllLevels={permissions.canViewAllLevels}
             yearLabel={selectedYear?.label ?? "Academic Year"}
+            canEdit={permissions.canManageYears}
+            onEditLevel={setEditingLevel}
           />
         </section>
       )}
@@ -267,6 +271,22 @@ export default function HomePage() {
           onYearCreated={(year) => {
             // Reload page to update server-side navigation with new year
             window.location.href = `/home?year=${year.id}`;
+          }}
+        />
+      )}
+
+      {permissions.canManageYears && editingLevel && (
+        <EditLevelModal
+          level={editingLevel}
+          yearLabel={selectedYear?.label ?? "Academic Year"}
+          onClose={() => setEditingLevel(null)}
+          onSaved={(description) => {
+            setLevels((prev) =>
+              prev.map((level) =>
+                level.id === editingLevel.id ? { ...level, description } : level
+              )
+            );
+            setEditingLevel(null);
           }}
         />
       )}
