@@ -1,7 +1,12 @@
 # Roadmap 1 — Claude AI Weekly Progress Reports
 
-**Status**: Phases 1–3 implemented (Phase 4 — attendance — pending Roadmap 2)
+**Status**: Phases 1–3 implemented and live. Beyond the original scope, **class-summary reports** and **on-demand triggers** were also added. Phase 4 (attendance as an input) is still pending — the attendance tracker now exists (Roadmap 2) but is not yet fed into the prompt.
 **Goal**: Automatically generate a comprehensive weekly progress report covering **all students** (~50 max), combining grades, academic status (probation), and — eventually — attendance.
+
+> **As built (additions beyond this plan):**
+> - Two report kinds via the `ReportType` enum: `StudentProgress` (per student) and `ClassSummary` (per cohort). The `ProgressReport` entity carries `CohortId`, `ReportType`, and `FailureReason` on top of the originally sketched fields.
+> - The weekly run is registered as a Hangfire recurring job (`RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(…, Cron.Weekly(DayOfWeek.Monday, 6))` in `Program.cs`) **and** can be triggered on demand: `POST /api/reports/trigger`, `/trigger/student/{id}`, `/trigger/class`.
+> - Reports are downloadable as DOCX (`GET /api/reports/{id}/download`). Full endpoint list: `docs/03-API-ENDPOINTS.md` §13.
 
 ---
 
@@ -80,7 +85,8 @@ Admin/Instructor reviews → optionally publish / email
 - [ ] (Optional) email/notification delivery.
 
 ### Phase 4 — Add attendance (depends on Roadmap 2)
-- [ ] Once the attendance tracker exists, add attendance metrics as **one more input field** in the per-student prompt.
+The attendance tracker now exists (Roadmap 2 core is implemented), so this is unblocked — but the wiring below is still pending.
+- [ ] Now that the attendance tracker exists, add attendance metrics as **one more input field** in the per-student prompt.
 - [ ] No change to report structure — only the data source expands.
 
 ---
@@ -92,7 +98,7 @@ Admin/Instructor reviews → optionally publish / email
 | Identity / level | `UserCourseEnrollment` → `Course` (level) | Anonymize name if policy requires |
 | Grades | grading/submission services | Compute averages + trend in C# |
 | Probation status | `User.IsOnProbation`, `ProbationReason` | Already deterministic |
-| Attendance | *Roadmap 2 (future)* | Added in Phase 4 |
+| Attendance | `Attendance` entity (Roadmap 2 — now built) | Not yet wired into the prompt; add in Phase 4 |
 
 ---
 

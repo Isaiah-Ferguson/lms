@@ -8,7 +8,8 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 - **Database**: Azure SQL Server with EF Core
 - **Storage**: Azure Blob Storage (assignments, submissions, videos)
 - **Authentication**: JWT bearer tokens (access token only — no refresh flow today)
-- **Background Processing**: Hangfire for async email jobs
+- **Background Processing**: Hangfire for async jobs (email notifications, weekly Claude progress reports)
+- **AI**: Anthropic Claude API for generated weekly progress reports (server-side only)
 
 ## Architecture Layers
 
@@ -31,9 +32,12 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
 │  │ Courses  │ │ Lessons  │ │ Assign.  │ │ Grading  │        │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐                     │
-│  │ Users    │ │ Enroll.  │ │ Submiss. │                     │
-│  └──────────┘ └──────────┘ └──────────┘                     │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │ Users    │ │ Enroll.  │ │ Submiss. │ │Attendance│        │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘        │
+│  ┌──────────┐ ┌──────────┐                                  │
+│  │ Reports  │ │Transcript│   (Reports = Claude AI)          │
+│  └──────────┘ └──────────┘                                  │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -71,7 +75,8 @@ Single repository with clear separation between frontend, backend, and shared co
 - HTTPS only, secure headers
 
 ### 5. **Async Processing**
-- Background jobs for heavy operations (grading notifications, video processing prep)
+- Background jobs for heavy operations (grading notifications, submission-returned notifications, video processing prep)
+- Weekly Claude AI progress reports via a Hangfire recurring job (`WeeklyProgressReportJob`, Mondays 06:00) — also triggerable on demand. See `docs/04-CLAUDE-REPORTS-ROADMAP.md`.
 - Event-driven for decoupling (e.g., submission → notification)
 
 ### 6. **Scalability Considerations**

@@ -72,6 +72,18 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 **Response**: Success message
 **Status**: 200 OK
 
+### POST `/api/auth/forgot-password`
+**Description**: Request a password reset for an email address
+**Auth**: Public
+**Body**:
+```json
+{
+  "email": "string"
+}
+```
+**Response**: Success message (always 200, regardless of whether the email exists, to avoid account enumeration)
+**Status**: 200 OK
+
 ---
 
 ## 2. Courses (`/api/courses`)
@@ -258,6 +270,20 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 
 ## 5. Lessons (`/api/lessons`)
 
+### GET `/api/lessons?moduleId={moduleId}`
+**Description**: Get all lessons for a module
+**Auth**: Authenticated
+**Query Params**: `?moduleId={moduleId}`
+**Response**: `LessonDto[]`
+**Status**: 200 OK
+
+### POST `/api/lessons`
+**Description**: Create a lesson (video, text, or link) in a module
+**Auth**: Instructor / Admin
+**Body**: `CreateLessonDto` (moduleId, title, type, and the type-specific fields — e.g. video source/blob path, text content, or link URL)
+**Response**: `LessonDto`
+**Status**: 201 Created
+
 ### GET `/api/lessons/{lessonId}/video-token`
 **Description**: Get SAS token for video streaming
 **Auth**: Authenticated
@@ -345,6 +371,32 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 **Status**: 200 OK
 **Note**: All assignments use a fixed 100-point grading scale
 
+### POST `/api/instructor/assignments/{assignmentId}/students/{studentId}/grade`
+**Description**: Grade a student's work for an assignment directly (used when grading from the roster, including students who have not formally submitted). Same 100-point body as the per-submission grade endpoint.
+**Auth**: Instructor
+**Body**:
+```json
+{
+  "totalScore": number,
+  "rubricBreakdownJson": "string",
+  "overallComment": "string"
+}
+```
+**Response**: `ExistingGradeDto`
+**Status**: 200 OK
+
+### POST `/api/instructor/submissions/{submissionId}/return`
+**Description**: Return a submission to the student with a reason (sends an email notification; the student can resubmit). Transitions the submission to `Returned`.
+**Auth**: Instructor
+**Body**:
+```json
+{
+  "reason": "string"
+}
+```
+**Response**: Success
+**Status**: 200 OK
+
 ### GET `/api/instructor/assignments/{assignmentId}/submissions-roster`
 **Description**: Get roster of all submissions for an assignment
 **Auth**: Instructor
@@ -422,6 +474,12 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 
 ## 9. Admin Participants (`/api/admin/participants`)
 
+### GET `/api/admin/participants`
+**Description**: List all participants (users) with role, status, and enrollment info for admin management
+**Auth**: Admin
+**Response**: `AdminParticipantsDto` (users + the course options used by the enroll UI)
+**Status**: 200 OK
+
 ### POST `/api/admin/participants/enrollments`
 **Description**: Enroll users in courses
 **Auth**: Admin
@@ -433,6 +491,31 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 }
 ```
 **Response**: Success
+**Status**: 200 OK
+
+### DELETE `/api/admin/participants/enrollments`
+**Description**: Unenroll users from courses
+**Auth**: Admin
+**Body**:
+```json
+{
+  "userIds": ["guid", "guid"],
+  "courseId": "string"
+}
+```
+**Response**: Success
+**Status**: 200 OK
+
+### PATCH `/api/admin/participants/{userId}/toggle-active`
+**Description**: Activate / deactivate a user account
+**Auth**: Admin
+**Response**: Updated user status
+**Status**: 200 OK
+
+### PATCH `/api/admin/participants/{userId}/toggle-admin`
+**Description**: Grant / revoke a user's admin role
+**Auth**: Admin
+**Response**: Updated user
 **Status**: 200 OK
 
 ### POST `/api/admin/participants/{userId}/notes/export-docx`
@@ -496,6 +579,118 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 **Description**: Set active academic year
 **Auth**: Admin
 **Response**: Success
+**Status**: 200 OK
+
+### POST `/api/home/levels/{courseId}/description`
+**Description**: Update a level's (course's) description shown on the dashboard
+**Auth**: Instructor / Admin
+**Body**:
+```json
+{
+  "description": "string"
+}
+```
+**Response**: Success
+**Status**: 200 OK
+
+**Note**: "Academic years" are modeled by the `Cohort` entity; the `years` endpoints create/activate cohorts, and "levels" are the `Course` records within a cohort.
+
+---
+
+## 12. Attendance (`/api/admin/attendance`)
+
+Attendance is recorded per **level** (`Course`) per **date**, one row per (level, student, day). Admin-only. See `docs/05-ATTENDANCE-ROADMAP.md`.
+
+**Status codes** are sent as single letters: `P` Present · `L` Late · `E` Excused · `U` Unexcused · `Z` Zoom (remote).
+
+### GET `/api/admin/attendance?courseId={courseId}&year={year}&month={month}`
+**Description**: Get the attendance grid for a level for a given month — the day columns (with each day's `sessionType`), the roster of students, their existing marks, and per-student tallies.
+**Auth**: Admin
+**Query Params**: `courseId` (the level), `year`, `month`
+**Response**: `AttendanceGridDto` → `{ courseId, courseTitle, year, month, days: [{ date, dayOfWeek, sessionType }], students: [{ studentId, name, marks: [{ date, status }], presentCount, lateCount, excusedCount, unexcusedCount, zoomCount }] }`
+**Status**: 200 OK
+
+### POST `/api/admin/attendance`
+**Description**: Upsert attendance marks for a level (each mark carries its own date, so a single call can span multiple days). A `null` status clears that mark.
+**Auth**: Admin
+**Body**:
+```json
+{
+  "courseId": "guid",
+  "marks": [
+    { "studentId": "guid", "date": "YYYY-MM-DD", "status": "P | L | E | U | Z | null", "note": "string?" }
+  ]
+}
+```
+**Response**: Success
+**Status**: 200 OK
+
+---
+
+## 13. Reports (`/api/reports`)
+
+Claude-generated weekly progress reports (per-student `StudentProgress` and per-cohort `ClassSummary`). Generation runs in a Hangfire job — weekly on a schedule and on-demand via the trigger endpoints. See `docs/04-CLAUDE-REPORTS-ROADMAP.md`.
+
+### GET `/api/reports`
+**Description**: List progress reports, with optional filters
+**Auth**: Admin / Instructor
+**Query Params** (all optional): `?cohortId={cohortId}&weekOf={date}&reportType={StudentProgress|ClassSummary}`
+**Response**: `ProgressReportSummaryDto[]`
+**Status**: 200 OK
+
+### GET `/api/reports/students`
+**Description**: List students available for on-demand report generation
+**Auth**: Admin / Instructor
+**Response**: `StudentOptionDto[]`
+**Status**: 200 OK
+
+### GET `/api/reports/{id}`
+**Description**: Get a single report's full detail (including Claude's markdown content)
+**Auth**: Admin / Instructor
+**Response**: `ProgressReportDetailDto`
+**Status**: 200 OK
+
+### PATCH `/api/reports/{id}/publish`
+**Description**: Publish a report (review gate: transitions `Generated` → `Published`)
+**Auth**: Admin / Instructor
+**Response**: Updated report
+**Status**: 200 OK
+
+### GET `/api/reports/{id}/download`
+**Description**: Download a report as a DOCX file
+**Auth**: Admin / Instructor
+**Response**: File download (`Content-Disposition` with filename)
+**Status**: 200 OK
+
+### POST `/api/reports/trigger`
+**Description**: Trigger a weekly run for all active students (enqueues a Hangfire job)
+**Auth**: Admin
+**Query Params**: `?cohortId={cohortId}` (optional)
+**Response**: `{ jobId: string, message: string }`
+**Status**: 200 OK
+
+### POST `/api/reports/trigger/student/{studentId}`
+**Description**: Trigger a report for a single student
+**Auth**: Admin
+**Query Params**: `?cohortId={cohortId}` (optional)
+**Response**: `{ jobId: string, message: string }`
+**Status**: 200 OK
+
+### POST `/api/reports/trigger/class`
+**Description**: Trigger a class-summary report for a cohort
+**Auth**: Admin
+**Query Params**: `?cohortId={cohortId}` (optional)
+**Response**: `{ jobId: string, message: string }`
+**Status**: 200 OK
+
+---
+
+## 14. Transcript (`/api/transcript`)
+
+### GET `/api/transcript/{userId}/download`
+**Description**: Download a student's grade transcript as a file
+**Auth**: Admin / Instructor (or self, per authorization policy)
+**Response**: File download (`Content-Disposition` with filename)
 **Status**: 200 OK
 
 ---
