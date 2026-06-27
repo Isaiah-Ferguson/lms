@@ -1,4 +1,5 @@
 using System.Text;
+using CodeStackLMS.API.Authorization;
 using CodeStackLMS.API.Middleware;
 using CodeStackLMS.API.Services;
 using CodeStackLMS.Infrastructure;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using CodeStackLMS.Infrastructure.BackgroundJobs;
 using Hangfire;
-using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -178,20 +178,3 @@ RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(
     Cron.Weekly(DayOfWeek.Monday, 6));
 
 app.Run();
-
-// ── Hangfire Authorization Filter ─────────────────────────────────────────────
-public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
-{
-    public bool Authorize(DashboardContext context)
-    {
-        var httpContext = context.GetHttpContext();
-        
-        // In development, allow all access
-        if (httpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
-            return true;
-        
-        // In production, require authentication and Admin role
-        return httpContext.User.Identity?.IsAuthenticated == true 
-            && httpContext.User.IsInRole("Admin");
-    }
-}
