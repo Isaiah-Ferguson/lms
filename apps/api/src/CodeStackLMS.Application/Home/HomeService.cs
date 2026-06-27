@@ -1,3 +1,4 @@
+using CodeStackLMS.Application.Common;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Home.DTOs;
@@ -87,7 +88,7 @@ public class HomeService : IHomeService
             CanViewAllLevels: user.Role.ToString() == "Admin" || user.Role.ToString() == "Instructor",
             CanViewEnrolledOnly: user.Role.ToString() != "Admin" && user.Role.ToString() != "Instructor");
 
-        var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
+        var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
 
         var userDto = new HomeCurrentUserDto(
             user.Id.ToString(),
@@ -221,21 +222,6 @@ public class HomeService : IHomeService
             cohort.StartDate.ToString("yyyy-MM-dd"),
             cohort.EndDate.ToString("yyyy-MM-dd"),
             cohort.IsActive);
-
-    private async Task<string?> ResolveAvatarUrlAsync(string? avatarBlobPath, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(avatarBlobPath))
-            return null;
-
-        var exists = await _blobStorage.BlobExistsAsync(avatarBlobPath, cancellationToken);
-        if (!exists)
-            return null;
-
-        return await _blobStorage.GenerateReadSasAsync(
-            avatarBlobPath,
-            TimeSpan.FromDays(1),
-            cancellationToken);
-    }
 
     public async Task<HomeCourseLevelDto> UpdateLevelDescriptionAsync(
         string courseId,

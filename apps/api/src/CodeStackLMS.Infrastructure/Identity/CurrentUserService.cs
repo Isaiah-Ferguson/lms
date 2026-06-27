@@ -29,7 +29,4 @@ public class CurrentUserService : ICurrentUserService
     public string Role =>
         _httpContextAccessor.HttpContext?.User
             .FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-
-    public bool IsAuthenticated =>
-        _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
 }

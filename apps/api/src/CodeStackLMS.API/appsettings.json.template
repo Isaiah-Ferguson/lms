@@ -34,8 +34,8 @@
       "Microsoft.EntityFrameworkCore.Database.Command": "Information"
     }
   },
-    "ApplicationInsights": {
-    "ConnectionString": "InstrumentationKey=4;IngestionEndpoint=https://.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId="
+  "ApplicationInsights": {
+    "ConnectionString": "YOUR_APPLICATIONINSIGHTS_CONNECTION_STRING"
   },
   "Anthropic": {
     "ApiKey": "YOUR_ANTHROPIC_API_KEY",

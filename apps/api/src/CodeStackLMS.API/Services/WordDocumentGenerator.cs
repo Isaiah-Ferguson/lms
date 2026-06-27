@@ -61,6 +61,34 @@ public sealed class WordDocumentGenerator
         return ms.ToArray();
     }
 
+    /// <summary>
+    /// Build a minimal Word document: a bold title followed by one paragraph per line.
+    /// Used for simple exports (e.g. admin notes) that don't need markdown formatting.
+    /// </summary>
+    public static byte[] BuildSimpleDocument(string title, IReadOnlyList<string> lines)
+    {
+        using var ms = new MemoryStream();
+        using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
+        {
+            var mainPart = doc.AddMainDocumentPart();
+            mainPart.Document = new Document();
+            var body = mainPart.Document.AppendChild(new Body());
+
+            body.AppendChild(MakeParagraph(title, 16, bold: true, spaceAfter: 160));
+
+            foreach (var line in lines)
+                body.AppendChild(MakeParagraph(line, 11, bold: false));
+
+            body.AppendChild(new SectionProperties(
+                new PageMargin { Top = 1440, Bottom = 1440, Left = 1440, Right = 1440 }
+            ));
+
+            mainPart.Document.Save();
+        }
+
+        return ms.ToArray();
+    }
+
     // ── Paragraph builders ────────────────────────────────────────────────────
 
     private static Paragraph MakeParagraph(

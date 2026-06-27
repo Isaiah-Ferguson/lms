@@ -1,4 +1,5 @@
 using CodeStackLMS.Application.AdminParticipants.DTOs;
+using CodeStackLMS.Application.Common;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Domain.Entities;
@@ -34,7 +35,7 @@ public class ProfileService : IProfileService
 
         var enrollments = await GetEnrollmentsAsync(user.Id, cancellationToken);
         var gradesOverview = await GetGradesOverviewAsync(user.Id, cancellationToken);
-        var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
+        var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
 
         return BuildProfileDto(
             user.Id,
@@ -71,7 +72,7 @@ public class ProfileService : IProfileService
         var enrollments = await GetEnrollmentsAsync(user.Id, cancellationToken);
         var gradesOverview = await GetGradesOverviewAsync(user.Id, cancellationToken);
         var adminNotes = await GetAdminNotesAsync(user.Id, cancellationToken);
-        var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
+        var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
 
         return BuildProfileDto(
             user.Id,
@@ -171,7 +172,7 @@ public class ProfileService : IProfileService
             }
         }
 
-        var resolvedAvatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
+        var resolvedAvatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
 
         return new ProfileUserDto(
             user.Id.ToString(),
@@ -376,7 +377,7 @@ public class ProfileService : IProfileService
                     g.Key.Id.ToString(),
                     g.Key.Title,
                     coursePercent,
-                    CalculateLetterGrade(coursePercent),
+                    GradeScale.ToLetter(coursePercent),
                     courseGraded.Count,
                     courseSubmissions.Count);
             })
@@ -389,22 +390,6 @@ public class ProfileService : IProfileService
             totalCount,
             lastGradedAt?.ToString("O"),
             courseGrades);
-    }
-
-    private static string CalculateLetterGrade(int percent)
-    {
-        if (percent >= 93) return "A";
-        if (percent >= 90) return "A-";
-        if (percent >= 87) return "B+";
-        if (percent >= 83) return "B";
-        if (percent >= 80) return "B-";
-        if (percent >= 77) return "C+";
-        if (percent >= 73) return "C";
-        if (percent >= 70) return "C-";
-        if (percent >= 67) return "D+";
-        if (percent >= 63) return "D";
-        if (percent >= 60) return "D-";
-        return "F";
     }
 
     private async Task<AdminNotesDto> GetAdminNotesAsync(Guid userId, CancellationToken cancellationToken)
@@ -496,18 +481,4 @@ public class ProfileService : IProfileService
             permissions);
     }
 
-    private async Task<string?> ResolveAvatarUrlAsync(string? avatarBlobPath, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(avatarBlobPath))
-            return null;
-
-        var exists = await _blobStorage.BlobExistsAsync(avatarBlobPath, cancellationToken);
-        if (!exists)
-            return null;
-
-        return await _blobStorage.GenerateReadSasAsync(
-            avatarBlobPath,
-            TimeSpan.FromDays(1),
-            cancellationToken);
-    }
 }

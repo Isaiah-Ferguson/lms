@@ -1,4 +1,5 @@
 using CodeStackLMS.Application.AdminParticipants.DTOs;
+using CodeStackLMS.Application.Common;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Domain.Entities;
@@ -57,7 +58,7 @@ public class AdminParticipantsService : IAdminParticipantsService
             var (firstName, lastName) = SplitName(user.Name);
             var initials = BuildInitials(firstName, lastName);
             var username = BuildUsername(user.Email);
-            var avatarUrl = await ResolveAvatarUrlAsync(user.AvatarUrl, cancellationToken);
+            var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
 
             userDtos.Add(new ParticipantUserDto(
                 user.Id.ToString(),
@@ -237,18 +238,4 @@ public class AdminParticipantsService : IAdminParticipantsService
         return atIndex > 0 ? email[..atIndex] : email;
     }
 
-    private async Task<string?> ResolveAvatarUrlAsync(string? avatarBlobPath, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(avatarBlobPath))
-            return null;
-
-        var exists = await _blobStorage.BlobExistsAsync(avatarBlobPath, cancellationToken);
-        if (!exists)
-            return null;
-
-        return await _blobStorage.GenerateReadSasAsync(
-            avatarBlobPath,
-            TimeSpan.FromDays(1),
-            cancellationToken);
-    }
 }

@@ -1,3 +1,4 @@
+using CodeStackLMS.Application.Common;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Courses.DTOs;
@@ -75,7 +76,7 @@ public class CourseDetailService : ICourseDetailService
                 cancellationToken);
 
         if (existingWeek != null)
-            throw new InvalidOperationException($"Week {dto.WeekNumber} already exists for this course.");
+            throw new ValidationException($"Week {dto.WeekNumber} already exists for this course.");
 
         // Enforce sequential week creation - get the highest week number
         var maxWeekNumber = await _db.Modules
@@ -84,7 +85,7 @@ public class CourseDetailService : ICourseDetailService
 
         var expectedNextWeek = maxWeekNumber + 1;
         if (dto.WeekNumber != expectedNextWeek)
-            throw new InvalidOperationException($"Weeks must be created sequentially. Next week should be Week {expectedNextWeek}, but received Week {dto.WeekNumber}.");
+            throw new ValidationException($"Weeks must be created sequentially. Next week should be Week {expectedNextWeek}, but received Week {dto.WeekNumber}.");
 
         // Get the highest order number for this course
         var maxOrder = await _db.Modules
@@ -300,17 +301,8 @@ public class CourseDetailService : ICourseDetailService
                 .FirstOrDefaultAsync(c => c.Id == parsedId, cancellationToken);
         }
 
-        // Resolve slug to title
-        var title = courseId.Trim().ToLowerInvariant() switch
-        {
-            "combine"  => "Combine",
-            "level-1"  => "Level 1",
-            "level-2"  => "Level 2",
-            "level-3"  => "Level 3",
-            "level-4"  => "Level 4",
-            _          => null,
-        };
-
+        // Resolve slug to an existing course title (shared with the grade services).
+        var title = await CourseResolver.ResolveTitleFromSlugAsync(_db, courseId, cancellationToken);
         if (title == null) return null;
 
         return await _db.Courses

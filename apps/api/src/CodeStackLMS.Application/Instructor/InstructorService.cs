@@ -1,4 +1,5 @@
 using CodeStackLMS.Application.BackgroundJobs;
+using CodeStackLMS.Application.Common;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Instructor.DTOs;
@@ -348,7 +349,7 @@ public class InstructorService : IInstructorService
                 allSubmissions = allSubmissions.Where(s => s.Assignment.Module.CourseId == parsedCourseId).ToList();
             else
             {
-                var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
+                var resolvedTitle = await CourseResolver.ResolveTitleFromSlugAsync(_db, courseId, cancellationToken);
                 if (resolvedTitle != null)
                     allSubmissions = allSubmissions.Where(s => s.Assignment.Module.Course.Title == resolvedTitle).ToList();
             }
@@ -415,48 +416,12 @@ public class InstructorService : IInstructorService
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
             parsedCohortId = cid;
 
-        // Each cohort gets its OWN duplicate set of course rows per level, so resolve
-        // the selected cohort's course IDs up front and prefer that cohort's own row.
-        List<Guid>? cohortCourseIds = null;
-        if (parsedCohortId.HasValue)
-        {
-            cohortCourseIds = await _db.CohortCourses
-                .AsNoTracking()
-                .Where(cc => cc.CohortId == parsedCohortId.Value)
-                .Select(cc => cc.CourseId)
-                .ToListAsync(cancellationToken);
-        }
+        // Resolve to the selected cohort's own course row (see CourseResolver).
+        var cohortCourseIds = parsedCohortId.HasValue
+            ? await CourseResolver.GetCohortCourseIdsAsync(_db, parsedCohortId.Value, cancellationToken)
+            : null;
 
-        // Resolve course - prefer courses with modules to avoid empty duplicates
-        Course? course = null;
-        if (Guid.TryParse(courseId, out var pid))
-        {
-            course = await _db.Courses.AsNoTracking()
-                .Include(c => c.Modules)
-                .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
-
-            if (course != null && cohortCourseIds != null && !cohortCourseIds.Contains(course.Id))
-                return new StudentGradesDto(course.Id.ToString(), course.Title, []);
-        }
-        else
-        {
-            var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
-            if (resolvedTitle != null)
-            {
-                var courses = await _db.Courses.AsNoTracking()
-                    .Where(c => c.Title == resolvedTitle)
-                    .Include(c => c.Modules)
-                    .ToListAsync(cancellationToken);
-
-                // Restrict to the selected cohort's course row(s) when filtering by cohort.
-                if (cohortCourseIds != null)
-                    courses = courses.Where(c => cohortCourseIds.Contains(c.Id)).ToList();
-
-                course = courses.FirstOrDefault(c => c.Modules.Any())
-                         ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
-            }
-        }
-
+        var course = await CourseResolver.ResolveCourseAsync(_db, courseId, cohortCourseIds, cancellationToken);
         if (course == null)
             return new StudentGradesDto(courseId, courseId, []);
 
@@ -510,54 +475,13 @@ public class InstructorService : IInstructorService
         if (!string.IsNullOrWhiteSpace(cohortId) && Guid.TryParse(cohortId, out var cid))
             parsedCohortId = cid;
 
-        // Each cohort gets its OWN duplicate set of course rows per level (see
-        // HomeService.CreateAcademicYear). Fetch the selected cohort's course IDs up
-        // front so course resolution can prefer THAT cohort's row rather than some
-        // other cohort's same-titled row.
-        List<Guid>? cohortCourseIds = null;
-        if (parsedCohortId.HasValue)
-        {
-            cohortCourseIds = await _db.CohortCourses
-                .AsNoTracking()
-                .Where(cc => cc.CohortId == parsedCohortId.Value)
-                .Select(cc => cc.CourseId)
-                .ToListAsync(cancellationToken);
-        }
+        // "combine" is a real level/course (resolved by slug), NOT an "all courses"
+        // aggregate. Resolve to the selected cohort's own course row (see CourseResolver).
+        var cohortCourseIds = parsedCohortId.HasValue
+            ? await CourseResolver.GetCohortCourseIdsAsync(_db, parsedCohortId.Value, cancellationToken)
+            : null;
 
-        // Resolve course. "combine" is a real level/course (resolved by slug), NOT an
-        // "all courses" aggregate. When a cohort is selected, resolve to that cohort's
-        // own course row so we don't pick a different cohort's duplicate (which would
-        // fail the cohort check and return empty grades).
-        Course? course = null;
-        if (Guid.TryParse(courseId, out var pid))
-        {
-            course = await _db.Courses.AsNoTracking()
-                .Include(c => c.Modules)
-                .FirstOrDefaultAsync(c => c.Id == pid, cancellationToken);
-
-            // Honor the cohort gate for an explicit course id.
-            if (course != null && cohortCourseIds != null && !cohortCourseIds.Contains(course.Id))
-                return new AdminGradesDto(course.Id.ToString(), course.Title, []);
-        }
-        else
-        {
-            var resolvedTitle = await ResolveCourseTitleFromSlugAsync(courseId, cancellationToken);
-            if (resolvedTitle != null)
-            {
-                var courses = await _db.Courses.AsNoTracking()
-                    .Where(c => c.Title == resolvedTitle)
-                    .Include(c => c.Modules)
-                    .ToListAsync(cancellationToken);
-
-                // Restrict to the selected cohort's course row(s) when filtering by cohort.
-                if (cohortCourseIds != null)
-                    courses = courses.Where(c => cohortCourseIds.Contains(c.Id)).ToList();
-
-                course = courses.FirstOrDefault(c => c.Modules.Any())
-                         ?? courses.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
-            }
-        }
-
+        var course = await CourseResolver.ResolveCourseAsync(_db, courseId, cohortCourseIds, cancellationToken);
         if (course == null)
             return new AdminGradesDto(courseId, courseId, []);
 
@@ -658,7 +582,7 @@ public class InstructorService : IInstructorService
                 status = "NotSubmitted";
             else if (submission.Status == SubmissionStatus.Graded)
                 status = "Graded";
-            else if (submission.Status == SubmissionStatus.ReadyToGrade || submission.Status == SubmissionStatus.Grading)
+            else if (submission.Status == SubmissionStatus.ReadyToGrade)
                 status = "NeedsGrading";
             else if (submission.Status == SubmissionStatus.Returned)
                 status = "Returned";
@@ -667,12 +591,7 @@ public class InstructorService : IInstructorService
 
             string? grade = null;
             if (submission?.Grade != null)
-            {
-                var maxScore = 100m;
-                grade = maxScore > 0 
-                    ? $"{submission.Grade.TotalScore} / {maxScore}"
-                    : $"{submission.Grade.TotalScore}%";
-            }
+                grade = $"{submission.Grade.TotalScore} / {DefaultMaxScore}";
 
             return new AssignmentSubmissionRosterRowDto(
                 student.Id,
@@ -724,17 +643,5 @@ public class InstructorService : IInstructorService
             sub?.Grade?.GradedAt,
             sub?.Grade?.OverallComment,
             sub?.Grade?.Instructor?.Name);
-    }
-
-    private async Task<string?> ResolveCourseTitleFromSlugAsync(string slug, CancellationToken ct)
-    {
-        var normalized = slug.Trim().ToLowerInvariant();
-        var titles = await _db.Courses
-            .AsNoTracking()
-            .Select(c => c.Title)
-            .ToListAsync(ct);
-
-        return titles.FirstOrDefault(t =>
-            t.Trim().ToLowerInvariant().Replace(" ", "-") == normalized);
     }
 }

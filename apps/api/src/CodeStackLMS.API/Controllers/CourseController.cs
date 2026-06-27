@@ -1,4 +1,3 @@
-using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Courses.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +17,9 @@ public class CourseController : ControllerBase
         _courseDetailService = courseDetailService;
     }
 
+    // Domain exceptions (NotFound/Forbidden/Validation) are translated to the
+    // appropriate status codes by ExceptionHandlingMiddleware.
+
     [HttpGet("{courseId}")]
     [ProducesResponseType(typeof(CourseDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -25,15 +27,8 @@ public class CourseController : ControllerBase
         [FromRoute] string courseId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var data = await _courseDetailService.GetCourseDetailAsync(courseId, cancellationToken);
-            return Ok(data);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
+        var data = await _courseDetailService.GetCourseDetailAsync(courseId, cancellationToken);
+        return Ok(data);
     }
 
     [HttpPost("{courseId}/weeks")]
@@ -47,23 +42,8 @@ public class CourseController : ControllerBase
         [FromBody] CreateWeekDto dto,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await _courseDetailService.CreateWeekAsync(courseId, dto, cancellationToken);
-            return StatusCode(201, result);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, new ProblemDetails { Title = "Forbidden", Detail = ex.Message, Status = 403 });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new ProblemDetails { Title = "Bad request", Detail = ex.Message, Status = 400 });
-        }
+        var result = await _courseDetailService.CreateWeekAsync(courseId, dto, cancellationToken);
+        return StatusCode(201, result);
     }
 
     [HttpPatch("{courseId}/weeks/{weekId}")]
@@ -77,19 +57,8 @@ public class CourseController : ControllerBase
         [FromBody] UpdateWeekDto dto,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await _courseDetailService.UpdateWeekAsync(courseId, weekId, dto, cancellationToken);
-            return Ok(result);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, new ProblemDetails { Title = "Forbidden", Detail = ex.Message, Status = 403 });
-        }
+        var result = await _courseDetailService.UpdateWeekAsync(courseId, weekId, dto, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost("{courseId}/announcements")]
@@ -102,19 +71,8 @@ public class CourseController : ControllerBase
         [FromBody] UpsertAnnouncementDto dto,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await _courseDetailService.CreateAnnouncementAsync(courseId, dto, cancellationToken);
-            return StatusCode(201, result);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, new ProblemDetails { Title = "Forbidden", Detail = ex.Message, Status = 403 });
-        }
+        var result = await _courseDetailService.CreateAnnouncementAsync(courseId, dto, cancellationToken);
+        return StatusCode(201, result);
     }
 
     [HttpPut("{courseId}/announcements/{announcementId}")]
@@ -128,19 +86,8 @@ public class CourseController : ControllerBase
         [FromBody] UpsertAnnouncementDto dto,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await _courseDetailService.UpdateAnnouncementAsync(courseId, announcementId, dto, cancellationToken);
-            return Ok(result);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, new ProblemDetails { Title = "Forbidden", Detail = ex.Message, Status = 403 });
-        }
+        var result = await _courseDetailService.UpdateAnnouncementAsync(courseId, announcementId, dto, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{courseId}/announcements/{announcementId}")]
@@ -153,18 +100,7 @@ public class CourseController : ControllerBase
         [FromRoute] string announcementId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            await _courseDetailService.DeleteAnnouncementAsync(courseId, announcementId, cancellationToken);
-            return NoContent();
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new ProblemDetails { Title = "Not found", Detail = ex.Message, Status = 404 });
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, new ProblemDetails { Title = "Forbidden", Detail = ex.Message, Status = 403 });
-        }
+        await _courseDetailService.DeleteAnnouncementAsync(courseId, announcementId, cancellationToken);
+        return NoContent();
     }
 }
