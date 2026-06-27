@@ -105,13 +105,13 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
   }, [activeFilter, rows, searchQuery]);
 
   function handleGradeClick(row: RosterRow) {
-    if (!row.submissionId) return;
     setGradingRow({
       userId: row.user.id,
       name: row.user.name,
       email: row.user.email,
+      assignmentId: params.courseAssignmentId,
       submissionId: row.submissionId,
-      submittedAt: row.submittedAt!,
+      submittedAt: row.submittedAt,
       dueDate: dueDate ?? new Date().toISOString(),
       currentGrade: row.grade,
       currentFeedback: null,

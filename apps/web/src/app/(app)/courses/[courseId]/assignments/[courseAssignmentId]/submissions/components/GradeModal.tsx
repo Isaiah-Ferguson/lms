@@ -12,8 +12,10 @@ export interface GradeModalRow {
   userId: string;
   name: string;
   email: string;
-  submissionId: string;
-  submittedAt: string;
+  assignmentId: string;
+  /** Undefined when the student has not turned anything in. */
+  submissionId?: string;
+  submittedAt: string | null;
   dueDate: string | null;
   currentGrade: string | null;
   currentFeedback: string | null;
@@ -33,8 +35,8 @@ interface GradeModalProps {
   onSave: (result: GradeResult) => void;
 }
 
-function isPastDue(submittedAt: string, dueDate: string | null): boolean {
-  if (!dueDate) return false;
+function isPastDue(submittedAt: string | null, dueDate: string | null): boolean {
+  if (!submittedAt || !dueDate) return false;
   return new Date(submittedAt) > new Date(dueDate);
 }
 
@@ -74,6 +76,12 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
 
   useEffect(() => {
     async function loadArtifacts() {
+      // Nothing turned in — no artifacts or external links to load.
+      if (!row.submissionId) {
+        setLoadingArtifacts(false);
+        return;
+      }
+
       const token = getToken();
       if (!token) {
         setLoadingArtifacts(false);
@@ -133,16 +141,19 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
         return;
       }
 
-      // Call the real API to save the grade
-      await instructorApi.gradeSubmission(
-        row.submissionId,
-        {
-          TotalScore: scoreNum,
-          RubricBreakdownJson: JSON.stringify({ outOf: outOfNum }),
-          OverallComment: feedback,
-        },
-        token
-      );
+      const body = {
+        TotalScore: scoreNum,
+        RubricBreakdownJson: JSON.stringify({ outOf: outOfNum }),
+        OverallComment: feedback,
+      };
+
+      // Call the real API to save the grade. Students who never turned the
+      // assignment in have no submission, so grade them by assignment + student.
+      if (row.submissionId) {
+        await instructorApi.gradeSubmission(row.submissionId, body, token);
+      } else {
+        await instructorApi.gradeByStudent(row.assignmentId, row.userId, body, token);
+      }
 
       onSave({ userId: row.userId, score, outOf, feedback });
     } catch (error) {
@@ -220,10 +231,14 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
         <div className="border-b border-gray-50 bg-gray-50 px-6 py-3 flex flex-wrap gap-4 text-xs text-gray-500 dark:border-gray-700/50 dark:bg-gray-800 dark:text-gray-400">
           <span>
             Submitted:{" "}
-            <span className={pastDue ? "font-semibold text-red-600 dark:text-red-400" : "font-medium text-gray-700 dark:text-gray-300"}>
-              {formatDateTime(row.submittedAt)}
-              {pastDue && " — Past due"}
-            </span>
+            {row.submittedAt ? (
+              <span className={pastDue ? "font-semibold text-red-600 dark:text-red-400" : "font-medium text-gray-700 dark:text-gray-300"}>
+                {formatDateTime(row.submittedAt)}
+                {pastDue && " — Past due"}
+              </span>
+            ) : (
+              <span className="font-semibold text-red-600 dark:text-red-400">Not submitted</span>
+            )}
           </span>
           {row.dueDate && (
             <span>

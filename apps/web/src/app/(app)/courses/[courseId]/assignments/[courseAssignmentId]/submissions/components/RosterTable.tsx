@@ -144,32 +144,30 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
 
                   {/* Action */}
                   <td className="px-4 py-3">
-                    {row.submissionId ? (
-                      <div className="flex gap-2">
-                        {row.status !== "Returned" && (
-                          <button
-                            onClick={() => onGradeClick(row)}
-                            className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
-                              ${row.status === "NeedsGrading"
-                                ? "bg-amber-500 text-white hover:bg-amber-600"
-                                : row.status === "Graded"
-                                  ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                                  : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50"
-                              }`}
-                          >
-                            {row.status === "Graded" ? "Edit Grade" : "Grade"}
-                          </button>
-                        )}
+                    <div className="flex gap-2">
+                      {row.status !== "Returned" && (
+                        <button
+                          onClick={() => onGradeClick(row)}
+                          className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors
+                            ${row.status === "NeedsGrading"
+                              ? "bg-amber-500 text-white hover:bg-amber-600"
+                              : row.status === "Graded"
+                                ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                : "border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                            }`}
+                        >
+                          {row.status === "Graded" ? "Edit Grade" : "Grade"}
+                        </button>
+                      )}
+                      {row.submissionId && (
                         <Link
                           href={`/instructor/submissions/${row.submissionId}`}
                           className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           View Details
                         </Link>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
-                    )}
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

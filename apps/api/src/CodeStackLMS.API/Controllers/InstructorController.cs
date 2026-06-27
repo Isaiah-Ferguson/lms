@@ -69,6 +69,27 @@ public class InstructorController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("assignments/{assignmentId:guid}/students/{studentId:guid}/grade")]
+    [ProducesResponseType(typeof(ExistingGradeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GradeByStudent(
+        [FromRoute] Guid assignmentId,
+        [FromRoute] Guid studentId,
+        [FromBody] GradeSubmissionDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _instructorService.GradeByStudentAsync(
+            assignmentId, studentId, dto, cancellationToken);
+
+        _logger.LogInformation(
+            "Assignment {AssignmentId} graded for student {StudentId}. Score={Score} InstructorId={InstructorId}",
+            assignmentId, studentId, result.TotalScore, result.InstructorId);
+
+        return Ok(result);
+    }
+
     [HttpPost("submissions/{submissionId:guid}/return")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

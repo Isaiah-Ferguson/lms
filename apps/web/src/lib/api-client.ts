@@ -296,6 +296,22 @@ export const instructorApi = {
     );
   },
 
+  gradeByStudent(
+    assignmentId: string,
+    studentId: string,
+    body: GradeSubmissionRequest,
+    token: string
+  ): Promise<ExistingGrade> {
+    return apiFetch<ExistingGrade>(
+      `/api/instructor/assignments/${assignmentId}/students/${studentId}/grade`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+      token
+    );
+  },
+
   returnSubmission(
     submissionId: string,
     reason: string,

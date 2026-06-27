@@ -120,8 +120,6 @@ public class InstructorService : IInstructorService
         GradeSubmissionDto dto,
         CancellationToken cancellationToken = default)
     {
-        var instructorId = _currentUser.UserId;
-
         var submission = await _db.Submissions
             .Include(s => s.Grade)
             .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken)
@@ -134,9 +132,69 @@ public class InstructorService : IInstructorService
             throw new ValidationException(
                 $"Submission is in '{submission.Status}' state and cannot be graded.");
 
+        return await ApplyGradeAsync(submission, dto, cancellationToken);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /api/instructor/assignments/{assignmentId}/students/{studentId}/grade
+    // Grade a student who has not turned the assignment in (e.g. record a zero
+    // for work missed by the due date). Reuses the student's latest submission
+    // when one exists; otherwise records a placeholder submission to hang the
+    // grade off of, since a Grade requires an owning Submission.
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<ExistingGradeDto> GradeByStudentAsync(
+        Guid assignmentId,
+        Guid studentId,
+        GradeSubmissionDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var submission = await _db.Submissions
+            .Include(s => s.Grade)
+            .Where(s => s.AssignmentId == assignmentId && s.StudentId == studentId)
+            .OrderByDescending(s => s.AttemptNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (submission is null)
+        {
+            // Nothing turned in — verify the assignment and student exist before
+            // creating a placeholder submission to attach the grade to.
+            var assignmentExists = await _db.Assignments
+                .AnyAsync(a => a.Id == assignmentId, cancellationToken);
+            if (!assignmentExists)
+                throw new NotFoundException(nameof(Assignment), assignmentId);
+
+            var studentExists = await _db.Users
+                .AnyAsync(u => u.Id == studentId && u.Role == UserRole.Student, cancellationToken);
+            if (!studentExists)
+                throw new NotFoundException(nameof(User), studentId);
+
+            submission = new Submission
+            {
+                Id = Guid.NewGuid(),
+                AssignmentId = assignmentId,
+                StudentId = studentId,
+                AttemptNumber = 1,
+                Type = SubmissionType.Upload,
+                Status = SubmissionStatus.ReadyToGrade,
+                CreatedAt = DateTime.UtcNow,
+            };
+            _db.Submissions.Add(submission);
+        }
+
+        return await ApplyGradeAsync(submission, dto, cancellationToken);
+    }
+
+    // Creates or updates the Grade on a tracked submission and marks it Graded.
+    private async Task<ExistingGradeDto> ApplyGradeAsync(
+        Submission submission,
+        GradeSubmissionDto dto,
+        CancellationToken cancellationToken)
+    {
+        var instructorId = _currentUser.UserId;
+
         if (dto.TotalScore < 0)
             throw new ValidationException("Score cannot be negative.");
-        
+
         if (dto.TotalScore > 100)
             throw new ValidationException("Score cannot exceed 100.");
 
@@ -148,7 +206,7 @@ public class InstructorService : IInstructorService
             var grade = new Grade
             {
                 Id = Guid.NewGuid(),
-                SubmissionId = submissionId,
+                SubmissionId = submission.Id,
                 InstructorId = instructorId,
                 TotalScore = dto.TotalScore,
                 RubricBreakdownJson = dto.RubricBreakdownJson ?? "{}",
@@ -175,7 +233,7 @@ public class InstructorService : IInstructorService
         await _db.SaveChangesAsync(cancellationToken);
 
         // Enqueue background job to send email notification
-        _backgroundJobs.EnqueueGradeNotification(submissionId);
+        _backgroundJobs.EnqueueGradeNotification(submission.Id);
 
         return ToDto(submission.Grade!);
     }

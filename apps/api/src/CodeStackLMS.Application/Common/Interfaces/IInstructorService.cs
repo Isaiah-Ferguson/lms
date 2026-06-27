@@ -13,6 +13,12 @@ public interface IInstructorService
         GradeSubmissionDto dto,
         CancellationToken cancellationToken = default);
 
+    Task<ExistingGradeDto> GradeByStudentAsync(
+        Guid assignmentId,
+        Guid studentId,
+        GradeSubmissionDto dto,
+        CancellationToken cancellationToken = default);
+
     Task ReturnSubmissionAsync(
         Guid submissionId,
         string reason,
