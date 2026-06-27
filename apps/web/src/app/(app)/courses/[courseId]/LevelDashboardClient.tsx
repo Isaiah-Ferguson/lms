@@ -49,6 +49,7 @@ export interface LevelAssignment {
 export interface LevelData {
   courseTitle: string;       // e.g. "Level 1 — Web Foundations"
   courseMeta: string;        // e.g. "10-week programme · Oct 14 – Dec 27"
+  description: string;       // matches the level description shown on the dashboard
   accentColor: string;       // tailwind bg class e.g. "bg-blue-500"
   gradient: string;          // tailwind bg-gradient-to-br from/via/to classes
   courseId: string;
@@ -880,7 +881,7 @@ export function LevelDashboardClient({
             CodeStack Academy
           </p>
           <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100">{data.courseTitle}</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">{data.courseMeta}</p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">{data.description}</p>
         </div>
       </div>
 

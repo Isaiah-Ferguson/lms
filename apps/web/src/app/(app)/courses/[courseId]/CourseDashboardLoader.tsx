@@ -45,6 +45,10 @@ function mapResponse(courseId: string, data: CourseDetailResponse): LevelData {
     courseId: data.id,
     courseTitle: data.title,
     courseMeta: data.courseMeta,
+    // Mirror the dashboard: show the real course description (same empty fallback).
+    description: data.description?.trim()
+      ? data.description
+      : "Level content and schedule details will be available soon.",
     accentColor: data.accentColor,
     gradient: ACCENT_GRADIENT_MAP[data.accentColor] ?? "from-brand-600 via-brand-500 to-sky-500",
     zoomUrl: data.zoomUrl,
