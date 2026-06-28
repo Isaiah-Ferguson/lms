@@ -49,5 +49,9 @@ public record StudentSubmissionStatusDto(
     DateTime? SubmittedAt,
     string? FileName,
     long? FileSize,
-    string? Status
+    string? Status,
+    string? Type = null,
+    string? GitHubRepoUrl = null,
+    string? Branch = null,
+    string? CommitHash = null
 );

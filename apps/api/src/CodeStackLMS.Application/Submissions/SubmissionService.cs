@@ -36,15 +36,18 @@ public class SubmissionService : ISubmissionService
     private readonly IApplicationDbContext _db;
     private readonly IBlobStorageService _blob;
     private readonly ICurrentUserService _currentUser;
+    private readonly IGitHubVerificationService _github;
 
     public SubmissionService(
         IApplicationDbContext db,
         IBlobStorageService blob,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IGitHubVerificationService github)
     {
         _db = db;
         _blob = blob;
         _currentUser = currentUser;
+        _github = github;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -285,12 +288,12 @@ public class SubmissionService : ISubmissionService
     {
         var studentId = _currentUser.UserId;
 
-        // 2. Validate repoUrl format: must be https://github.com/{owner}/{repo}
+        // 1. Validate repoUrl format (cheap fast-fail before any network/DB work).
         if (!IsValidGitHubUrl(dto.RepoUrl))
             throw new ValidationException(
                 "repoUrl must be a valid GitHub repository URL (https://github.com/owner/repo).");
 
-        // 3. Load assignment + enrollment check
+        // 2. Load assignment + enrollment check.
         var assignment = await _db.Assignments
             .Include(a => a.Module)
                 .ThenInclude(m => m.Course)
@@ -298,77 +301,104 @@ public class SubmissionService : ISubmissionService
             .FirstOrDefaultAsync(a => a.Id == assignmentId, cancellationToken)
             ?? throw new NotFoundException(nameof(Assignment), assignmentId);
 
-        if (DateTime.UtcNow > assignment.DueDate)
-            throw new ValidationException("The assignment due date has passed.");
+        // Late submissions are allowed (enforced via grading policy), matching the upload flow.
 
         var courseId = assignment.Module.CourseId;
         await ResolveCohortForStudentAsync(studentId, courseId, cancellationToken);
 
-        // 4. Normalize for duplicate check — no DB access needed at this stage
-        var normalizedRepo = dto.RepoUrl.TrimEnd('/').ToLowerInvariant();
-        var normalizedHash = string.IsNullOrWhiteSpace(dto.CommitHash)
-            ? null
-            : dto.CommitHash.Trim().ToLowerInvariant();
+        // 3. Verify the repo is public and resolve the latest commit on the branch.
+        //    Done before opening a transaction so a slow/failed GitHub call holds no DB locks.
+        var repoInfo = await _github.VerifyAndResolveAsync(dto.RepoUrl, dto.Branch, cancellationToken);
+        var normalizedRepo = dto.RepoUrl.TrimEnd('/');
 
-        // 5. Determine attempt number inside a Serializable transaction to prevent
-        //    two concurrent requests from reading the same count and creating duplicate attempts.
-        //    The duplicate check is also inside the transaction to close the TOCTOU window
-        //    where two concurrent requests could both pass the check before either commits.
-        Submission submission;
-        await using (var tx = await _db.Database
-            .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
+        // 4. Reuse the student's existing submission for this assignment (a single
+        //    "My Submission"), mirroring the upload flow rather than stacking attempts.
+        var existingSubmission = await _db.Submissions
+            .Where(s => s.AssignmentId == assignmentId && s.StudentId == studentId)
+            .OrderByDescending(s => s.AttemptNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var strategy = _db.Database.CreateExecutionStrategy();
+        var submission = await strategy.ExecuteAsync(async () =>
         {
-            if (normalizedHash is not null)
-            {
-                var duplicate = await _db.GitHubSubmissionInfos
-                    .AnyAsync(g =>
-                        g.Submission.AssignmentId == assignmentId &&
-                        g.Submission.StudentId == studentId &&
-                        g.RepoUrl.ToLower() == normalizedRepo &&
-                        g.CommitHash.ToLower() == normalizedHash,
-                        cancellationToken);
+            await using var tx = await _db.Database
+                .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
-                if (duplicate)
-                    throw new ValidationException(
-                        "A submission with the same repository URL and commit hash already exists for this assignment.");
+            Submission submissionToUse;
+
+            if (existingSubmission != null)
+            {
+                var submissionToUpdate = await _db.Submissions
+                    .Include(s => s.Artifacts)
+                    .Include(s => s.Grade)
+                    .Include(s => s.GitHubInfo)
+                    .FirstOrDefaultAsync(s => s.Id == existingSubmission.Id, cancellationToken)
+                    ?? throw new NotFoundException(nameof(Submission), existingSubmission.Id);
+
+                // Clear any prior artifacts/blobs (e.g. a previous ZIP attempt).
+                foreach (var artifact in submissionToUpdate.Artifacts.ToList())
+                {
+                    await _blob.DeleteBlobAsync(artifact.BlobPath, cancellationToken);
+                    _db.SubmissionArtifacts.Remove(artifact);
+                }
+
+                if (submissionToUpdate.Grade != null)
+                    _db.Grades.Remove(submissionToUpdate.Grade);
+
+                if (submissionToUpdate.GitHubInfo != null)
+                    _db.GitHubSubmissionInfos.Remove(submissionToUpdate.GitHubInfo);
+
+                submissionToUpdate.Type = SubmissionType.GitHub;
+                submissionToUpdate.Status = SubmissionStatus.ReadyToGrade;
+                submissionToUpdate.CreatedAt = DateTime.UtcNow;
+                submissionToUpdate.UpdatedAt = DateTime.UtcNow;
+                submissionToUpdate.FigmaUrl = dto.FigmaUrl;
+                submissionToUpdate.GitHubRepoUrl = normalizedRepo;
+                submissionToUpdate.HostedUrl = dto.HostedUrl;
+                submissionToUpdate.Note = dto.Note;
+
+                submissionToUse = submissionToUpdate;
+            }
+            else
+            {
+                var newSubmission = new Submission
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignmentId,
+                    StudentId = studentId,
+                    AttemptNumber = 1,
+                    Type = SubmissionType.GitHub,
+                    Status = SubmissionStatus.ReadyToGrade,
+                    CreatedAt = DateTime.UtcNow,
+                    FigmaUrl = dto.FigmaUrl,
+                    GitHubRepoUrl = normalizedRepo,
+                    HostedUrl = dto.HostedUrl,
+                    Note = dto.Note
+                };
+
+                _db.Submissions.Add(newSubmission);
+                submissionToUse = newSubmission;
             }
 
-            var attemptNumber = await _db.Submissions
-                .Where(s => s.AssignmentId == assignmentId && s.StudentId == studentId)
-                .CountAsync(cancellationToken) + 1;
+            // Persist the removals/update first so the old 1:1 GitHubInfo is gone before
+            // the new one is inserted (the SubmissionId index is unique).
+            await _db.SaveChangesAsync(cancellationToken);
 
-            // 6. Create Submission record
-            submission = new Submission
+            _db.GitHubSubmissionInfos.Add(new GitHubSubmissionInfo
             {
                 Id = Guid.NewGuid(),
-                AssignmentId = assignmentId,
-                StudentId = studentId,
-                AttemptNumber = attemptNumber,
-                Type = SubmissionType.GitHub,
-                Status = SubmissionStatus.ReadyToGrade,
-                CreatedAt = DateTime.UtcNow,
-                FigmaUrl = dto.FigmaUrl,
-                GitHubRepoUrl = dto.RepoUrl,
-                HostedUrl = dto.HostedUrl
-            };
-
-            _db.Submissions.Add(submission);
-
-            // 7. Create GitHubSubmissionInfo
-            var gitHubInfo = new GitHubSubmissionInfo
-            {
-                Id = Guid.NewGuid(),
-                SubmissionId = submission.Id,
-                RepoUrl = dto.RepoUrl.TrimEnd('/'),
-                Branch = string.IsNullOrWhiteSpace(dto.Branch) ? "main" : dto.Branch.Trim(),
-                CommitHash = normalizedHash ?? string.Empty,
+                SubmissionId = submissionToUse.Id,
+                RepoUrl = normalizedRepo,
+                Branch = repoInfo.Branch,
+                CommitHash = repoInfo.CommitHash,
                 CreatedAt = DateTime.UtcNow
-            };
+            });
 
-            _db.GitHubSubmissionInfos.Add(gitHubInfo);
             await _db.SaveChangesAsync(cancellationToken);
             await tx.CommitAsync(cancellationToken);
-        }
+
+            return submissionToUse;
+        });
 
         return ToDto(submission);
     }

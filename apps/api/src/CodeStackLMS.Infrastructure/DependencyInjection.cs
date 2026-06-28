@@ -17,6 +17,7 @@ using CodeStackLMS.Application.Transcript;
 using CodeStackLMS.Infrastructure.AI;
 using CodeStackLMS.Infrastructure.BackgroundJobs;
 using CodeStackLMS.Infrastructure.Email;
+using CodeStackLMS.Infrastructure.GitHub;
 using CodeStackLMS.Infrastructure.Identity;
 using CodeStackLMS.Infrastructure.Persistence;
 using CodeStackLMS.Infrastructure.Reports;
@@ -118,6 +119,22 @@ public static class DependencyInjection
             configuration.GetSection(AnthropicOptions.SectionName).Bind(opts));
 
         services.AddHttpClient<IClaudeClient, ClaudeClient>();
+
+        // ── GitHub repo verification ───────────────────────────────────────────
+        // Unauthenticated public API = 60 req/hr per server IP. Set an optional
+        // GitHub:Token (a fine-grained PAT with public read) to raise this to 5,000/hr.
+        services.AddHttpClient<IGitHubVerificationService, GitHubVerificationService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.github.com/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("CodeStackLMS");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+            client.Timeout = TimeSpan.FromSeconds(10);
+
+            var token = configuration["GitHub:Token"];
+            if (!string.IsNullOrWhiteSpace(token))
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        });
 
         // ── Background Jobs ───────────────────────────────────────────────────
         services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();

@@ -48,4 +48,8 @@ export interface StudentSubmissionStatus {
   fileName: string | null;
   fileSize: number | null;
   status: string | null;
+  type?: string | null;
+  githubRepoUrl?: string | null;
+  branch?: string | null;
+  commitHash?: string | null;
 }

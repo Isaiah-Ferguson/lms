@@ -204,14 +204,20 @@ export const submissionsApi = {
 
   githubSubmit(
     courseAssignmentId: string,
-    payload: { repoUrl: string; branch: string; commitHash: string },
+    payload: {
+      repoUrl: string;
+      branch?: string;
+      figmaUrl?: string;
+      hostedUrl?: string;
+      note?: string;
+    },
     token: string
   ): Promise<SubmissionResponse> {
     return apiFetch<SubmissionResponse>(
       `/api/submissions/${courseAssignmentId}/github-submit`,
       {
         method: "POST",
-        body: JSON.stringify({ type: "GitHub", ...payload }),
+        body: JSON.stringify(payload),
       },
       token
     );

@@ -102,6 +102,10 @@ export default function AssignmentDetailsPage({ params }: AssignmentDetailsPageP
             fileName: submission.fileName,
             fileSize: submission.fileSize,
             submissionId: submission.submissionId,
+            type: submission.type === "GitHub" ? "GitHub" : "Upload",
+            githubRepoUrl: submission.githubRepoUrl,
+            branch: submission.branch,
+            commitHash: submission.commitHash,
           });
         }
       } catch {

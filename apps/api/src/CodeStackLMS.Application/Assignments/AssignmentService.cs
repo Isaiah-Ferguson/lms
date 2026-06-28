@@ -188,6 +188,7 @@ public class AssignmentService : IAssignmentService
         var submission = await _db.Submissions
             .AsNoTracking()
             .Include(s => s.Artifacts)
+            .Include(s => s.GitHubInfo)
             .Where(s => s.AssignmentId == id && s.StudentId == userId)
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
@@ -212,7 +213,11 @@ public class AssignmentService : IAssignmentService
             SubmittedAt: submission.CreatedAt,
             FileName: firstArtifact?.FileName,
             FileSize: firstArtifact?.Size,
-            Status: submission.Status.ToString()
+            Status: submission.Status.ToString(),
+            Type: submission.Type.ToString(),
+            GitHubRepoUrl: submission.GitHubInfo?.RepoUrl ?? submission.GitHubRepoUrl,
+            Branch: submission.GitHubInfo?.Branch,
+            CommitHash: submission.GitHubInfo?.CommitHash
         );
     }
 
