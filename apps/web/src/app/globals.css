@@ -20,6 +20,11 @@
   .dark body {
     @apply bg-gray-900 text-gray-100;
   }
+
+  .dark input[type="date"],
+  .dark input[type="datetime-local"] {
+    color-scheme: dark;
+  }
 }
 
 /* FullCalendar Dark Mode */

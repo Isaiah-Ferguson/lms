@@ -142,12 +142,12 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-4xl space-y-4">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
         </Link>
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-400">
+        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-600">
           You do not have permission to view submissions.
         </div>
       </div>
@@ -159,12 +159,12 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-7xl space-y-5">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
         </Link>
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-600">
           Loading submissions...
         </div>
       </div>
@@ -176,7 +176,7 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
       <div className="mx-auto max-w-7xl space-y-5">
         <Link
           href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to assignment
@@ -192,7 +192,7 @@ export default function AssignmentSubmissionsPage({ params }: AssignmentSubmissi
     <div className="mx-auto max-w-7xl space-y-5">
       <Link
         href={`/courses/${params.courseId}/assignments/${params.courseAssignmentId}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-200"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to assignment
