@@ -45,27 +45,54 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
   };
 
   const activeYear = data.years.find(y => y.isActive) ?? data.years[0];
-  const enrolledLevelIds = activeYear ? (data.enrollmentsByYear[activeYear.id] ?? []) : [];
-  const enrolledLevels = data.levels.filter(level => enrolledLevelIds.includes(level.id));
+
+  // All levels the user is enrolled in, across every year (used for the "current level" badge)
+  const allEnrolledLevelIds = Object.values(data.enrollmentsByYear).flat();
+  const enrolledLevels = data.levels.filter(level => allEnrolledLevelIds.includes(level.id));
 
   // Build navigation based on enrollments
   const nav: NavItem[] = [];
 
-  // Get all levels for the active year (not just enrolled ones for admins)
-  const activeLevels = data.levels.filter(level => level.yearId === activeYear?.id);
+  // Pushes Combine + Level 1-4 nav items for a single year's levels.
+  // A level is shown if the user is enrolled in it, or if they can view all levels (admin/instructor).
+  const pushLevelNav = (
+    yearLevels: typeof data.levels,
+    enrolledLevelIds: string[],
+    yearSuffix: string,
+  ) => {
+    const canViewAll = data.permissions.canViewAllLevels;
 
-  // Add Combine if enrolled or admin
-  const combineLevel = activeLevels.find(l => l.key === "combine");
-  if (combineLevel && (enrolledLevelIds.includes(combineLevel.id) || data.permissions.canViewAllLevels)) {
-    nav.push({ label: "Combine", href: `/courses/${combineLevel.id}`, icon: "grid" });
-  }
+    const combineLevel = yearLevels.find(l => l.key === "combine");
+    if (combineLevel && (enrolledLevelIds.includes(combineLevel.id) || canViewAll)) {
+      nav.push({ label: `Combine${yearSuffix}`, href: `/courses/${combineLevel.id}`, icon: "grid" });
+    }
 
-  // Add Level 1-4 if enrolled or admin
-  for (let i = 1; i <= 4; i++) {
-    const levelKey = `level-${i}`;
-    const level = activeLevels.find(l => l.key === levelKey);
-    if (level && (enrolledLevelIds.includes(level.id) || data.permissions.canViewAllLevels)) {
-      nav.push({ label: `Level ${i}`, href: `/courses/${level.id}`, icon: i.toString() });
+    for (let i = 1; i <= 4; i++) {
+      const level = yearLevels.find(l => l.key === `level-${i}`);
+      if (level && (enrolledLevelIds.includes(level.id) || canViewAll)) {
+        nav.push({ label: `Level ${i}${yearSuffix}`, href: `/courses/${level.id}`, icon: i.toString() });
+      }
+    }
+  };
+
+  if (data.permissions.canViewAllLevels) {
+    // Admins/instructors: show all levels for the active year (they switch years elsewhere)
+    const activeLevels = data.levels.filter(level => level.yearId === activeYear?.id);
+    pushLevelNav(activeLevels, [], "");
+  } else {
+    // Students: show enrolled levels across ALL years they're enrolled in (newest first),
+    // mirroring the dashboard. Previously the sidebar only looked at the active year, so
+    // students enrolled in a non-active year saw nothing here.
+    const enrolledYears = data.years
+      .filter(y => (data.enrollmentsByYear[y.id] ?? []).length > 0)
+      .sort((a, b) => b.label.localeCompare(a.label));
+
+    const multipleYears = enrolledYears.length > 1;
+    for (const year of enrolledYears) {
+      const yearLevels = data.levels.filter(level => level.yearId === year.id);
+      const enrolledLevelIds = data.enrollmentsByYear[year.id] ?? [];
+      // Disambiguate "Level 1" across years only when more than one year is enrolled
+      pushLevelNav(yearLevels, enrolledLevelIds, multipleYears ? ` (${year.label})` : "");
     }
   }
 
