@@ -155,7 +155,7 @@ export function CreateAssignmentForm({
 
         <div>
           <label htmlFor="attachmentUrl" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
-            Attachment URL <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span>
+            Attachment URL <span className="text-gray-400 dark:text-slate-100 font-normal">(optional)</span>
           </label>
           <input
             type="url"
@@ -169,7 +169,7 @@ export function CreateAssignmentForm({
 
         <div>
           <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
-            Or Upload Zip File <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span>
+            Or Upload Zip File <span className="text-gray-400 dark:text-slate-100 font-normal">(optional)</span>
           </label>
           <input
             type="file"

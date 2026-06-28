@@ -9,7 +9,7 @@ import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
-import { formatDateTime, parseApiDate } from "@/lib/date-utils";
+import { formatDateShort, parseApiDate } from "@/lib/date-utils";
 
 const COURSES = [
   { id: "",         name: "All Courses" },
@@ -214,44 +214,47 @@ export default function SubmissionQueuePage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
-                <th className="px-4 py-3">Student</th>
-                <th className="px-4 py-3">Assignment</th>
-                <th className="px-4 py-3">Course</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Score</th>
-                <th className="px-4 py-3">Submitted</th>
-                <th className="px-4 py-3">Graded</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-              {filtered.map((item) => {
-                const pct =
-                  item.totalScore !== null && item.maxScore > 0
-                    ? Math.round((item.totalScore / item.maxScore) * 100)
-                    : null;
-                const pctColor =
-                  pct === null ? "text-gray-400"
-                  : pct >= 80 ? "text-emerald-600"
-                  : pct >= 60 ? "text-amber-600"
-                  : "text-red-600";
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm whitespace-nowrap">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                  <th className="px-4 py-3">Student</th>
+                  <th className="px-4 py-3">Assignment</th>
+                  <th className="px-4 py-3">Course</th>
+                  <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Score</th>
+                  <th className="px-4 py-3">Submitted</th>
+                  <th className="px-4 py-3">Graded</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                {filtered.map((item) => {
+                  const pct =
+                    item.totalScore !== null && item.maxScore > 0
+                      ? Math.round((item.totalScore / item.maxScore) * 100)
+                      : null;
+                  const pctColor =
+                    pct === null ? "text-gray-400"
+                    : pct >= 80 ? "text-emerald-600"
+                    : pct >= 60 ? "text-amber-600"
+                    : "text-red-600";
 
-                const submittedAt = parseApiDate(item.submittedAt);
-                const dueDate     = parseApiDate(item.dueDate);
-                const isLate      = !!(submittedAt && dueDate && submittedAt.getTime() > dueDate.getTime());
+                  const submittedAt = parseApiDate(item.submittedAt);
+                  const dueDate     = parseApiDate(item.dueDate);
+                  const isLate      = !!(submittedAt && dueDate && submittedAt.getTime() > dueDate.getTime());
 
-                return (
-                  <tr key={item.submissionId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                  return (
+                    <tr key={item.submissionId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900 dark:text-slate-100">{item.studentName}</p>
-                      <p className="text-xs text-gray-400 dark:text-slate-500">{item.studentEmail}</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-100 whitespace-nowrap">{item.studentName}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 whitespace-nowrap">{item.studentEmail}</p>
                     </td>
-                    <td className="px-4 py-3 max-w-[180px]">
-                      <p className="truncate font-medium text-gray-800 dark:text-slate-200">{item.assignmentTitle}</p>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-gray-800 dark:text-slate-200 whitespace-nowrap">
+                        {item.assignmentTitle.length > 15 ? `${item.assignmentTitle.slice(0, 15)}...` : item.assignmentTitle}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-slate-300">
@@ -282,10 +285,10 @@ export default function SubmissionQueuePage() {
                       )}
                     </td>
                     <td className={`px-4 py-3 text-xs ${isLate ? "font-medium text-red-600 dark:text-red-400" : "text-gray-500 dark:text-slate-400"}`}>
-                      {formatDateTime(item.submittedAt)}
+                      {formatDateShort(item.submittedAt)}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-slate-400">
-                      {formatDateTime(item.gradedAt)}
+                      {formatDateShort(item.gradedAt)}
                     </td>
                     <td className="px-4 py-3">
                       <Link
@@ -299,7 +302,8 @@ export default function SubmissionQueuePage() {
                 );
               })}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </div>

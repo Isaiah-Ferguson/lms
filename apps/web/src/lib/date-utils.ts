@@ -70,3 +70,24 @@ export function formatDate(dateString: string | null | undefined): string {
   });
 }
 
+/**
+ * Format a date string to mm/dd/yy h:mm AM/PM (US short date + time)
+ * @param dateString - ISO 8601 date string from the API
+ * @returns Formatted date string like "04/24/26, 2:30 PM"
+ */
+export function formatDateShort(dateString: string | null | undefined): string {
+  if (!dateString) return "—";
+
+  const date = parseApiDate(dateString);
+  if (!date) return "Invalid date";
+
+  return date.toLocaleString("en-US", {
+    year: "2-digit",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+

@@ -207,7 +207,7 @@ export function CreateAssignmentModal({
           </div>
 
           <div>
-            <label htmlFor="AttachmentUrl" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+            <label htmlFor="AttachmentUrl" className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-100">
               Attachment URL (optional)
             </label>
             <input

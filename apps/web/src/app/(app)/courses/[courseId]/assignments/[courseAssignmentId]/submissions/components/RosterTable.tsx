@@ -78,7 +78,7 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400">
             <tr>
               <th className="px-4 py-3 font-semibold">Student</th>
@@ -105,8 +105,8 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                 <tr key={row.user.id} className="align-middle hover:bg-gray-50/60 dark:hover:bg-gray-800/60">
                   {/* Student */}
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900 dark:text-gray-100">{row.user.name}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">@{row.user.username}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{row.user.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">@{row.user.username}</p>
                   </td>
 
                   {/* Email */}
@@ -132,9 +132,9 @@ export function RosterTable({ rows, dueDate, onGradeClick }: RosterTableProps) {
                   {/* Graded By */}
                   <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                     {row.gradedBy ? (
-                      <span>{row.gradedBy}
+                      <span className="whitespace-nowrap">{row.gradedBy}
                         {row.gradedAt && (
-                          <span className="block text-gray-400 dark:text-gray-500">{formatDate(row.gradedAt)}</span>
+                          <span className="block text-gray-400 dark:text-gray-500 whitespace-nowrap">{formatDate(row.gradedAt)}</span>
                         )}
                       </span>
                     ) : (

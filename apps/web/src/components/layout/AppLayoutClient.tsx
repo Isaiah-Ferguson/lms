@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserMenu } from "@/components/ui/UserMenu";
 import { Footer } from "@/components/ui/Footer";
+import Image from "next/image";
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
 import { MobileMenuButton } from "@/components/ui/MobileMenuButton";
+import Logo from "@/assets/CSALGO.png";
 import type { NavItem } from "@/lib/dashboard-data";
 import type { UserInfo } from "@/lib/dashboard-data";
 
@@ -36,11 +37,11 @@ export function AppLayoutClient({ nav, currentLevel, user, children }: AppLayout
         <div className="flex items-center gap-3">
           <MobileMenuButton onClick={handleOpenSidebar} />
           <Link href="/home" className="flex items-center gap-3 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-500 shadow-lg shadow-brand-500/30 transition-transform group-hover:scale-105">
-              <BookOpen className="h-5 w-5 text-white" />
+            <div className="relative h-10 w-10 shrink-0 rounded-xl transition-transform group-hover:scale-105">
+              <Image src={Logo} alt="CodeStack LMS" fill className="rounded-xl object-contain" />
             </div>
             <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-slate-50">
-              CodeStack LMS
+              CodeStack Academy
             </span>
           </Link>
         </div>
