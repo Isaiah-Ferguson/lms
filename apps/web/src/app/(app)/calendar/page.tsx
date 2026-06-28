@@ -120,6 +120,15 @@ export default function CalendarPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("all");
   const [types, setTypes] = useState<CalendarEventType[]>(["assignment", "event"]);
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -276,12 +285,12 @@ export default function CalendarPage() {
         ) : (
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "dayGridMonth,timeGridWeek,listWeek",
-            }}
+            initialView={isMobile ? "listWeek" : "dayGridMonth"}
+            headerToolbar={
+              isMobile
+                ? { left: "prev,next", center: "title", right: "listWeek,dayGridMonth" }
+                : { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,listWeek" }
+            }
             buttonText={{
               dayGridMonth: "Month",
               timeGridWeek: "Week",
@@ -290,7 +299,7 @@ export default function CalendarPage() {
             events={calendarEvents}
             eventClick={onEventClick}
             height="auto"
-            dayMaxEvents={3}
+            dayMaxEvents={isMobile ? 2 : 3}
           />
         )}
 
