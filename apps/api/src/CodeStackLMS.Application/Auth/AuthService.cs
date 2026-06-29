@@ -68,20 +68,6 @@ public class AuthService : IAuthService
         return new AuthTokenDto(token, TokenExpirySeconds, user.MustChangePassword);
     }
 
-    public async Task RegisterAsync(
-        RegisterDto dto,
-        CancellationToken cancellationToken = default)
-    {
-        await CreateUserInternalAsync(
-            dto.Name,
-            dto.Email,
-            string.Empty,
-            dto.Password,
-            UserRole.Student,
-            false,
-            cancellationToken);
-    }
-
     public async Task CreateUserAsync(
         CreateUserDto dto,
         CancellationToken cancellationToken = default)
@@ -144,13 +130,11 @@ public class AuthService : IAuthService
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == emailLower, cancellationToken);
 
-        // Silently return if email doesn't exist to prevent email enumeration attacks
-        if (user == null)
+        // Silently return for non-existent OR deactivated accounts so the response is
+        // indistinguishable to the caller. Throwing a distinct error for deactivated
+        // accounts would leak which emails are registered (account enumeration).
+        if (user == null || !user.IsActive)
             return;
-
-        // Check if account is deactivated - throw error instead of silently returning
-        if (!user.IsActive)
-            throw new ValidationException("Your account has been deactivated. Please contact an administrator for assistance.");
 
         // Generate temporary password
         var temporaryPassword = GenerateTemporaryPassword();

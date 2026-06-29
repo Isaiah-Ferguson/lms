@@ -25,12 +25,13 @@ export const options = {
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
 const API_URL = `${BASE_URL}/api`;
 
-// Test user credentials - UPDATE THESE WITH YOUR TEST USERS
-const TEST_USERS = [
-  { email: 'crestice@yahoo.com', password: 'password' },
-  { email: 'isaiahkferguson89@gmail.com', password: 'Ferguson123' },
-  // { email: 'student5@Codestack.com', password: 'password' },
-];
+// Test user credentials are supplied via the TEST_USERS env var as a JSON array,
+// e.g.  k6 run -e TEST_USERS='[{"email":"a@x.com","password":"..."}]' ...
+// Never commit real credentials to this file.
+const TEST_USERS = JSON.parse(__ENV.TEST_USERS || '[]');
+if (TEST_USERS.length === 0) {
+  throw new Error('No test users configured. Pass -e TEST_USERS=\'[{"email":"...","password":"..."}]\'.');
+}
 
 function getRandomUser() {
   return TEST_USERS[Math.floor(Math.random() * TEST_USERS.length)];

@@ -2,6 +2,7 @@ using CodeStackLMS.Application.Auth.DTOs;
 using CodeStackLMS.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CodeStackLMS.API.Controllers;
 
@@ -21,6 +22,7 @@ public class AuthController : ControllerBase
     // POST /api/auth/login
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     [ProducesResponseType(typeof(AuthTokenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login(
@@ -31,18 +33,8 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    // POST /api/auth/register
-    [HttpPost("register")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register(
-        [FromBody] RegisterDto dto,
-        CancellationToken cancellationToken)
-    {
-        await _authService.RegisterAsync(dto, cancellationToken);
-        return StatusCode(StatusCodes.Status201Created, new { message = "Account created successfully." });
-    }
+    // Public self-registration is intentionally not exposed. Accounts are created
+    // by administrators via POST /api/auth/users (Admin-only) below.
 
     // POST /api/auth/users
     [HttpPost("users")]
@@ -75,6 +67,7 @@ public class AuthController : ControllerBase
     // POST /api/auth/forgot-password
     [HttpPost("forgot-password")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ForgotPassword(

@@ -58,16 +58,16 @@ k6 run --env BASE_URL=http://localhost:5000 load-tests/authenticated-load-test.j
 - Maintains 10 users for 2m
 - Ramps down over 1m
 
-**⚠️ IMPORTANT: Update test users before running!**
+**⚠️ IMPORTANT: Supply test users before running!**
 
-Edit the `TEST_USERS` array in the script:
-```javascript
-const TEST_USERS = [
-  { email: 'student1@test.com', password: 'Test123!' },
-  { email: 'student2@test.com', password: 'Test123!' },
-  { email: 'instructor@test.com', password: 'Test123!' },
-];
+Credentials are read from the `TEST_USERS` env var as a JSON array — never hardcode them in the scripts:
+```bash
+k6 run -e TEST_USERS='[
+  {"email":"student1@test.com","password":"Test123!"},
+  {"email":"instructor@test.com","password":"Test123!"}
+]' authenticated-load-test.js
 ```
+Use dedicated throwaway test accounts, not real user credentials.
 
 ---
 
@@ -260,7 +260,7 @@ k6 cloud load-tests/authenticated-load-test.js
 ## Next Steps
 
 1. Create test users in your database
-2. Update TEST_USERS in authenticated-load-test.js
+2. Pass them via `-e TEST_USERS='[...]'` when running authenticated-load-test.js
 3. Start backend API
 4. Run basic-load-test.js to verify setup
 5. Run authenticated-load-test.js for comprehensive testing

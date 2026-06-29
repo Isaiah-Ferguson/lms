@@ -1,7 +1,6 @@
 import type {
   AuthTokens,
   LoginRequest,
-  RegisterRequest,
   CreateUserRequest,
   ChangePasswordRequest,
   FileMeta,
@@ -113,12 +112,6 @@ export const authApi = {
     });
   },
 
-  register(body: RegisterRequest): Promise<{ message: string }> {
-    return apiFetch<{ message: string }>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-  },
 
   createUser(body: CreateUserRequest, token: string): Promise<{ message: string }> {
     return apiFetch<{ message: string }>("/api/auth/users", {

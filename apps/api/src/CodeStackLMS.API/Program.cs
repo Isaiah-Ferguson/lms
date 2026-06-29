@@ -71,6 +71,11 @@ builder.Services.AddHangfireServer(options =>
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
 
+// Fail fast on a weak signing key: HS256 requires a high-entropy secret of at
+// least 256 bits (32 bytes). A short or placeholder key makes tokens forgeable.
+if (Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+    throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes (256 bits) of high-entropy data.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -120,6 +125,23 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// Throttle unauthenticated auth endpoints (login / forgot-password) per client IP
+// to slow credential brute-forcing and account enumeration.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
+
 var app = builder.Build();
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
@@ -127,6 +149,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    // Enforce HTTPS on subsequent requests once the browser has connected.
+    app.UseHsts();
 }
 
 
@@ -138,7 +165,21 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 });
 
 app.UseHttpsRedirection();
+
+// Security headers for API/controller responses (placed after the Hangfire
+// dashboard so its HTML/JS isn't broken by the strict CSP below).
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["X-Frame-Options"] = "DENY";
+    headers["Referrer-Policy"] = "no-referrer";
+    headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+    await next();
+});
+
 app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
