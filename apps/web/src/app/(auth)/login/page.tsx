@@ -100,6 +100,8 @@ function LoginForm() {
         setServerError(
           err.status === 401
             ? "Invalid email or password."
+            : err.status === 429
+            ? "Too many sign-in attempts. Please wait a minute and try again."
             : err.detail
         );
       } else {

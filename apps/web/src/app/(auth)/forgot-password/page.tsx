@@ -41,7 +41,11 @@ export default function ForgotPasswordPage() {
       setSuccess(true);
     } catch (err) {
       if (err instanceof ApiError) {
-        setServerError(err.detail || "Failed to send password reset email. Please try again.");
+        setServerError(
+          err.status === 429
+            ? "Too many requests. Please wait a minute and try again."
+            : err.detail || "Failed to send password reset email. Please try again."
+        );
       } else {
         setServerError("An unexpected error occurred. Please try again.");
       }

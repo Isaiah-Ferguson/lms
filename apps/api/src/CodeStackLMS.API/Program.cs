@@ -6,6 +6,7 @@ using CodeStackLMS.Infrastructure;
 using CodeStackLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using CodeStackLMS.Infrastructure.BackgroundJobs;
 using Hangfire;
@@ -126,8 +127,24 @@ builder.Services.AddCors(options =>
 });
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
-// Throttle unauthenticated auth endpoints (login / forgot-password) per client IP
-// to slow credential brute-forcing and account enumeration.
+// Behind Azure App Service the app sits behind a reverse proxy that forwards the real
+// client IP/protocol in X-Forwarded-* headers. Honor them so RemoteIpAddress (used by
+// the rate limiter and logging) reflects the actual client rather than the platform.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // The App Service front-ends overwrite these headers and the app isn't reachable
+    // directly, so clearing the default trusted-proxy lists is the documented pattern.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+// Throttle unauthenticated auth endpoints (login / forgot-password) per client IP to
+// slow credential brute-forcing. NOTE: a whole classroom shares one public IP via NAT,
+// so this bucket is per-location, not per-student. The limit is sized to absorb the
+// largest class (max ~60 students) logging in together with retries, while still
+// capping a runaway flood. It is a coarse backstop only — BCrypt is the real defense
+// against guessing, and per-account throttling would be the next step if needed.
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -136,7 +153,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = 300,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
@@ -145,6 +162,10 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
+// Must run first so the corrected client IP/protocol is in place before HTTPS
+// redirection, the rate limiter, and logging read them.
+app.UseForwardedHeaders();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
