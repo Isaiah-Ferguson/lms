@@ -3,20 +3,20 @@ using System.ComponentModel.DataAnnotations;
 namespace CodeStackLMS.Application.Assignments.DTOs;
 
 public record CreateAssignmentDto(
-    [property: Required, StringLength(300, MinimumLength = 1)] string Title,
-    [property: Required, StringLength(100)] string AssignmentType,
-    [property: Required(AllowEmptyStrings = true), StringLength(20000)] string Instructions,
+    [Required, StringLength(300, MinimumLength = 1)] string Title,
+    [Required, StringLength(100)] string AssignmentType,
+    [Required(AllowEmptyStrings = true), StringLength(20000)] string Instructions,
     DateTime DueDate,
-    [property: StringLength(1000)] string? AttachmentUrl,
+    [StringLength(1000)] string? AttachmentUrl,
     Guid ModuleId
 );
 
 public record UpdateAssignmentDto(
-    [property: Required, StringLength(300, MinimumLength = 1)] string Title,
-    [property: Required, StringLength(100)] string AssignmentType,
-    [property: Required(AllowEmptyStrings = true), StringLength(20000)] string Instructions,
+    [Required, StringLength(300, MinimumLength = 1)] string Title,
+    [Required, StringLength(100)] string AssignmentType,
+    [Required(AllowEmptyStrings = true), StringLength(20000)] string Instructions,
     DateTime DueDate,
-    [property: StringLength(1000)] string? AttachmentUrl
+    [StringLength(1000)] string? AttachmentUrl
 );
 
 public record AssignmentDto(

@@ -33,10 +33,10 @@ public record CoursePermissionsDto(
     bool CanEditContent);
 
 public record UpsertAnnouncementDto(
-    [property: Required, StringLength(300, MinimumLength = 1)] string Title,
-    [property: Required, StringLength(20000, MinimumLength = 1)] string Body,
-    [property: StringLength(100)] string? Tag,
-    [property: Required] string AnnouncedAt);
+    [Required, StringLength(300, MinimumLength = 1)] string Title,
+    [Required, StringLength(20000, MinimumLength = 1)] string Body,
+    [StringLength(100)] string? Tag,
+    [Required] string AnnouncedAt);
 
 public record CreateWeekDto(
     int WeekNumber,

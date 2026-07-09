@@ -3,21 +3,21 @@ using System.ComponentModel.DataAnnotations;
 namespace CodeStackLMS.Application.Auth.DTOs;
 
 public record LoginDto(
-    [property: Required, EmailAddress, StringLength(320)] string Email,
-    [property: Required, StringLength(128)] string Password);
+    [Required, EmailAddress, StringLength(320)] string Email,
+    [Required, StringLength(128)] string Password);
 
 public record CreateUserDto(
-    [property: Required, StringLength(200, MinimumLength = 1)] string Name,
-    [property: Required, EmailAddress, StringLength(320)] string Email,
-    [property: Required] string Role,
-    [property: StringLength(200)] string? Town);
+    [Required, StringLength(200, MinimumLength = 1)] string Name,
+    [Required, EmailAddress, StringLength(320)] string Email,
+    [Required] string Role,
+    [StringLength(200)] string? Town);
 
 public record ChangePasswordDto(
-    [property: Required, StringLength(128)] string CurrentPassword,
-    [property: Required, StringLength(128, MinimumLength = 8)] string NewPassword);
+    [Required, StringLength(128)] string CurrentPassword,
+    [Required, StringLength(128, MinimumLength = 8)] string NewPassword);
 
 public record ForgotPasswordDto(
-    [property: Required, EmailAddress, StringLength(320)] string Email);
+    [Required, EmailAddress, StringLength(320)] string Email);
 
 public record AuthTokenDto(
     string AccessToken,
@@ -27,7 +27,7 @@ public record AuthTokenDto(
     int RefreshExpiresIn);
 
 public record RefreshRequestDto(
-    [property: Required, StringLength(512)] string RefreshToken);
+    [Required, StringLength(512)] string RefreshToken);
 
 public record LogoutRequestDto(
-    [property: StringLength(512)] string? RefreshToken);
+    [StringLength(512)] string? RefreshToken);

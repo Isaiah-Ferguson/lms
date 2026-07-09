@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace CodeStackLMS.Application.Comments.DTOs;
 
 public record CreateCommentDto(
-    [property: Required, StringLength(4000, MinimumLength = 1)] string Message
+    [Required, StringLength(4000, MinimumLength = 1)] string Message
 );
 
 public record CommentDto(
