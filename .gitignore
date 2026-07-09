@@ -93,3 +93,5 @@ reset-database.sh
 DESIGN.md 
 PRODUCT.md
 skills-lock.json
+# VS Code C# extension sometimes creates a literal "bin\Debug" dir on macOS
+*bin\\Debug/
