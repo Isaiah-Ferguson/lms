@@ -112,7 +112,7 @@ public class HomeService : IHomeService
         bool setActive,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role != "Admin")
+        if (!_currentUser.IsAdmin())
             throw new ForbiddenException();
 
         var trimmedLabel = label.Trim();
@@ -191,7 +191,7 @@ public class HomeService : IHomeService
         string yearId,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role != "Admin")
+        if (!_currentUser.IsAdmin())
             throw new ForbiddenException();
 
         if (!Guid.TryParse(yearId, out var parsedYearId))
@@ -228,7 +228,7 @@ public class HomeService : IHomeService
         string description,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role != "Admin")
+        if (!_currentUser.IsAdmin())
             throw new ForbiddenException();
 
         if (!Guid.TryParse(courseId, out var parsedCourseId))
@@ -241,7 +241,6 @@ public class HomeService : IHomeService
         // Edits apply only to this cohort/year's course row — descriptions are
         // stored per-cohort, so this does not affect other years.
         course.Description = description?.Trim() ?? string.Empty;
-        course.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 

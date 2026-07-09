@@ -25,7 +25,7 @@ public class TranscriptService : ITranscriptService
             throw new ValidationException("Invalid user identifier.");
 
         var isSelf = _currentUser.UserId == parsedUserId;
-        var isStaff = _currentUser.Role is "Admin" or "Instructor";
+        var isStaff = _currentUser.IsStaff();
         if (!isSelf && !isStaff)
             throw new ForbiddenException();
 

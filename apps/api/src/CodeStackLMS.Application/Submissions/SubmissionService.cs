@@ -194,7 +194,6 @@ public class SubmissionService : ISubmissionService
                 submissionToUpdate.Type = dto.Type;
                 submissionToUpdate.Status = SubmissionStatus.PendingUpload;
                 submissionToUpdate.CreatedAt = DateTime.UtcNow; // Update submission date to now
-                submissionToUpdate.UpdatedAt = DateTime.UtcNow;
                 submissionToUpdate.FigmaUrl = dto.FigmaUrl;
                 submissionToUpdate.GitHubRepoUrl = dto.GitHubRepoUrl;
                 submissionToUpdate.HostedUrl = dto.HostedUrl;
@@ -276,10 +275,18 @@ public class SubmissionService : ISubmissionService
             throw new ValidationException(
                 $"The following blobs were not found in storage: {string.Join(", ", missing)}");
 
-        // 5. Validate blob paths belong to this submission (prevent path injection)
+        // 5. Validate blob paths belong to this submission (prevent path injection).
+        //    Paths are built as submissions/{cohort}/{assignment}/{student}/{submission}/{file}
+        //    (see BuildBlobPath), so require the submission-id path segment to match
+        //    exactly rather than a substring anywhere in the path.
         foreach (var file in dto.Files)
         {
-            if (!file.BlobPath.Contains(submissionId.ToString(), StringComparison.OrdinalIgnoreCase))
+            var segments = file.BlobPath.Split('/');
+            var ownsPath = segments.Length >= 6
+                && segments[0] == "submissions"
+                && string.Equals(segments[4], submissionId.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            if (!ownsPath)
                 throw new ForbiddenException(
                     $"Blob path '{file.BlobPath}' does not belong to submission '{submissionId}'.");
         }
@@ -304,7 +311,6 @@ public class SubmissionService : ISubmissionService
         //    Set to ReadyToGrade immediately since artifacts are already validated during upload
         //    If background processing is needed in the future, use Processing status and implement background job
         submission.Status = SubmissionStatus.ReadyToGrade;
-        submission.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -390,7 +396,6 @@ public class SubmissionService : ISubmissionService
                 submissionToUpdate.Type = SubmissionType.GitHub;
                 submissionToUpdate.Status = SubmissionStatus.ReadyToGrade;
                 submissionToUpdate.CreatedAt = DateTime.UtcNow;
-                submissionToUpdate.UpdatedAt = DateTime.UtcNow;
                 submissionToUpdate.FigmaUrl = dto.FigmaUrl;
                 submissionToUpdate.GitHubRepoUrl = normalizedRepo;
                 submissionToUpdate.HostedUrl = dto.HostedUrl;
@@ -452,7 +457,6 @@ public class SubmissionService : ISubmissionService
         CancellationToken cancellationToken = default)
     {
         var callerId = _currentUser.UserId;
-        var callerRole = _currentUser.Role;
 
         // 1. Load submission with artifacts (no navigation beyond what we need)
         var submission = await _db.Submissions
@@ -464,10 +468,8 @@ public class SubmissionService : ISubmissionService
         //    - Student: must own the submission
         //    - Instructor / Admin: role is sufficient
         //      (extend this check once Course.InstructorId is added to the domain)
-        var isStudent = callerRole == nameof(UserRole.Student);
-        var isInstructorOrAdmin =
-            callerRole == nameof(UserRole.Instructor) ||
-            callerRole == nameof(UserRole.Admin);
+        var isStudent = _currentUser.Role == nameof(UserRole.Student);
+        var isInstructorOrAdmin = _currentUser.IsStaff();
 
         if (isStudent)
         {
@@ -503,10 +505,7 @@ public class SubmissionService : ISubmissionService
         Guid submissionId,
         CancellationToken cancellationToken = default)
     {
-        var callerRole = _currentUser.Role;
-        var isPrivileged =
-            callerRole == nameof(UserRole.Instructor) ||
-            callerRole == nameof(UserRole.Admin);
+        var isPrivileged = _currentUser.IsStaff();
 
         var submission = await _db.Submissions
             .AsNoTracking()

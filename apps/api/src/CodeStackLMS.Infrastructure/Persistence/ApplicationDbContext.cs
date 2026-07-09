@@ -12,14 +12,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        // Suppress pending model changes warning to allow EF to create new tables
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-    }
-
     public DbSet<User> Users => Set<User>();
     public DbSet<Cohort> Cohorts => Set<Cohort>();
     public DbSet<Course> Courses => Set<Course>();

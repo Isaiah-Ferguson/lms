@@ -17,6 +17,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Azure.Identity" Version="1.14.2" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.0" />
+    <!-- Pin patched transitive System.IO.Packaging (via DocumentFormat.OpenXml):
+         GHSA-f32c-w444-8ppv / GHSA-qj66-m88j-hmgj -->
+    <PackageReference Include="System.IO.Packaging" Version="10.0.9" />
+    <PackageReference Include="QuestPDF" Version="2026.2.4" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Hangfire.Core" Version="1.8.17" />

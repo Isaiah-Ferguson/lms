@@ -1,11 +1,12 @@
+using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Transcript.DTOs;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace CodeStackLMS.API.Services;
+namespace CodeStackLMS.Infrastructure.Documents;
 
-public sealed class TranscriptPdfGenerator
+public sealed class TranscriptPdfGenerator : ITranscriptPdfGenerator
 {
     // ── Static school header (configured per institution) ──────────────────────
     private const string SchoolName = "CodeStack Academy";

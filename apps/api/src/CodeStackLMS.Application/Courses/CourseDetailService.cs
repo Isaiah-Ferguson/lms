@@ -26,7 +26,7 @@ public class CourseDetailService : ICourseDetailService
         var course = await ResolveCourseAsync(courseId, cancellationToken)
             ?? throw new NotFoundException("Course", courseId);
 
-        var isAdminOrInstructor = _currentUser.Role is "Admin" or "Instructor";
+        var isAdminOrInstructor = _currentUser.IsStaff();
 
         var weeks = course.Modules
             .Where(m => m.WeekNumber.HasValue)
@@ -317,7 +317,7 @@ public class CourseDetailService : ICourseDetailService
 
     private void RequireAdminOrInstructor()
     {
-        if (_currentUser.Role is not ("Admin" or "Instructor"))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException();
     }
 

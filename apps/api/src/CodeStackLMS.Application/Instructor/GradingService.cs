@@ -227,7 +227,6 @@ public class GradingService : IGradingService
         }
 
         submission.Status = SubmissionStatus.Graded;
-        submission.UpdatedAt = now;
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -289,7 +288,6 @@ public class GradingService : IGradingService
         submission.GitHubRepoUrl = null;
         submission.HostedUrl = null;
         submission.Note = reason; // Store the return reason in the Note field
-        submission.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 

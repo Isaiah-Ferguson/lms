@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { authApi } from "@/lib/api-client";
+import { authApi, ApiError } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 
 interface ChangePasswordModalProps {
@@ -55,8 +55,14 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to change password." });
+    } catch (err: unknown) {
+      const text =
+        err instanceof ApiError
+          ? err.detail
+          : err instanceof Error && err.message
+            ? err.message
+            : "Failed to change password.";
+      setMessage({ type: "error", text });
     } finally {
       setSaving(false);
     }

@@ -54,10 +54,7 @@ public class LessonService : ILessonService
 
         // Verify caller is enrolled in this course,
         // or is an Instructor/Admin (who can access any lesson).
-        var callerRole = _currentUser.Role;
-        var isPrivileged =
-            callerRole == nameof(UserRole.Instructor) ||
-            callerRole == nameof(UserRole.Admin);
+        var isPrivileged = _currentUser.IsStaff();
 
         if (!isPrivileged)
         {
@@ -127,8 +124,7 @@ public class LessonService : ILessonService
         CancellationToken cancellationToken = default)
     {
         // Verify user is Admin or Instructor
-        var callerRole = _currentUser.Role;
-        if (callerRole != nameof(UserRole.Instructor) && callerRole != nameof(UserRole.Admin))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException("Only instructors and admins can create lessons.");
 
         // Verify module exists
@@ -167,8 +163,7 @@ public class LessonService : ILessonService
         CancellationToken cancellationToken = default)
     {
         // Verify user is Admin or Instructor
-        var callerRole = _currentUser.Role;
-        if (callerRole != nameof(UserRole.Instructor) && callerRole != nameof(UserRole.Admin))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException("Only instructors and admins can update lessons.");
 
         var lesson = await _db.Lessons
@@ -180,7 +175,6 @@ public class LessonService : ILessonService
         lesson.VideoSource = string.IsNullOrWhiteSpace(dto.VideoUrl)
             ? VideoSourceType.None
             : VideoSourceType.External;
-        lesson.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -196,8 +190,7 @@ public class LessonService : ILessonService
         CancellationToken cancellationToken = default)
     {
         // Verify user is Admin or Instructor
-        var callerRole = _currentUser.Role;
-        if (callerRole != nameof(UserRole.Instructor) && callerRole != nameof(UserRole.Admin))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException("Only instructors and admins can delete lessons.");
 
         var lesson = await _db.Lessons
@@ -220,8 +213,7 @@ public class LessonService : ILessonService
         CancellationToken cancellationToken = default)
     {
         // Verify user is Admin or Instructor
-        var callerRole = _currentUser.Role;
-        if (callerRole != nameof(UserRole.Instructor) && callerRole != nameof(UserRole.Admin))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException("Only instructors and admins can upload artifacts.");
 
         var lesson = await _db.Lessons
@@ -270,8 +262,7 @@ public class LessonService : ILessonService
         CancellationToken cancellationToken = default)
     {
         // Verify user is Admin or Instructor
-        var callerRole = _currentUser.Role;
-        if (callerRole != nameof(UserRole.Instructor) && callerRole != nameof(UserRole.Admin))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException("Only instructors and admins can delete artifacts.");
 
         var artifact = await _db.LessonArtifacts

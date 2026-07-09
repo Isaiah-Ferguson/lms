@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { courseApi, type Assignment } from "@/lib/api-client";
+import { courseApi, assignmentsApi, type Assignment, type AssignmentListItem } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import { CreateAssignmentForm } from "./CreateAssignmentForm";
 import { AssignmentList } from "./AssignmentList";
@@ -59,12 +59,17 @@ export function AssignmentManager({
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleAssignmentSelect = (assignment: Assignment) => {
+  const handleAssignmentSelect = (assignment: AssignmentListItem) => {
     router.push(`/courses/${courseId}/assignments/${assignment.id}`);
   };
 
-  const handleAssignmentEdit = (assignment: Assignment) => {
-    setSelectedAssignment(assignment);
+  // The list only holds summary items; fetch the full assignment (with
+  // instructions, moduleId, …) before opening the edit form.
+  const handleAssignmentEdit = async (assignment: AssignmentListItem) => {
+    const token = getToken();
+    if (!token) return;
+    const full = await assignmentsApi.getAssignment(assignment.id, token);
+    setSelectedAssignment(full);
     setCurrentView("edit");
   };
 

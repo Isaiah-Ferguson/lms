@@ -94,9 +94,10 @@ export function EditAssignmentModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 

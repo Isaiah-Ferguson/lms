@@ -13,6 +13,7 @@ import { profileApi, courseApi, assignmentsApi, adminParticipantsApi, type Enrol
 import { getUserRole } from "@/lib/auth";
 import { useApiQuery } from "@/lib/use-api-query";
 import type { CalendarEvent, CalendarEventType } from "@/lib/calendar-data";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 function EventDetailsModal({
   event,
@@ -273,9 +274,7 @@ export default function CalendarPage() {
 
       <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
         {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
-          </div>
+          <LoadingState className="py-24" />
         ) : (
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}

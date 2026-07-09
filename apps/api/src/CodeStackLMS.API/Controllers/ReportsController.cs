@@ -1,4 +1,3 @@
-using CodeStackLMS.API.Services;
 using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Reports.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -12,9 +11,9 @@ namespace CodeStackLMS.API.Controllers;
 public class ReportsController : ControllerBase
 {
     private readonly IProgressReportService _reports;
-    private readonly WordDocumentGenerator _wordGen;
+    private readonly IWordDocumentGenerator _wordGen;
 
-    public ReportsController(IProgressReportService reports, WordDocumentGenerator wordGen)
+    public ReportsController(IProgressReportService reports, IWordDocumentGenerator wordGen)
     {
         _reports = reports;
         _wordGen = wordGen;

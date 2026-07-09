@@ -122,17 +122,23 @@ Do these *after* the test safety net exists.
 - [x] Split `InstructorService` (647 lines) into `GradingService`, `SubmissionQueueService`, `GradebookService` with focused interfaces (M1); extracted `ProgressReportPromptBuilder` (pure, unit-testable) from `WeeklyProgressReportJob` (605 → 317 lines) (M2).
 - [x] Split `api-client.ts` into 16 domain modules under `src/lib/api/`; `api-client.ts` is now pure re-exports so no import site changed (M11).
 - [x] Added `useApiQuery` hook (loading/error/stale-response guard/login redirect) and migrated three representative pages; removed all four `eslint-disable react-hooks/exhaustive-deps` suppressions by stabilizing callbacks (M12, M15). Remaining hand-rolled fetch effects can migrate incrementally.
-- [x] Consolidated the duplicated `Modal` into `components/ui/Modal.tsx` (M13). The two `VideoPlayer`s and `FiltersBar`s were inspected and intentionally left separate — they are different components (token-based streaming player vs. resolved-URL card; role/status selects vs. quick-filter chips). Shared `LoadingState`/`ErrorState` (L9) still open.
-- [x] Parallelized SAS URL generation with `Task.WhenAll` in submission detail, artifact list, and lesson list (M4); blob deletions now happen only after the DB transaction commits, best-effort with logging (M5). Exact-match blob ownership check (L4) still open.
-- [ ] Consolidate role checks into authorization policies (L1); move doc generators to Infrastructure (L2); remove the `PendingModelChangesWarning` suppression (L3); rely on `UpdateAuditableEntities` for timestamps (L5); move Hangfire scheduling out of `Program.cs` (L7).
+- [x] Consolidated the duplicated `Modal` into `components/ui/Modal.tsx` (M13). The two `VideoPlayer`s and `FiltersBar`s were inspected and intentionally left separate — they are different components (token-based streaming player vs. resolved-URL card; role/status selects vs. quick-filter chips).
+- [x] Shared `LoadingState`/`ErrorState` components in `components/ui/`, adopted across 8 pages (L9).
+- [x] Parallelized SAS URL generation with `Task.WhenAll` in submission detail, artifact list, and lesson list (M4); blob deletions now happen only after the DB transaction commits, best-effort with logging (M5).
+- [x] Exact-match blob ownership check — the submission-id path segment must match exactly instead of a substring anywhere in the path (L4).
+- [x] Centralized role checks in `ICurrentUserService.IsAdmin()`/`IsStaff()` extensions — one place role strings are compared; controllers' `[Authorize(Roles=...)]` remain the primary gate (L1).
+- [x] Moved `WordDocumentGenerator`/`TranscriptPdfGenerator` (and their QuestPDF/OpenXml packages) to `Infrastructure/Documents` behind `IWordDocumentGenerator`/`ITranscriptPdfGenerator` (L2).
+- [x] Removed the `PendingModelChangesWarning` suppression; verified `dotnet ef migrations has-pending-model-changes` reports the model in sync (L3).
+- [x] Removed the 9 redundant manual `UpdatedAt` assignments — `UpdateAuditableEntities` is the single writer; intentional `CreatedAt` business logic (resubmission date reset) kept (L5).
+- [x] Recurring-job registration moved to `RecurringJobsRegistrar`, and **fixed a real bug**: the weekly report job's date argument was serialized once at deploy time, freezing "current week" forever; the job now computes its week at execution (L7).
 
 ### Phase 5 — Polish & modernization (ongoing)
 
-- [ ] Convert read-heavy pages (grades, course detail) to server components following the dashboard pattern (M14).
-- [ ] Accessibility pass: `aria-label` on icon buttons, `alt` text, keyboard traps in modals (L10).
-- [ ] Fix the remaining `any` casts (L8); shorten external video URL expiry or document the exception (M8).
-- [ ] Upgrade ESLint to v9, add Prettier + root `.editorconfig` (L12); plan the Next.js 15 upgrade once CI is green (L15).
-- [ ] Wire the k6 load tests into a scheduled or pre-release CI job.
+- [x] Grades page converted to a server component (dashboard pattern): enrollments + first course's grades render with the HTML; course switching stays client-side via the proxy (M14). Course-detail page remains a candidate for the same treatment.
+- [x] Accessibility pass: `aria-label` on all icon-only buttons, focus management in the shared Modal (focus on open, restore on close), alt text verified (L10). A dependency-free focus-trap remains a nice-to-have.
+- [x] Zero `any`/`as any` remain in apps/web; fixing `AssignmentList` uncovered and fixed a latent bug where the edit form opened with `undefined` fields (L8). M8 (external video URL expiry) intentionally kept — needed for archiving.
+- [x] Prettier + root `.editorconfig` added (config only, no mass reformat) (L12). **Deferred by design:** ESLint 9 (eslint-config-next 14 requires ESLint 8) and the Next.js 15 upgrade — do them together as one migration now that CI is green (L15).
+- [x] k6 load tests wired into a manual `workflow_dispatch` CI job (`.github/workflows/load-test.yml`) with selectable script and target URL — deliberately not automatic.
 
 ---
 

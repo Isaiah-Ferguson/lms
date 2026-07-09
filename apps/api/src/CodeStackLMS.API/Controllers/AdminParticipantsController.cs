@@ -1,4 +1,3 @@
-using CodeStackLMS.API.Services;
 using CodeStackLMS.Application.AdminParticipants.DTOs;
 using CodeStackLMS.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -12,10 +11,14 @@ namespace CodeStackLMS.API.Controllers;
 public class AdminParticipantsController : ControllerBase
 {
     private readonly IAdminParticipantsService _adminParticipantsService;
+    private readonly IWordDocumentGenerator _wordGen;
 
-    public AdminParticipantsController(IAdminParticipantsService adminParticipantsService)
+    public AdminParticipantsController(
+        IAdminParticipantsService adminParticipantsService,
+        IWordDocumentGenerator wordGen)
     {
         _adminParticipantsService = adminParticipantsService;
+        _wordGen = wordGen;
     }
 
     [HttpGet]
@@ -106,7 +109,7 @@ public class AdminParticipantsController : ControllerBase
             ? "Previous Admin Notes"
             : $"Previous Admin Notes - {request.UserName}";
 
-        var bytes = WordDocumentGenerator.BuildSimpleDocument(title, rows);
+        var bytes = _wordGen.BuildSimpleDocument(title, rows);
         var safeUserId = userId.Replace("/", "-").Replace("\\", "-");
         var fileName = $"previous-admin-notes-{safeUserId}-{DateTime.UtcNow:yyyy-MM-dd}.docx";
 

@@ -107,6 +107,8 @@ public static class DependencyInjection
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<ITranscriptService, TranscriptService>();
         services.AddScoped<ISubmissionService, SubmissionService>();
+        services.AddSingleton<IWordDocumentGenerator, Documents.WordDocumentGenerator>();
+        services.AddSingleton<ITranscriptPdfGenerator, Documents.TranscriptPdfGenerator>();
         services.AddScoped<IGradingService, GradingService>();
         services.AddScoped<ISubmissionQueueService, SubmissionQueueService>();
         services.AddScoped<IGradebookService, GradebookService>();

@@ -13,6 +13,7 @@ import {
 import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { formatDate } from "@/lib/date-utils";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -68,7 +69,7 @@ function StudentPickerModal({
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 px-5 py-4">
           <h3 className="font-bold text-gray-900 dark:text-slate-50">Pick a Student</h3>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+          <button onClick={onClose} aria-label="Close dialog" className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -436,9 +437,7 @@ export default function ReportsPage() {
       {error && <Alert variant="error" message={error} />}
 
       {loading ? (
-        <div className="flex items-center justify-center py-24 text-gray-400 dark:text-slate-500">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <LoadingState className="py-24" />
       ) : (
         <ReportTable reports={reports} />
       )}

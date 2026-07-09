@@ -287,7 +287,7 @@ export function SubmissionCard({ courseAssignmentId, initial }: SubmissionCardPr
             ? <AlertCircle className="h-4 w-4 shrink-0" />
             : <CheckCircle2 className="h-4 w-4 shrink-0" />}
           <span className="flex-1">{toast.message}</span>
-          <button onClick={() => setToast(null)} className="ml-1 opacity-70 hover:opacity-100">
+          <button onClick={() => setToast(null)} aria-label="Dismiss notification" className="ml-1 opacity-70 hover:opacity-100">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>

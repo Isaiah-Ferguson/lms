@@ -27,6 +27,14 @@ public class WeeklyProgressReportJob
         _logger = logger;
     }
 
+    /// <summary>
+    /// Recurring-job entry point: computes the week at execution time. The
+    /// scheduler must NOT pass a precomputed date — Hangfire serializes job
+    /// arguments once at registration, which would freeze the week forever.
+    /// </summary>
+    public Task ExecuteForCurrentWeekAsync(CancellationToken cancellationToken)
+        => ExecuteAsync(DateTime.UtcNow, null, cancellationToken);
+
     public async Task ExecuteAsync(DateTime weekOf, Guid? cohortId, CancellationToken cancellationToken)
     {
         var weekStart = weekOf.Date.AddDays(-(int)weekOf.DayOfWeek + 1);

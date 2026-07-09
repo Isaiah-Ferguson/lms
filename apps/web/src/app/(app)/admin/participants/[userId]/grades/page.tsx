@@ -11,6 +11,7 @@ import { TrendingUp, BookOpen, Calendar, Download, ArrowLeft } from "lucide-reac
 import { gradesApi, homeApi, ApiError, type AdminGrades } from "@/lib/api-client";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { COURSES, letterGrade, pct, percentColor, statusBadge } from "@/lib/grade-helpers";
 import { downloadCsv } from "@/lib/utils";
 import { parseApiDate } from "@/lib/date-utils";
@@ -158,9 +159,7 @@ export default function StudentGradesPage() {
       {error && <Alert variant="error" message={error} />}
 
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
-        </div>
+        <LoadingState />
       ) : !student ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-gray-400" />

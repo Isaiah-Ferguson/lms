@@ -9,6 +9,7 @@ import { Search, X, ChevronUp, ChevronDown, Download } from "lucide-react";
 import { gradesApi, homeApi, ApiError, type AdminGrades, type AdminStudentGrade, type StudentGradeRow } from "@/lib/api-client";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { COURSES, letterGrade, percentColor } from "@/lib/grade-helpers";
 import { downloadCsv } from "@/lib/utils";
@@ -185,9 +186,7 @@ export default function AdminGradesPage() {
         {error && <Alert variant="error" message={error} />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
-          </div>
+          <LoadingState />
         ) : (
           <>
             {/* Distribution chart */}
@@ -219,7 +218,7 @@ export default function AdminGradesPage() {
                 className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 py-2 pl-9 pr-4 text-sm shadow-sm focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-400/20"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+                <button onClick={() => setSearch("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
                   <X className="h-4 w-4" />
                 </button>
               )}

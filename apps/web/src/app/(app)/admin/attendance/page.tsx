@@ -12,6 +12,7 @@ import {
 } from "@/lib/api-client";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 // Status cycle order: blank -> P -> L -> E -> U -> Z -> blank
 const CYCLE: (AttendanceCode | "")[] = ["", "P", "L", "E", "U", "Z"];
@@ -256,9 +257,7 @@ export default function AttendancePage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="flex items-center justify-center py-24 text-gray-400 dark:text-slate-500">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <LoadingState className="py-24" />
       ) : !grid || grid.students.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 py-20 text-center">
           <CalendarCheck className="mb-4 h-10 w-10 text-gray-300 dark:text-slate-600" />

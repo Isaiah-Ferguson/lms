@@ -15,6 +15,8 @@ import { ensureProtocol, formatBytes, formatStatus } from "@/lib/utils";
 import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
 
@@ -27,6 +29,7 @@ export default function InstructorGradingPage() {
     data: detail,
     loading,
     error: loadError,
+    reload,
   } = useApiQuery(
     (token) => instructorApi.getSubmissionDetail(submissionId, token),
     [submissionId]
@@ -109,10 +112,7 @@ export default function InstructorGradingPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900">
-        <div className="flex flex-col items-center gap-3 text-gray-400 dark:text-slate-500">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
-          <p className="text-sm dark:text-slate-400">Loading submission…</p>
-        </div>
+        <LoadingState message="Loading submission…" className="py-0" />
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function InstructorGradingPage() {
   if (loadError || !detail) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <Alert variant="error" message={loadError ?? "Submission not found."} />
+        <ErrorState message={loadError ?? "Submission not found."} onRetry={reload} />
         <button
           onClick={() => router.back()}
           className="mt-4 flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"

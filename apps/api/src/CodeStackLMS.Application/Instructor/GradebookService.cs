@@ -86,7 +86,7 @@ public class GradebookService : IGradebookService
         string? cohortId,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role is not ("Admin" or "Instructor"))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException();
 
         if (string.IsNullOrWhiteSpace(courseId))
@@ -163,7 +163,7 @@ public class GradebookService : IGradebookService
         Guid assignmentId,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role is not ("Admin" or "Instructor"))
+        if (!_currentUser.IsStaff())
             throw new ForbiddenException();
 
         var assignment = await _db.Assignments

@@ -1,7 +1,6 @@
 using System.Text;
 using CodeStackLMS.API.Authorization;
 using CodeStackLMS.API.Middleware;
-using CodeStackLMS.API.Services;
 using CodeStackLMS.Infrastructure;
 using CodeStackLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +29,6 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-builder.Services.AddSingleton<WordDocumentGenerator>();
-builder.Services.AddSingleton<TranscriptPdfGenerator>();
 
 // Configure form options for file uploads
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
@@ -252,12 +249,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ── Recurring Jobs ───────────────────────────────────────────────────────────
-RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(
-    "weekly-progress-reports",
-    job => job.ExecuteAsync(
-        DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek + 1),
-        null,
-        CancellationToken.None),
-    Cron.Weekly(DayOfWeek.Monday, 6));
+RecurringJobsRegistrar.RegisterAll();
 
 app.Run();

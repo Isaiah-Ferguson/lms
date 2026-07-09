@@ -1,0 +1,31 @@
+name: Load Test (manual)
+
+# Run the k6 load tests against a chosen environment on demand.
+# Deliberately manual — load-testing production should be a decision, not a side effect.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "API base URL to test (e.g. https://csalms.azurewebsites.net)"
+        required: true
+        type: string
+      script:
+        description: "Which k6 script to run"
+        required: true
+        type: choice
+        default: basic-load-test.js
+        options:
+          - basic-load-test.js
+          - stress-test.js
+          - spike-test.js
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Run ${{ inputs.script }}
+        run: k6 run load-tests/${{ inputs.script }}
+        env:
+          BASE_URL: ${{ inputs.base_url }}

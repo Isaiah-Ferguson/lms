@@ -18,6 +18,7 @@ const widths = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-lg" };
 
 export function Modal({ title, onClose, children, width, wide }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const resolvedWidth = width ?? (wide ? "lg" : "md");
   const titleId = `modal-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
@@ -32,6 +33,18 @@ export function Modal({ title, onClose, children, width, wide }: ModalProps) {
     };
   }, [onClose]);
 
+  // Focus the dialog when it opens and return focus to the previously
+  // focused element (usually the trigger button) when it closes.
+  useEffect(() => {
+    if (!mounted) return;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.focus();
+    return () => {
+      previouslyFocused?.focus();
+    };
+  }, [mounted]);
+
   if (!mounted) return null;
 
   const modalContent = (
@@ -43,7 +56,11 @@ export function Modal({ title, onClose, children, width, wide }: ModalProps) {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
       onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
-      <div className={`w-full ${widths[resolvedWidth]} flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl`}>
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        className={`w-full ${widths[resolvedWidth]} flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl focus:outline-none`}
+      >
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4 shrink-0">
           <h2 id={titleId} className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
           <button

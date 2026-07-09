@@ -1,4 +1,3 @@
-using CodeStackLMS.API.Services;
 using CodeStackLMS.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +10,9 @@ namespace CodeStackLMS.API.Controllers;
 public class TranscriptController : ControllerBase
 {
     private readonly ITranscriptService _transcripts;
-    private readonly TranscriptPdfGenerator _pdfGen;
+    private readonly ITranscriptPdfGenerator _pdfGen;
 
-    public TranscriptController(ITranscriptService transcripts, TranscriptPdfGenerator pdfGen)
+    public TranscriptController(ITranscriptService transcripts, ITranscriptPdfGenerator pdfGen)
     {
         _transcripts = transcripts;
         _pdfGen = pdfGen;

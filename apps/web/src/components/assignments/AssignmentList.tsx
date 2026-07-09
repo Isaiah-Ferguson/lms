@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { assignmentsApi, type AssignmentListItem, type Assignment } from "@/lib/api-client";
+import { assignmentsApi, type AssignmentListItem } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 
 interface AssignmentListProps {
   courseId: string;
   moduleId?: string;
-  onAssignmentSelect?: (assignment: Assignment) => void;
-  onAssignmentEdit?: (assignment: Assignment) => void;
+  onAssignmentSelect?: (assignment: AssignmentListItem) => void;
+  onAssignmentEdit?: (assignment: AssignmentListItem) => void;
   onAssignmentDelete?: (assignmentId: string) => void;
   canEdit?: boolean;
 }
@@ -96,7 +96,7 @@ export function AssignmentList({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h4 className="text-base font-medium text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
-                  onClick={() => onAssignmentSelect?.(assignment as any)}>
+                  onClick={() => onAssignmentSelect?.(assignment)}>
                 {assignment.title}
               </h4>
               <div className="mt-1 text-sm text-gray-500 dark:text-slate-400">
@@ -109,7 +109,7 @@ export function AssignmentList({
             {canEdit && (
               <div className="flex space-x-2 ml-4">
                 <button
-                  onClick={() => onAssignmentEdit?.(assignment as any)}
+                  onClick={() => onAssignmentEdit?.(assignment)}
                   className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                 >
                   Edit

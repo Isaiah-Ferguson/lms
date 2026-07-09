@@ -8,6 +8,8 @@ import { reportsApi, ApiError } from "@/lib/api-client";
 import { useApiQuery } from "@/lib/use-api-query";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { formatDate } from "@/lib/date-utils";
 
 // ─── Minimal markdown renderer ────────────────────────────────────────────────
@@ -61,7 +63,7 @@ export default function ReportDetailPage() {
   // without a refetch.
   const [published, setPublished] = useState(false);
 
-  const { data, loading, error } = useApiQuery(
+  const { data, loading, error, reload } = useApiQuery(
     (t) => reportsApi.getReport(id, t),
     [id]
   );
@@ -95,17 +97,13 @@ export default function ReportDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
-      </div>
-    );
+    return <LoadingState className="py-32" />;
   }
 
   if (error || !report) {
     return (
       <div className="mx-auto max-w-3xl space-y-4">
-        <Alert variant="error" message={error ?? "Report not found."} />
+        <ErrorState message={error ?? "Report not found."} onRetry={reload} />
         <Link href="/admin/reports" className="inline-flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Reports
         </Link>

@@ -158,7 +158,6 @@ public class AssignmentService : IAssignmentService
         assignment.Instructions = dto.Instructions;
         assignment.DueDate = dto.DueDate;
         assignment.AttachmentUrl = dto.AttachmentUrl;
-        assignment.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 

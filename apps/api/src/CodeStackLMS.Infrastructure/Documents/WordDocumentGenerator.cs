@@ -1,12 +1,13 @@
 using System.Text.RegularExpressions;
+using CodeStackLMS.Application.Common.Interfaces;
 using CodeStackLMS.Application.Reports.DTOs;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace CodeStackLMS.API.Services;
+namespace CodeStackLMS.Infrastructure.Documents;
 
-public sealed class WordDocumentGenerator
+public sealed class WordDocumentGenerator : IWordDocumentGenerator
 {
     public byte[] Generate(ProgressReportDetailDto report)
     {
@@ -65,7 +66,7 @@ public sealed class WordDocumentGenerator
     /// Build a minimal Word document: a bold title followed by one paragraph per line.
     /// Used for simple exports (e.g. admin notes) that don't need markdown formatting.
     /// </summary>
-    public static byte[] BuildSimpleDocument(string title, IReadOnlyList<string> lines)
+    public byte[] BuildSimpleDocument(string title, IReadOnlyList<string> lines)
     {
         using var ms = new MemoryStream();
         using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))

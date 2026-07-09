@@ -8,6 +8,7 @@ import { instructorApi, homeApi, ApiError, type SubmissionQueueItem } from "@/li
 import type { AcademicYear } from "@/lib/dashboard-home-data";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus";
 import { formatDateShort, parseApiDate } from "@/lib/date-utils";
 
@@ -193,6 +194,7 @@ export default function SubmissionQueuePage() {
             {search && (
               <button
                 onClick={() => setSearch("")}
+                aria-label="Clear search"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
               >
                 <X className="h-3.5 w-3.5" />
@@ -203,9 +205,7 @@ export default function SubmissionQueuePage() {
 
       {/* Queue table */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 dark:border-slate-700 border-t-blue-500" />
-        </div>
+        <LoadingState className="py-20" />
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-20 text-center">
           <ClipboardList className="h-10 w-10 text-gray-300 dark:text-slate-600" />

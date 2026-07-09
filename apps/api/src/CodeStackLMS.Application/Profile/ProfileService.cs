@@ -107,7 +107,7 @@ public class ProfileService : IProfileService
         if (!Guid.TryParse(userId, out var parsedUserId))
             throw new ValidationException("Invalid user identifier.");
 
-        var canEdit = _currentUser.UserId == parsedUserId || _currentUser.Role == "Admin";
+        var canEdit = _currentUser.UserId == parsedUserId || _currentUser.IsAdmin();
         if (!canEdit)
             throw new ForbiddenException();
 
@@ -131,7 +131,7 @@ public class ProfileService : IProfileService
         user.PhoneNumber = trimmedPhone;
         user.GitHubUsername = trimmedGitHub;
 
-        if (!string.IsNullOrWhiteSpace(email) && _currentUser.Role == "Admin")
+        if (!string.IsNullOrWhiteSpace(email) && _currentUser.IsAdmin())
         {
             var trimmedEmail = email.Trim().ToLowerInvariant();
             if (!trimmedEmail.Contains('@'))
@@ -196,7 +196,7 @@ public class ProfileService : IProfileService
         if (!Guid.TryParse(userId, out var parsedUserId))
             throw new ValidationException("Invalid user identifier.");
 
-        var canEdit = _currentUser.UserId == parsedUserId || _currentUser.Role == "Admin";
+        var canEdit = _currentUser.UserId == parsedUserId || _currentUser.IsAdmin();
         if (!canEdit)
             throw new ForbiddenException();
 
@@ -245,7 +245,6 @@ public class ProfileService : IProfileService
 
         user.EmailNotificationsEnabled = emailNotificationsEnabled;
         user.DarkModeEnabled = darkModeEnabled;
-        user.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -254,7 +253,7 @@ public class ProfileService : IProfileService
 
     public async Task SaveAdminNoteAsync(string userId, string text, CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role != "Admin")
+        if (!_currentUser.IsAdmin())
             throw new ForbiddenException();
 
         if (!Guid.TryParse(userId, out var targetUserId))
@@ -286,7 +285,7 @@ public class ProfileService : IProfileService
         string reason,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUser.Role != "Admin")
+        if (!_currentUser.IsAdmin())
             throw new ForbiddenException();
 
         if (!Guid.TryParse(userId, out var targetUserId))
@@ -298,7 +297,6 @@ public class ProfileService : IProfileService
 
         user.IsOnProbation = isOnProbation;
         user.ProbationReason = isOnProbation ? reason.Trim() : string.Empty;
-        user.UpdatedAt = DateTime.UtcNow;
 
         var noteText = isOnProbation
             ? $"[Academic Probation] Status set to ON. Reason: {(string.IsNullOrWhiteSpace(reason) ? "(none provided)" : reason.Trim())}"
