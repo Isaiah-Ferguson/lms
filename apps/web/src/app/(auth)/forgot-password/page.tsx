@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Forgot password?</h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
-              Enter your email address and we'll send you a temporary password to get back into your account.
+              Enter your email address and we&apos;ll send you a temporary password to get back into your account.
             </p>
           </div>
 
@@ -174,10 +174,10 @@ export default function ForgotPasswordPage() {
 
             <div>
               <h1 className="text-4xl xl:text-5xl font-bold mb-4 leading-tight">
-                We've Got you Covered
+                We&apos;ve Got you Covered
               </h1>
               <p className="text-lg text-brand-50/90 leading-relaxed max-w-xl">
-            Password resets are quick and secure. We'll send you a temporary password to get you back on track.
+            Password resets are quick and secure. We&apos;ll send you a temporary password to get you back on track.
               </p>
             </div>
           </motion.div>

@@ -77,6 +77,21 @@ var jwtSecret = builder.Configuration["Jwt:Secret"]
 if (Encoding.UTF8.GetByteCount(jwtSecret) < 32)
     throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes (256 bits) of high-entropy data.");
 
+// The template/dev placeholders satisfy the length gate, so reject them
+// explicitly outside Development — an unchanged secret in production would
+// make every token forgeable by anyone who has read the repo.
+string[] knownPlaceholderSecrets =
+[
+    "codestack-lms-super-secret-key-change-in-production-min32chars!",
+    "YOUR_JWT_SECRET_KEY_MIN_32_CHARACTERS",
+];
+if (!builder.Environment.IsDevelopment()
+    && knownPlaceholderSecrets.Contains(jwtSecret, StringComparer.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        "Jwt:Secret is a known placeholder value. Generate a random 32+ byte secret for this environment.");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

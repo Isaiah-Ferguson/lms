@@ -114,6 +114,62 @@ public class AuthServiceTests : IDisposable
         Assert.True(result.MustChangePassword);
     }
 
+    // ── Refresh tokens ────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task Login_IssuesARefreshToken()
+    {
+        await SeedUserAsync();
+
+        var result = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+
+        Assert.False(string.IsNullOrWhiteSpace(result.RefreshToken));
+        Assert.True(result.RefreshExpiresIn > result.ExpiresIn);
+    }
+
+    [Fact]
+    public async Task Refresh_WithValidToken_ReturnsNewAccessToken()
+    {
+        await SeedUserAsync();
+        var login = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+
+        var refreshed = await _sut.RefreshAsync(login.RefreshToken);
+
+        Assert.False(string.IsNullOrWhiteSpace(refreshed.AccessToken));
+        Assert.Equal(login.RefreshToken, refreshed.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Refresh_WithUnknownToken_ThrowsUnauthorized()
+    {
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _sut.RefreshAsync("not-a-real-token"));
+    }
+
+    [Fact]
+    public async Task Refresh_AfterRevocation_ThrowsUnauthorized()
+    {
+        await SeedUserAsync();
+        var login = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+
+        await _sut.RevokeRefreshTokenAsync(login.RefreshToken);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _sut.RefreshAsync(login.RefreshToken));
+    }
+
+    [Fact]
+    public async Task Refresh_AfterPasswordChange_ThrowsUnauthorized()
+    {
+        var user = await SeedUserAsync();
+        var login = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+
+        await _sut.ChangePasswordAsync(user.Id, new ChangePasswordDto(Password, "new-password-123"));
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _sut.RefreshAsync(login.RefreshToken));
+    }
+
     // ── ChangePasswordAsync ───────────────────────────────────────────────────
 
     [Fact]

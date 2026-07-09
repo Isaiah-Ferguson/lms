@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/ui/Modal";
 import type { LevelWeek } from "./level-dashboard-types";
 
 const TOPICS_PLACEHOLDER = "Controllers & Routes\nServices & Dependency Injection\nRESTful API Design\n...";

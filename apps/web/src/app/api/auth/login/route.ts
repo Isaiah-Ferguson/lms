@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE } from "@/lib/utils";
 import { getJwtRole } from "@/lib/jwt";
-import { TOKEN_COOKIE, ROLE_COOKIE } from "@/lib/auth-cookies";
+import { setSessionCookies, type BackendAuthTokens } from "@/lib/session-cookies";
 
-// Proxies the login request to the backend and stores the returned JWT in a
-// first-party httpOnly cookie so client-side JS can never read it. A separate
-// readable role cookie exists purely for UI decisions (nav items, labels);
-// the backend authorizes every request from the JWT alone.
+// Proxies the login request to the backend and stores the returned tokens in
+// first-party httpOnly cookies so client-side JS can never read them. A
+// separate readable role cookie exists purely for UI decisions (nav items,
+// labels); the backend authorizes every request from the JWT alone.
 export async function POST(req: NextRequest) {
   const body = await req.text();
 
@@ -26,34 +26,14 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const tokens = JSON.parse(text) as {
-    accessToken: string;
-    expiresIn: number;
-    mustChangePassword: boolean;
-  };
-  const role = getJwtRole(tokens.accessToken);
+  const tokens = JSON.parse(text) as BackendAuthTokens;
 
   const response = NextResponse.json({
     expiresIn: tokens.expiresIn,
     mustChangePassword: tokens.mustChangePassword,
-    role,
+    role: getJwtRole(tokens.accessToken),
   });
-
-  const secure = process.env.NODE_ENV === "production";
-  response.cookies.set(TOKEN_COOKIE, tokens.accessToken, {
-    httpOnly: true,
-    secure,
-    sameSite: "lax",
-    path: "/",
-    maxAge: tokens.expiresIn,
-  });
-  response.cookies.set(ROLE_COOKIE, role ?? "", {
-    httpOnly: false,
-    secure,
-    sameSite: "lax",
-    path: "/",
-    maxAge: tokens.expiresIn,
-  });
+  setSessionCookies(response, tokens);
 
   return response;
 }

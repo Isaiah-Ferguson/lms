@@ -265,18 +265,26 @@ export default function ReportsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [data, studentList] = await Promise.all([
-        reportsApi.getReports(token, cohort || undefined, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"),
-        activeTab === "student" ? reportsApi.getStudents(token, cohort || undefined) : Promise.resolve(students),
-      ]);
-      setReports(data);
-      if (activeTab === "student") setStudents(studentList as StudentOption[]);
+      const reportsPromise = reportsApi.getReports(
+        token, cohort || undefined, undefined, activeTab === "class" ? "ClassSummary" : "StudentProgress"
+      );
+      if (activeTab === "student") {
+        // Students are only (re)fetched on the student tab; the class tab
+        // keeps whatever list was loaded previously.
+        const [data, studentList] = await Promise.all([
+          reportsPromise,
+          reportsApi.getStudents(token, cohort || undefined),
+        ]);
+        setReports(data);
+        setStudents(studentList);
+      } else {
+        setReports(await reportsPromise);
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.detail : "Failed to load reports.");
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => { if (cohortId !== null) load(tab, cohortId); }, [load, tab, cohortId]);

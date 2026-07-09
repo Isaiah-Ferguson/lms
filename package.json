@@ -1,0 +1,21 @@
+{
+  "name": "codestack-lms",
+  "private": true,
+  "description": "Monorepo scripts for the CodeStack LMS web app (apps/web) and API (apps/api)",
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "dotnet run --project apps/api/src/CodeStackLMS.API",
+    "lint": "npm --prefix apps/web run lint",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "test:web": "npm --prefix apps/web run test",
+    "test:api": "dotnet test apps/api/tests/CodeStackLMS.Application.Tests",
+    "test": "npm run test:web && npm run test:api",
+    "build:web": "npm --prefix apps/web run build",
+    "build:api": "dotnet build apps/api/CodeStackLMS.sln",
+    "build": "npm run build:web && npm run build:api",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

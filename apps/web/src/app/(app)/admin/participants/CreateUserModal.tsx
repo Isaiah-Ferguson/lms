@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Info } from "lucide-react";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ApiError, authApi } from "@/lib/api-client";

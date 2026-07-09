@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 
 export interface VideoToken {
@@ -202,7 +202,7 @@ export function LessonVideo({ lessonId, fetchToken, className }: LessonVideoProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -213,9 +213,9 @@ export function LessonVideo({ lessonId, fetchToken, className }: LessonVideoProp
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetchToken, lessonId]);
 
-  useEffect(() => { load(); }, [lessonId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return (

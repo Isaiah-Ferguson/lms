@@ -150,7 +150,7 @@ export function CommentsThread({
               onChange={(e) => setStaffOnly(e.target.checked)}
               className="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
             />
-            Staff-only note (students won't see this)
+            Staff-only note (students won&apos;t see this)
           </label>
         )}
         <div className="flex gap-2">

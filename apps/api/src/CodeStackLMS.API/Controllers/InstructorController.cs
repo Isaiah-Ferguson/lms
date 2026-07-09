@@ -10,14 +10,20 @@ namespace CodeStackLMS.API.Controllers;
 [Authorize(Roles = "Instructor,Admin")]
 public class InstructorController : ControllerBase
 {
-    private readonly IInstructorService _instructorService;
+    private readonly IGradingService _grading;
+    private readonly ISubmissionQueueService _queue;
+    private readonly IGradebookService _gradebook;
     private readonly ILogger<InstructorController> _logger;
 
     public InstructorController(
-        IInstructorService instructorService,
+        IGradingService grading,
+        ISubmissionQueueService queue,
+        IGradebookService gradebook,
         ILogger<InstructorController> logger)
     {
-        _instructorService = instructorService;
+        _grading = grading;
+        _queue = queue;
+        _gradebook = gradebook;
         _logger = logger;
     }
 
@@ -29,7 +35,7 @@ public class InstructorController : ControllerBase
         [FromRoute] Guid submissionId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetSubmissionDetailAsync(
+        var result = await _grading.GetSubmissionDetailAsync(
             submissionId, cancellationToken);
 
         return Ok(result);
@@ -45,7 +51,7 @@ public class InstructorController : ControllerBase
         [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
-        var result = await _instructorService.GetSubmissionQueueAsync(courseId, status, yearId, page, pageSize, cancellationToken);
+        var result = await _queue.GetSubmissionQueueAsync(courseId, status, yearId, page, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -59,7 +65,7 @@ public class InstructorController : ControllerBase
         [FromBody] GradeSubmissionDto dto,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GradeSubmissionAsync(
+        var result = await _grading.GradeSubmissionAsync(
             submissionId, dto, cancellationToken);
 
         _logger.LogInformation(
@@ -80,7 +86,7 @@ public class InstructorController : ControllerBase
         [FromBody] GradeSubmissionDto dto,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GradeByStudentAsync(
+        var result = await _grading.GradeByStudentAsync(
             assignmentId, studentId, dto, cancellationToken);
 
         _logger.LogInformation(
@@ -100,7 +106,7 @@ public class InstructorController : ControllerBase
         [FromBody] ReturnSubmissionDto dto,
         CancellationToken cancellationToken)
     {
-        await _instructorService.ReturnSubmissionAsync(
+        await _grading.ReturnSubmissionAsync(
             submissionId, dto.Reason, cancellationToken);
 
         _logger.LogInformation(
@@ -122,7 +128,7 @@ public class InstructorController : ControllerBase
         [FromRoute] Guid assignmentId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetAssignmentSubmissionsRosterAsync(
+        var result = await _gradebook.GetAssignmentSubmissionsRosterAsync(
             assignmentId, cancellationToken);
 
         return Ok(result);

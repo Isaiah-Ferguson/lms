@@ -305,10 +305,12 @@ public class LessonService : ILessonService
         foreach (var lesson in lessons)
         {
             var artifactDtos = new List<LessonArtifactDto>();
-            
+
             if (lesson.Artifacts != null && lesson.Artifacts.Any())
             {
-                foreach (var artifact in lesson.Artifacts)
+                // Generate SAS URLs concurrently; one bad artifact must not
+                // break the entire lesson list, so failures resolve to null.
+                var dtos = await Task.WhenAll(lesson.Artifacts.Select(async artifact =>
                 {
                     try
                     {
@@ -317,15 +319,16 @@ public class LessonService : ILessonService
                             TimeSpan.FromHours(1),
                             cancellationToken);
 
-                        artifactDtos.Add(ToDto(artifact, downloadUrl));
+                        return ToDto(artifact, downloadUrl);
                     }
                     catch (Exception ex)
                     {
-                        // Log error but continue processing other artifacts
-                        // This prevents one bad artifact from breaking the entire lesson list
                         System.Diagnostics.Debug.WriteLine($"Failed to generate SAS for artifact {artifact.Id}: {ex.Message}");
+                        return null;
                     }
-                }
+                }));
+
+                artifactDtos.AddRange(dtos.Where(d => d is not null)!);
             }
 
             result.Add(ToDto(lesson, artifactDtos));

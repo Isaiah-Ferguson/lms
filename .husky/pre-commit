@@ -1,0 +1,12 @@
+# Fast, targeted checks: only validate the app whose files are staged.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if echo "$staged" | grep -q '^apps/web/'; then
+  echo "pre-commit: typechecking apps/web…"
+  (cd apps/web && npx tsc --noEmit) || exit 1
+fi
+
+if echo "$staged" | grep -q '^apps/api/.*\.cs$'; then
+  echo "pre-commit: building apps/api…"
+  dotnet build apps/api/CodeStackLMS.sln --nologo -v q || exit 1
+fi

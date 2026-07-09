@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CodeStackLMS.Application.Courses.DTOs;
 
 public record CourseDetailDto(
@@ -31,10 +33,10 @@ public record CoursePermissionsDto(
     bool CanEditContent);
 
 public record UpsertAnnouncementDto(
-    string Title,
-    string Body,
-    string? Tag,
-    string AnnouncedAt);
+    [property: Required, StringLength(300, MinimumLength = 1)] string Title,
+    [property: Required, StringLength(20000, MinimumLength = 1)] string Body,
+    [property: StringLength(100)] string? Tag,
+    [property: Required] string AnnouncedAt);
 
 public record CreateWeekDto(
     int WeekNumber,

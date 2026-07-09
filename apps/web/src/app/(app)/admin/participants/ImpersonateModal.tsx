@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { ParticipantUser } from "@/lib/admin-participants-data";
 

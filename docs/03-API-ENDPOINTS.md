@@ -599,7 +599,7 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 
 ## 12. Attendance (`/api/admin/attendance`)
 
-Attendance is recorded per **level** (`Course`) per **date**, one row per (level, student, day). Admin-only. See `docs/05-ATTENDANCE-ROADMAP.md`.
+Attendance is recorded per **level** (`Course`) per **date**, one row per (level, student, day). Admin-only.
 
 **Status codes** are sent as single letters: `P` Present · `L` Late · `E` Excused · `U` Unexcused · `Z` Zoom (remote).
 

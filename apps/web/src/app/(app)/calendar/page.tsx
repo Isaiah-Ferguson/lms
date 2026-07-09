@@ -11,7 +11,7 @@ import type { EventClickArg, EventInput } from "@fullcalendar/core";
 import { Calendar as CalendarIcon, Clock, X } from "lucide-react";
 import { profileApi, courseApi, assignmentsApi, adminParticipantsApi, type Enrollment } from "@/lib/api-client";
 import { getUserRole } from "@/lib/auth";
-import { useAuthedToken } from "@/lib/use-authed-token";
+import { useApiQuery } from "@/lib/use-api-query";
 import type { CalendarEvent, CalendarEventType } from "@/lib/calendar-data";
 
 function EventDetailsModal({
@@ -113,10 +113,6 @@ const TYPE_COLOR: Record<CalendarEventType, string> = {
 
 export default function CalendarPage() {
   const router = useRouter();
-  const token = useAuthedToken();
-  const [loading, setLoading] = useState(true);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [allEvents, setAllEvents] = useState<CalendarEvent[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("all");
   const [types, setTypes] = useState<CalendarEventType[]>(["assignment", "event"]);
   const [selected, setSelected] = useState<CalendarEvent | null>(null);
@@ -130,81 +126,79 @@ export default function CalendarPage() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
+  // Errors are intentionally not surfaced (matching the previous behavior):
+  // on failure the calendar simply renders with no events.
+  const { data: calendarData, loading } = useApiQuery(
+    async (token) => {
+      const role = getUserRole();
+      const isAdminOrInstructor = role === "Admin" || role === "Instructor";
 
-    async function loadCalendarData() {
-      try {
-        const role = getUserRole();
-        const isAdminOrInstructor = role === "Admin" || role === "Instructor";
+      let courseList: { courseId: string; title: string }[] = [];
+      let enrollments: Enrollment[] = [];
 
-        let courseList: { courseId: string; title: string }[] = [];
-
-        if (isAdminOrInstructor) {
-          const adminData = await adminParticipantsApi.getParticipants(token!);
-          courseList = adminData.courses.map((c) => ({ courseId: c.id, title: c.label }));
-        } else {
-          const profile = await profileApi.getMyProfile(token!);
-          setEnrollments(profile.enrollments);
-          courseList = profile.enrollments.map((e) => ({ courseId: e.courseId, title: e.title }));
-        }
-
-        const events: CalendarEvent[] = [];
-        const adminEnrollments: Enrollment[] = [];
-
-        await Promise.all(
-          courseList.map(async (course) => {
-            const [courseDetail, assignments] = await Promise.all([
-              courseApi.getCourseDetail(course.courseId, token!),
-              assignmentsApi.getAssignmentsByCourse(course.courseId, token!),
-            ]);
-
-            for (const ann of courseDetail.announcements) {
-              events.push({
-                id: `ann-${ann.id}`,
-                type: "event",
-                courseId: course.courseId,
-                courseTitle: course.title,
-                title: ann.title,
-                start: ann.announcedAt,
-                allDay: true,
-                description: ann.body,
-              });
-            }
-
-            for (const asgn of assignments) {
-              events.push({
-                id: `asgn-${asgn.id}`,
-                type: "assignment",
-                courseId: course.courseId,
-                courseTitle: course.title,
-                title: asgn.title,
-                start: asgn.dueDate,
-                allDay: false,
-                href: `/courses/${course.courseId}/assignments/${asgn.id}`,
-                description: `Module: ${asgn.moduleTitle}`,
-              });
-            }
-
-            if (isAdminOrInstructor) {
-              adminEnrollments.push({ courseId: course.courseId, title: course.title, status: "Active" });
-            }
-          })
-        );
-
-        if (isAdminOrInstructor) {
-          setEnrollments(adminEnrollments);
-        }
-
-        setAllEvents(events);
-      } catch (err) {
-      } finally {
-        setLoading(false);
+      if (isAdminOrInstructor) {
+        const adminData = await adminParticipantsApi.getParticipants(token);
+        courseList = adminData.courses.map((c) => ({ courseId: c.id, title: c.label }));
+      } else {
+        const profile = await profileApi.getMyProfile(token);
+        enrollments = profile.enrollments;
+        courseList = profile.enrollments.map((e) => ({ courseId: e.courseId, title: e.title }));
       }
-    }
 
-    loadCalendarData();
-  }, [token]);
+      const events: CalendarEvent[] = [];
+      const adminEnrollments: Enrollment[] = [];
+
+      await Promise.all(
+        courseList.map(async (course) => {
+          const [courseDetail, assignments] = await Promise.all([
+            courseApi.getCourseDetail(course.courseId, token),
+            assignmentsApi.getAssignmentsByCourse(course.courseId, token),
+          ]);
+
+          for (const ann of courseDetail.announcements) {
+            events.push({
+              id: `ann-${ann.id}`,
+              type: "event",
+              courseId: course.courseId,
+              courseTitle: course.title,
+              title: ann.title,
+              start: ann.announcedAt,
+              allDay: true,
+              description: ann.body,
+            });
+          }
+
+          for (const asgn of assignments) {
+            events.push({
+              id: `asgn-${asgn.id}`,
+              type: "assignment",
+              courseId: course.courseId,
+              courseTitle: course.title,
+              title: asgn.title,
+              start: asgn.dueDate,
+              allDay: false,
+              href: `/courses/${course.courseId}/assignments/${asgn.id}`,
+              description: `Module: ${asgn.moduleTitle}`,
+            });
+          }
+
+          if (isAdminOrInstructor) {
+            adminEnrollments.push({ courseId: course.courseId, title: course.title, status: "Active" });
+          }
+        })
+      );
+
+      if (isAdminOrInstructor) {
+        enrollments = adminEnrollments;
+      }
+
+      return { enrollments, events };
+    },
+    []
+  );
+
+  const enrollments = calendarData?.enrollments ?? [];
+  const allEvents = useMemo(() => calendarData?.events ?? [], [calendarData]);
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((e) => {

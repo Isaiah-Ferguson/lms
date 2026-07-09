@@ -33,6 +33,37 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    // POST /api/auth/refresh
+    // Exchanges a valid refresh token for a fresh short-lived access token.
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [ProducesResponseType(typeof(AuthTokenDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Refresh(
+        [FromBody] RefreshRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _authService.RefreshAsync(dto.RefreshToken, cancellationToken);
+        return Ok(result);
+    }
+
+    // POST /api/auth/logout
+    // Revokes the refresh token so the session cannot be extended.
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Logout(
+        [FromBody] LogoutRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(dto.RefreshToken))
+            await _authService.RevokeRefreshTokenAsync(dto.RefreshToken, cancellationToken);
+
+        return Ok(new { message = "Signed out." });
+    }
+
     // Public self-registration is intentionally not exposed. Accounts are created
     // by administrators via POST /api/auth/users (Admin-only) below.
 

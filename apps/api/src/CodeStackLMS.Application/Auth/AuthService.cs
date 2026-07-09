@@ -16,7 +16,10 @@ namespace CodeStackLMS.Application.Auth;
 
 public class AuthService : IAuthService
 {
-    private const int TokenExpirySeconds = 86400; // 24 hours
+    // Short-lived access token; sessions are extended via refresh tokens, so a
+    // leaked bearer token is only useful for minutes, not a full day.
+    private const int TokenExpirySeconds = 1800; // 30 minutes
+    private const int RefreshTokenExpiryDays = 14;
 
     private readonly IApplicationDbContext _db;
     private readonly IConfiguration _config;
@@ -54,6 +57,7 @@ public class AuthService : IAuthService
             throw new ValidationException("Invalid email or password.");
 
         var token = GenerateJwt(user);
+        var (refreshToken, refreshExpiresAt) = await IssueRefreshTokenAsync(user.Id, cancellationToken);
 
         // A failed timestamp update must not block a successful login.
         try
@@ -66,8 +70,91 @@ public class AuthService : IAuthService
             _logger.LogError(ex, "Failed to update LastLoginAt for user {UserId}", user.Id);
         }
 
-        return new AuthTokenDto(token, TokenExpirySeconds, user.MustChangePassword);
+        return new AuthTokenDto(
+            token,
+            TokenExpirySeconds,
+            user.MustChangePassword,
+            refreshToken,
+            (int)(refreshExpiresAt - DateTime.UtcNow).TotalSeconds);
     }
+
+    public async Task<AuthTokenDto> RefreshAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var hash = HashToken(refreshToken);
+
+        var stored = await _db.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
+
+        if (stored is null
+            || stored.RevokedAt is not null
+            || stored.ExpiresAt <= DateTime.UtcNow
+            || !stored.User.IsActive)
+        {
+            throw new UnauthorizedAccessException("The session has expired. Please sign in again.");
+        }
+
+        var token = GenerateJwt(stored.User);
+
+        return new AuthTokenDto(
+            token,
+            TokenExpirySeconds,
+            stored.User.MustChangePassword,
+            refreshToken,
+            (int)(stored.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+    }
+
+    public async Task RevokeRefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var hash = HashToken(refreshToken);
+
+        var stored = await _db.RefreshTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
+
+        // Revoking an unknown token is a no-op — logout must always succeed.
+        if (stored is null || stored.RevokedAt is not null)
+            return;
+
+        stored.RevokedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<(string Token, DateTime ExpiresAt)> IssueRefreshTokenAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var entity = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            TokenHash = HashToken(token),
+            ExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenExpiryDays),
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        _db.RefreshTokens.Add(entity);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return (token, entity.ExpiresAt);
+    }
+
+    private async Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var active = await _db.RefreshTokens
+            .Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var t in active)
+            t.RevokedAt = DateTime.UtcNow;
+    }
+
+    private static string HashToken(string token)
+        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
     public async Task CreateUserAsync(
         CreateUserDto dto,
@@ -119,6 +206,9 @@ public class AuthService : IAuthService
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         user.MustChangePassword = false;
 
+        // A password change invalidates every other session for this account.
+        await RevokeAllRefreshTokensAsync(userId, cancellationToken);
+
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -141,6 +231,9 @@ public class AuthService : IAuthService
         var temporaryPassword = GenerateTemporaryPassword();
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
         user.MustChangePassword = true;
+
+        // A password reset invalidates every existing session for this account.
+        await RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
 
         await _db.SaveChangesAsync(cancellationToken);
 

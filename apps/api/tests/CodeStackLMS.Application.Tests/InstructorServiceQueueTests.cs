@@ -3,7 +3,6 @@ using CodeStackLMS.Application.Instructor;
 using CodeStackLMS.Application.Tests.TestSupport;
 using CodeStackLMS.Domain.Entities;
 using CodeStackLMS.Domain.Enums;
-using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace CodeStackLMS.Application.Tests;
@@ -17,7 +16,8 @@ public class InstructorServiceQueueTests : IDisposable
 {
     private readonly TestDb _db = new();
     private readonly FakeCurrentUserService _currentUser = new() { Role = "Admin" };
-    private readonly InstructorService _sut;
+    private readonly SubmissionQueueService _queue;
+    private readonly GradebookService _gradebook;
 
     private readonly Course _course = new() { Id = Guid.NewGuid(), Title = "Level 1", CreatedAt = DateTime.UtcNow };
     private readonly Module _module;
@@ -27,12 +27,8 @@ public class InstructorServiceQueueTests : IDisposable
 
     public InstructorServiceQueueTests()
     {
-        _sut = new InstructorService(
-            _db.Context,
-            new FakeBlobStorageService(),
-            _currentUser,
-            new FakeBackgroundJobService(),
-            NullLogger<InstructorService>.Instance);
+        _queue = new SubmissionQueueService(_db.Context);
+        _gradebook = new GradebookService(_db.Context, _currentUser);
 
         _module = new Module { Id = Guid.NewGuid(), CourseId = _course.Id, Title = "Week 1", Order = 1, CreatedAt = DateTime.UtcNow };
         _assignment = new Assignment
@@ -91,7 +87,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(3, SubmissionStatus.ReadyToGrade));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, null, null);
+        var page = await _queue.GetSubmissionQueueAsync(null, null, null);
 
         var item = Assert.Single(page.Items);
         Assert.Equal(SubmissionStatus.ReadyToGrade, item.Status);
@@ -104,7 +100,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(1, SubmissionStatus.PendingUpload));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, null, null);
+        var page = await _queue.GetSubmissionQueueAsync(null, null, null);
 
         Assert.Empty(page.Items);
         Assert.Equal(0, page.TotalCount);
@@ -119,7 +115,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(2, SubmissionStatus.PendingUpload));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, null, null);
+        var page = await _queue.GetSubmissionQueueAsync(null, null, null);
 
         Assert.Empty(page.Items);
     }
@@ -133,7 +129,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(1, SubmissionStatus.Graded, student2));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, "Graded", null);
+        var page = await _queue.GetSubmissionQueueAsync(null, "Graded", null);
 
         var item = Assert.Single(page.Items);
         Assert.Equal(SubmissionStatus.Graded, item.Status);
@@ -159,7 +155,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(1, SubmissionStatus.ReadyToGrade, assignment: otherAssignment));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(otherCourse.Id.ToString(), null, null);
+        var page = await _queue.GetSubmissionQueueAsync(otherCourse.Id.ToString(), null, null);
 
         var item = Assert.Single(page.Items);
         Assert.Equal("Other Challenge", item.AssignmentTitle);
@@ -178,7 +174,7 @@ public class InstructorServiceQueueTests : IDisposable
         }
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, null, null, page: 2, pageSize: 2);
+        var page = await _queue.GetSubmissionQueueAsync(null, null, null, page: 2, pageSize: 2);
 
         Assert.Equal(5, page.TotalCount);
         Assert.Equal(2, page.Items.Count);
@@ -191,7 +187,7 @@ public class InstructorServiceQueueTests : IDisposable
         _db.Context.Submissions.Add(NewSubmission(1, SubmissionStatus.ReadyToGrade));
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var page = await _sut.GetSubmissionQueueAsync(null, null, Guid.NewGuid().ToString());
+        var page = await _queue.GetSubmissionQueueAsync(null, null, Guid.NewGuid().ToString());
 
         Assert.Empty(page.Items);
     }
@@ -229,7 +225,7 @@ public class InstructorServiceQueueTests : IDisposable
         });
         await _db.Context.SaveChangesAsync(CancellationToken.None);
 
-        var grades = await _sut.GetAdminGradesAsync(_course.Id.ToString(), null);
+        var grades = await _gradebook.GetAdminGradesAsync(_course.Id.ToString(), null);
 
         var studentRow = Assert.Single(grades.Students);
         var row = Assert.Single(studentRow.Rows);
@@ -243,6 +239,6 @@ public class InstructorServiceQueueTests : IDisposable
         _currentUser.Role = "Student";
 
         await Assert.ThrowsAsync<ForbiddenException>(
-            () => _sut.GetAdminGradesAsync(_course.Id.ToString(), null));
+            () => _gradebook.GetAdminGradesAsync(_course.Id.ToString(), null));
     }
 }

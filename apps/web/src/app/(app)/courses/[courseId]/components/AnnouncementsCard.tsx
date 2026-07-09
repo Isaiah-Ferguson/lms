@@ -5,7 +5,7 @@ import { Megaphone, Calendar, AlertCircle, Info, X, Plus, Pencil, Trash2 } from 
 import { clsx } from "clsx";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/ui/Modal";
 import type { LevelAnnouncement } from "./level-dashboard-types";
 
 const TAG_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {

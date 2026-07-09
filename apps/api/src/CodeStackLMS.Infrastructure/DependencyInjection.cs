@@ -107,7 +107,9 @@ public static class DependencyInjection
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<ITranscriptService, TranscriptService>();
         services.AddScoped<ISubmissionService, SubmissionService>();
-        services.AddScoped<IInstructorService, InstructorService>();
+        services.AddScoped<IGradingService, GradingService>();
+        services.AddScoped<ISubmissionQueueService, SubmissionQueueService>();
+        services.AddScoped<IGradebookService, GradebookService>();
         services.AddScoped<ILessonService, LessonService>();
         services.AddScoped<ICourseDetailService, CourseDetailService>();
         services.AddScoped<IAssignmentService, AssignmentService>();

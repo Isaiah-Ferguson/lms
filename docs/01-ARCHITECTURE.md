@@ -16,7 +16,7 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     CLIENT LAYER                            │
-│  Next.js 14 App Router (SSR/CSR) + TailwindCSS + shadcn/ui  │
+│  Next.js 14 App Router (SSR/CSR) + TailwindCSS + custom UI  │
 └─────────────────────────────────────────────────────────────┘
                             ↓ HTTPS/REST
 ┌─────────────────────────────────────────────────────────────┐

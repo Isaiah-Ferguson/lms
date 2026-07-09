@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CodeStackLMS.Application.Submissions.DTOs;
 
 public record GitHubSubmitDto(
-    string RepoUrl,
-    string? Branch = null,
-    string? CommitHash = null,
-    string? FigmaUrl = null,
-    string? HostedUrl = null,
-    string? Note = null
+    [property: Required, StringLength(500)] string RepoUrl,
+    [property: StringLength(255)] string? Branch = null,
+    [property: StringLength(64)] string? CommitHash = null,
+    [property: StringLength(1000)] string? FigmaUrl = null,
+    [property: StringLength(1000)] string? HostedUrl = null,
+    [property: StringLength(4000)] string? Note = null
 );

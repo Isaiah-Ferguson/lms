@@ -56,13 +56,37 @@ public sealed class ClaudeClient : IClaudeClient
         if (!response.IsSuccessStatusCode)
             throw new HttpRequestException($"Anthropic API error {(int)response.StatusCode}: {body}");
 
+        // The content array can contain non-text blocks (e.g. tool_use) or be
+        // empty; concatenate the text blocks rather than assuming content[0].text.
         using var doc = JsonDocument.Parse(body);
-        var text = doc.RootElement
-            .GetProperty("content")[0]
-            .GetProperty("text")
-            .GetString()
-            ?? throw new InvalidOperationException("Unexpected Anthropic response shape.");
 
-        return text;
+        if (!doc.RootElement.TryGetProperty("content", out var content)
+            || content.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidOperationException(
+                "Unexpected Anthropic response shape: missing 'content' array.");
+        }
+
+        var sb = new StringBuilder();
+        foreach (var block in content.EnumerateArray())
+        {
+            if (block.TryGetProperty("type", out var type)
+                && type.ValueEquals("text")
+                && block.TryGetProperty("text", out var textProp))
+            {
+                sb.Append(textProp.GetString());
+            }
+        }
+
+        if (sb.Length == 0)
+        {
+            var stopReason = doc.RootElement.TryGetProperty("stop_reason", out var sr)
+                ? sr.GetString()
+                : null;
+            throw new InvalidOperationException(
+                $"Anthropic response contained no text blocks (stop_reason: {stopReason ?? "unknown"}).");
+        }
+
+        return sb.ToString();
     }
 }

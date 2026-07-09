@@ -10,11 +10,11 @@ namespace CodeStackLMS.API.Controllers;
 [Authorize]
 public class GradesController : ControllerBase
 {
-    private readonly IInstructorService _instructorService;
+    private readonly IGradebookService _gradebook;
 
-    public GradesController(IInstructorService instructorService)
+    public GradesController(IGradebookService gradebook)
     {
-        _instructorService = instructorService;
+        _gradebook = gradebook;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ public class GradesController : ControllerBase
         [FromQuery] string? cohortId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetMyGradesAsync(courseId, cohortId, cancellationToken);
+        var result = await _gradebook.GetMyGradesAsync(courseId, cohortId, cancellationToken);
         return Ok(result);
     }
 
@@ -45,7 +45,7 @@ public class GradesController : ControllerBase
         [FromQuery] string? cohortId,
         CancellationToken cancellationToken)
     {
-        var result = await _instructorService.GetAdminGradesAsync(courseId, cohortId, cancellationToken);
+        var result = await _gradebook.GetAdminGradesAsync(courseId, cohortId, cancellationToken);
         return Ok(result);
     }
 }

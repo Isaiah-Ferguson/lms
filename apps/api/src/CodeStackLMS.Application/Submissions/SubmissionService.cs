@@ -4,6 +4,7 @@ using CodeStackLMS.Application.Submissions.DTOs;
 using CodeStackLMS.Domain.Entities;
 using CodeStackLMS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CodeStackLMS.Application.Submissions;
 
@@ -37,17 +38,42 @@ public class SubmissionService : ISubmissionService
     private readonly IBlobStorageService _blob;
     private readonly ICurrentUserService _currentUser;
     private readonly IGitHubVerificationService _github;
+    private readonly ILogger<SubmissionService> _logger;
 
     public SubmissionService(
         IApplicationDbContext db,
         IBlobStorageService blob,
         ICurrentUserService currentUser,
-        IGitHubVerificationService github)
+        IGitHubVerificationService github,
+        ILogger<SubmissionService> logger)
     {
         _db = db;
         _blob = blob;
         _currentUser = currentUser;
         _github = github;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Deletes blobs after the owning DB transaction has committed. A failure
+    /// here only orphans storage (safe, logged) — never the other way round.
+    /// </summary>
+    private async Task DeleteBlobsBestEffortAsync(
+        IReadOnlyCollection<string> blobPaths,
+        CancellationToken cancellationToken)
+    {
+        foreach (var path in blobPaths)
+        {
+            try
+            {
+                await _blob.DeleteBlobAsync(path, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to delete blob {BlobPath} after commit; it is orphaned in storage", path);
+            }
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -117,9 +143,14 @@ public class SubmissionService : ISubmissionService
 
         // 7. All SAS URLs generated successfully — now persist the submission.
         //    Use the execution strategy to handle transactions with retry logic.
+        //    Old blobs are only collected here and deleted AFTER commit, so a
+        //    rolled-back transaction can't destroy the still-current attempt.
+        var blobPathsToDelete = new List<string>();
         var strategy = _db.Database.CreateExecutionStrategy();
         var submission = await strategy.ExecuteAsync(async () =>
         {
+            blobPathsToDelete.Clear(); // retry-safe
+
             await using var tx = await _db.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
@@ -137,12 +168,12 @@ public class SubmissionService : ISubmissionService
                 if (submissionToUpdate == null)
                     throw new NotFoundException(nameof(Submission), existingSubmission.Id);
 
-                // Delete old artifacts and their blobs
+                // Remove old artifact rows; their blobs are deleted post-commit
                 if (submissionToUpdate.Artifacts.Count > 0)
                 {
                     foreach (var artifact in submissionToUpdate.Artifacts.ToList())
                     {
-                        await _blob.DeleteBlobAsync(artifact.BlobPath, cancellationToken);
+                        blobPathsToDelete.Add(artifact.BlobPath);
                         _db.SubmissionArtifacts.Remove(artifact);
                     }
                 }
@@ -198,6 +229,8 @@ public class SubmissionService : ISubmissionService
 
             return submissionToUse;
         });
+
+        await DeleteBlobsBestEffortAsync(blobPathsToDelete, cancellationToken);
 
         return new UploadUrlResponseDto(submission.Id, slots, expiresAt);
     }
@@ -318,9 +351,14 @@ public class SubmissionService : ISubmissionService
             .OrderByDescending(s => s.AttemptNumber)
             .FirstOrDefaultAsync(cancellationToken);
 
+        // Old blobs are collected inside the transaction and deleted only after
+        // commit, so a rollback can't destroy the still-current attempt.
+        var blobPathsToDelete = new List<string>();
         var strategy = _db.Database.CreateExecutionStrategy();
         var submission = await strategy.ExecuteAsync(async () =>
         {
+            blobPathsToDelete.Clear(); // retry-safe
+
             await using var tx = await _db.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
@@ -335,10 +373,11 @@ public class SubmissionService : ISubmissionService
                     .FirstOrDefaultAsync(s => s.Id == existingSubmission.Id, cancellationToken)
                     ?? throw new NotFoundException(nameof(Submission), existingSubmission.Id);
 
-                // Clear any prior artifacts/blobs (e.g. a previous ZIP attempt).
+                // Clear any prior artifacts (e.g. a previous ZIP attempt);
+                // their blobs are deleted post-commit.
                 foreach (var artifact in submissionToUpdate.Artifacts.ToList())
                 {
-                    await _blob.DeleteBlobAsync(artifact.BlobPath, cancellationToken);
+                    blobPathsToDelete.Add(artifact.BlobPath);
                     _db.SubmissionArtifacts.Remove(artifact);
                 }
 
@@ -400,6 +439,8 @@ public class SubmissionService : ISubmissionService
             return submissionToUse;
         });
 
+        await DeleteBlobsBestEffortAsync(blobPathsToDelete, cancellationToken);
+
         return ToDto(submission);
     }
 
@@ -443,18 +484,17 @@ public class SubmissionService : ISubmissionService
         if (submission.Artifacts.Count == 0)
             return new ArtifactListDto(submissionId, Array.Empty<ArtifactDownloadDto>(), DateTimeOffset.UtcNow);
 
-        // 4. Generate a read-only SAS per artifact — 10-minute expiry
+        // 4. Generate a read-only SAS per artifact — 10-minute expiry, concurrently
         var expiry = TimeSpan.FromMinutes(10);
         var expiresAt = DateTimeOffset.UtcNow.Add(expiry);
-        var artifacts = new List<ArtifactDownloadDto>(submission.Artifacts.Count);
 
-        foreach (var artifact in submission.Artifacts)
+        var artifacts = await Task.WhenAll(submission.Artifacts.Select(async artifact =>
         {
             var downloadUrl = await _blob.GenerateReadSasAsync(
                 artifact.BlobPath, expiry, cancellationToken);
 
-            artifacts.Add(ToDto(artifact, downloadUrl, expiresAt));
-        }
+            return ToDto(artifact, downloadUrl, expiresAt);
+        }));
 
         return new ArtifactListDto(submissionId, artifacts, expiresAt);
     }

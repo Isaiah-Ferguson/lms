@@ -6,7 +6,7 @@ import { Grid2X2, Calendar, Hash, Users, GraduationCap, BarChart2, X, ClipboardL
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { NavItem } from "@/lib/dashboard-data";
 import { clsx } from "clsx";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface SidebarProps {
   nav: NavItem[];
@@ -35,12 +35,20 @@ export function Sidebar({ nav, currentLevel, isOpen = true, onClose }: SidebarPr
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
 
-  // Close sidebar on route change (mobile only)
+  // Close sidebar on route change (mobile only). The latest onClose/isOpen are
+  // kept in a ref so the close effect can depend on pathname alone — depending
+  // on isOpen directly would re-run the effect (and close the sidebar) the
+  // moment it is opened.
+  const closeStateRef = useRef({ onClose, isOpen });
   useEffect(() => {
-    if (onClose && isOpen) {
-      onClose();
+    closeStateRef.current = { onClose, isOpen };
+  }, [onClose, isOpen]);
+
+  useEffect(() => {
+    const { onClose: close, isOpen: open } = closeStateRef.current;
+    if (close && open) {
+      close();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return (

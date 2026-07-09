@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   type AcademicYear,
@@ -39,7 +39,9 @@ export default function HomePage() {
 
   const [years, setYears] = useState<AcademicYear[]>([]);
   const [levels, setLevels] = useState<CourseLevel[]>([]);
-  const [selectedYearId, setSelectedYearId] = useState("");
+  // The year the user explicitly picked (YearSelector / Manage Years modal).
+  // The effective selection is derived from this + the URL param + loaded data.
+  const [userSelectedYearId, setUserSelectedYearId] = useState<string | null>(null);
   const [enrollmentsByYear, setEnrollmentsByYear] = useState<EnrollmentsByYear>({});
   const [currentUser, setCurrentUser] = useState<DashboardCurrentUser | null>(null);
   const [permissions, setPermissions] = useState<DashboardPermissions>({
@@ -56,7 +58,7 @@ export default function HomePage() {
   // switching via the URL param) can't overwrite a newer one.
   const dashboardReqRef = useRef(0);
 
-  async function loadDashboard(opts?: { preserveSelectedYear?: string }) {
+  const loadDashboard = useCallback(async () => {
     const token = getToken();
     if (!token) {
       setError("Your session expired. Please sign in again.");
@@ -74,50 +76,19 @@ export default function HomePage() {
       setEnrollmentsByYear(data.enrollmentsByYear);
       setCurrentUser(data.user);
       setPermissions(data.permissions);
-
-      const preferred = opts?.preserveSelectedYear
-        ?? (queryYearId
-          ? data.years.find((year) => year.id === queryYearId || year.label === queryYearId)?.id
-          : undefined);
-
-      const activeYearId = data.years.find((year) => year.isActive)?.id ?? data.years[0]?.id ?? "";
-      setSelectedYearId(preferred ?? activeYearId);
     } catch (loadError) {
       if (reqId !== dashboardReqRef.current) return;
       setError(loadError instanceof ApiError ? loadError.detail : "Unable to load dashboard data.");
     } finally {
       if (reqId === dashboardReqRef.current) setLoading(false);
     }
-  }
+  }, []);
 
+  // Refetch when the URL year param changes; dashboardReqRef guards against a
+  // stale response overwriting a newer one during rapid year switching.
   useEffect(() => {
     void loadDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryYearId]);
-
-  useEffect(() => {
-    const activeYear = years.find((year) => year.isActive) ?? years[0];
-    if (!activeYear) {
-      return;
-    }
-
-    const visibleYears =
-      permissions.canViewAllLevels
-        ? years
-        : years.filter((year) => (enrollmentsByYear[year.id] ?? []).length > 0);
-
-    // For students (canViewEnrolledOnly), automatically select their enrolled year
-    // Ignore query params for students - they should only see their cohort
-    const resolvedSelected = permissions.canViewAllLevels
-      ? (queryYearId && visibleYears.some((year) => year.id === queryYearId)
-          ? queryYearId
-          : visibleYears.find((year) => year.id === selectedYearId)?.id ?? activeYear.id)
-      : (visibleYears[0]?.id ?? activeYear.id); // Students: use first enrolled year
-
-    if (resolvedSelected !== selectedYearId) {
-      setSelectedYearId(resolvedSelected);
-    }
-  }, [years, queryYearId, selectedYearId, enrollmentsByYear, permissions.canViewAllLevels]);
+  }, [loadDashboard, queryYearId]);
 
   // Year switching is now handled by Manage Years modal which reloads the page
 
@@ -128,6 +99,33 @@ export default function HomePage() {
         : years.filter((year) => (enrollmentsByYear[year.id] ?? []).length > 0),
     [permissions.canViewAllLevels, years, enrollmentsByYear]
   );
+
+  // The effective selected year is derived during render rather than synced
+  // via effects. Precedence for admins/instructors: URL param (id or label),
+  // then the user's explicit selection, then the active year. Students always
+  // see their first enrolled year — query params are ignored so they only see
+  // their own cohort.
+  const selectedYearId = useMemo(() => {
+    const activeYear = years.find((year) => year.isActive) ?? years[0];
+    if (!activeYear) return "";
+
+    if (!permissions.canViewAllLevels) {
+      return visibleYears[0]?.id ?? activeYear.id;
+    }
+
+    if (queryYearId) {
+      const fromQuery = visibleYears.find(
+        (year) => year.id === queryYearId || year.label === queryYearId
+      );
+      if (fromQuery) return fromQuery.id;
+    }
+
+    if (userSelectedYearId && visibleYears.some((year) => year.id === userSelectedYearId)) {
+      return userSelectedYearId;
+    }
+
+    return activeYear.id;
+  }, [years, visibleYears, queryYearId, userSelectedYearId, permissions.canViewAllLevels]);
 
   // For enrolled students: group levels by year
   const levelsByYear = useMemo(() => {
@@ -198,7 +196,7 @@ export default function HomePage() {
                 years={visibleYears}
                 selectedYearId={selectedYearId}
                 onChange={(yearId) => {
-                  setSelectedYearId(yearId);
+                  setUserSelectedYearId(yearId);
                   router.push(`${pathname}?year=${yearId}`);
                 }}
               />
@@ -262,7 +260,7 @@ export default function HomePage() {
           selectedYearId={selectedYearId}
           onClose={() => setIsManageYearsOpen(false)}
           onViewYear={(yearId) => {
-            setSelectedYearId(yearId);
+            setUserSelectedYearId(yearId);
             setIsManageYearsOpen(false);
           }}
           onYearActivated={(yearId) => {

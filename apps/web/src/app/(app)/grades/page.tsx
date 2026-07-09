@@ -30,9 +30,11 @@ export default function GradesPage() {
     profileApi.getMyProfile(token)
       .then((profile) => {
         setEnrollments(profile.enrollments);
-        // Set the first enrolled course as active if not already set
-        if (profile.enrollments.length > 0 && !activeCourseId) {
-          setActiveCourseId(profile.enrollments[0].courseId);
+        // Set the first enrolled course as active if not already set. The
+        // functional update reads the current value, so the effect doesn't
+        // need to depend on (and re-run for) activeCourseId.
+        if (profile.enrollments.length > 0) {
+          setActiveCourseId((current) => current ?? profile.enrollments[0].courseId);
         }
       })
       .catch((err) => {

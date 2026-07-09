@@ -88,41 +88,42 @@ Small, high-impact, low-risk fixes.
 
 - [x] **Move local dev secrets to `dotnet user-secrets`** — done 2026-07-09; `appsettings.json`/`appsettings.Development.json` no longer contain secrets. **Rotation of the previously exposed keys (Anthropic key, Azure Storage key, Gmail app password, JWT secret) still needs to be done manually** (H5).
 - [x] Fix the fire-and-forget `LastLoginAt` write — now saved synchronously with logged failure (H1).
+- [x] Home-page derived-state-in-effect refactored to `useMemo`-derived selection (M16).
 - [x] Fix Hangfire dashboard middleware ordering + auth — mapped after auth middleware; accepts Admin JWT or `Hangfire:Dashboard` Basic-auth credentials; `HANGFIRE.md` reconciled (H4).
 - [x] Push filtering/pagination into SQL for the submission queue and gradebook queries (H2, H3).
-- [ ] Guard the Claude response parsing (M3).
-- [ ] Restore or de-reference `docs/05-ATTENDANCE-ROADMAP.md` (M21); fix the shadcn/ui doc claim (L13); ~~normalize the template API-key placeholder (L14)~~ done.
-- [ ] Add `"typecheck": "tsc --noEmit"` to `apps/web/package.json` (M17).
+- [x] Guard the Claude response parsing (M3) — content blocks are now validated and text blocks concatenated; non-text/empty responses throw a descriptive error.
+- [x] Restore or de-reference `docs/05-ATTENDANCE-ROADMAP.md` (M21); fixed the shadcn/ui doc claim (L13); normalized the template API-key placeholder (L14).
+- [x] Add `"typecheck": "tsc --noEmit"` to `apps/web/package.json` (M17).
 
 ### Phase 2 — Safety net: CI + first tests (3–5 days)
 
 Everything after this gets cheaper once this exists.
 
-- [ ] Add GitHub Actions: `dotnet build` + `dotnet test` for the API; `npm run lint && npm run typecheck && npm run test && npm run build` for web, on every PR (M18).
+- [x] GitHub Actions CI at `.github/workflows/ci.yml` (M18) — web job: lint + typecheck + test + build; api job: restore + build + test, on push to main and every PR. Also added `apps/web/.eslintrc.json` (next/core-web-vitals) — `next lint` had never actually been configured — and fixed the lint errors it surfaced.
 - [x] Created `apps/api/tests/CodeStackLMS.Application.Tests` (xUnit + SQLite in-memory against the real `ApplicationDbContext`) — 22 tests covering `AuthService` (login/change/forgot-password, enumeration safety, LastLoginAt) and `InstructorService` queue/gradebook SQL (latest-attempt, filters, pagination, role check) (H8). Next targets: `SubmissionService` state transitions and cohort resolution.
 - [x] Added Vitest to the frontend (`npm run test`, `npm run typecheck`) — 21 tests covering the `returnUrl` open-redirect validator (extracted to `lib/safe-return-url.ts`), JWT decode/expiry/role helpers, and `apiFetch` error mapping (H8, M17).
-- [ ] Add a root `package.json` with workspace scripts (or Turborepo) so `lint`/`build`/`test` run from the root (M19), plus Husky + lint-staged (M20).
-- [ ] Align .NET packages to `10.0.x` to match the `net10.0` target; verify build in CI (M10).
+- [x] Root `package.json` with cross-app scripts (`npm run test` / `build` / `lint` / `typecheck` from the repo root) (M19), plus a Husky pre-commit hook that typechecks apps/web and builds apps/api only when their files are staged (M20).
+- [x] Aligned all Microsoft/EF packages to `10.0.x` for the `net10.0` target (M10); bumped `Azure.Identity` to 1.14.2 and pinned patched `Microsoft.OpenApi` 2.10.0 and `SQLitePCLRaw` to clear NU1903 vulnerability warnings.
 
 ### Phase 3 — Auth hardening (1 week)
 
 - [x] **httpOnly session cookie via BFF pattern** (H6) — done 2026-07-09. Because web (Vercel) and API (Azure) are cross-site, the cookie is set first-party by Next.js route handlers: `/api/auth/login` proxies login and stores the JWT httpOnly; `/api/proxy/[...path]` attaches it to backend calls server-side; `/api/auth/logout` clears it. Client JS never holds the JWT (a readable `cslms_role` cookie exists for UI display only). Blob uploads/video still go direct via SAS URLs.
 - [x] **Server-side route guards** (H7) — `src/middleware.ts` redirects unauthenticated/expired sessions to login (clearing stale cookies) and role-gates `/admin` (Admin) and `/instructor` (Admin/Instructor).
 - [x] **Backend authz audit** (H7) — every controller has class-level `[Authorize]` (or stricter); `[AllowAnonymous]` only on login/forgot-password; `{userId}`-parameterized endpoints (transcript, profile) verify self-or-staff in the service layer. Follow-up: an integration test asserting anonymous/wrong-role rejection.
-- [ ] Implement refresh tokens with a short-lived access token (15–30 min) and revocation (M7). Note: the BFF route handlers are now the natural place for silent refresh.
-- [ ] Add per-account throttling to auth endpoints (L6) — now more relevant since proxied logins share Vercel egress IPs in the per-IP bucket; reject placeholder JWT secrets at startup (M9).
-- [ ] Add DataAnnotations/FluentValidation to request DTOs so bad input returns 400, not 500 (M6).
+- [x] **Refresh tokens + 30-minute access tokens** (M7) — done 2026-07-09. New `RefreshToken` entity (SHA-256 hash at rest, 14-day expiry, `AddRefreshTokens` migration applies on next API start), `POST /api/auth/refresh` and `POST /api/auth/logout` endpoints (rate-limited), revocation of all sessions on password change/reset. The BFF does silent refresh in two places: the middleware refreshes on page navigations (rewriting the request cookie so server components see the fresh token), and `/api/proxy` retries once after a 401. Refresh tokens live in an httpOnly `cslms_refresh` cookie; client JS never sees any token. Non-rotating by design (avoids concurrent-refresh races) — rotation with reuse detection is a possible future hardening.
+- [ ] Add per-account throttling to auth endpoints (L6) — now more relevant since proxied logins share Vercel egress IPs in the per-IP bucket. ~~Reject placeholder JWT secrets at startup (M9)~~ done: known placeholder values are rejected outside Development.
+- [x] DataAnnotations on request DTOs (M6) — auth, grading, return, comments, submissions (upload/complete/GitHub), assignments, and announcements now validate email format, lengths, ranges (score 0–100, file size ≤100 MB), returning 400s via `[ApiController]` automatic validation.
 - [ ] Lesson-artifact uploads (`POST /api/lessons/{id}/artifacts`) now pass through the Vercel proxy, which caps request bodies (~4.5 MB). Move them to SAS-based direct upload like submissions/avatars.
 
 ### Phase 4 — Structural refactors (1–2 weeks)
 
 Do these *after* the test safety net exists.
 
-- [ ] Split `InstructorService` into grading / queue / gradebook services (M1); extract the prompt builder from `WeeklyProgressReportJob` (M2).
-- [ ] Split `api-client.ts` into per-domain modules (M11).
-- [ ] Introduce a shared `useApiQuery` hook (or React Query) and migrate the ~16 hand-rolled fetch effects; standardize on `useAuthedToken` (M12, M15).
-- [ ] Consolidate duplicated `Modal` / `VideoPlayer` / `FiltersBar` into `components/ui/`; add shared `LoadingState`/`ErrorState` (M13, L9).
-- [ ] Parallelize SAS URL generation (M4); move blob deletion after transaction commit (M5); exact-match blob ownership check (L4).
+- [x] Split `InstructorService` (647 lines) into `GradingService`, `SubmissionQueueService`, `GradebookService` with focused interfaces (M1); extracted `ProgressReportPromptBuilder` (pure, unit-testable) from `WeeklyProgressReportJob` (605 → 317 lines) (M2).
+- [x] Split `api-client.ts` into 16 domain modules under `src/lib/api/`; `api-client.ts` is now pure re-exports so no import site changed (M11).
+- [x] Added `useApiQuery` hook (loading/error/stale-response guard/login redirect) and migrated three representative pages; removed all four `eslint-disable react-hooks/exhaustive-deps` suppressions by stabilizing callbacks (M12, M15). Remaining hand-rolled fetch effects can migrate incrementally.
+- [x] Consolidated the duplicated `Modal` into `components/ui/Modal.tsx` (M13). The two `VideoPlayer`s and `FiltersBar`s were inspected and intentionally left separate — they are different components (token-based streaming player vs. resolved-URL card; role/status selects vs. quick-filter chips). Shared `LoadingState`/`ErrorState` (L9) still open.
+- [x] Parallelized SAS URL generation with `Task.WhenAll` in submission detail, artifact list, and lesson list (M4); blob deletions now happen only after the DB transaction commits, best-effort with logging (M5). Exact-match blob ownership check (L4) still open.
 - [ ] Consolidate role checks into authorization policies (L1); move doc generators to Infrastructure (L2); remove the `PendingModelChangesWarning` suppression (L3); rely on `UpdateAuditableEntities` for timestamps (L5); move Hangfire scheduling out of `Program.cs` (L7).
 
 ### Phase 5 — Polish & modernization (ongoing)

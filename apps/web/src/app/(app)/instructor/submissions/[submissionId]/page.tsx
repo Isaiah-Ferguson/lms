@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, User, BookOpen, Github, FileText,
@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 
 import { instructorApi, ApiError } from "@/lib/api-client";
-import type { SubmissionDetail, ExistingGrade } from "@/lib/api-client";
+import type { ExistingGrade } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
-import { useAuthedToken } from "@/lib/use-authed-token";
+import { useApiQuery } from "@/lib/use-api-query";
 import { ensureProtocol, formatBytes, formatStatus } from "@/lib/utils";
 import { formatDateTime, parseApiDate } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
@@ -21,12 +21,16 @@ import { SubmissionStatusBadge } from "@/components/submissions/SubmissionStatus
 export default function InstructorGradingPage() {
   const params = useParams();
   const router = useRouter();
-  const token = useAuthedToken();
   const submissionId = params.submissionId as string;
 
-  const [detail, setDetail] = useState<SubmissionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const {
+    data: detail,
+    loading,
+    error: loadError,
+  } = useApiQuery(
+    (token) => instructorApi.getSubmissionDetail(submissionId, token),
+    [submissionId]
+  );
 
   // Grading state — kept as a string so the field can start empty and reject
   // leading zeros like "075"; parsed to a number only at save time.
@@ -42,30 +46,14 @@ export default function InstructorGradingPage() {
   const [returning, setReturning] = useState(false);
   const [returnError, setReturnError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    if (!token) return;
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const data = await instructorApi.getSubmissionDetail(submissionId, token);
-      setDetail(data);
-
-      if (data.existingGrade) {
-        setSavedGrade(data.existingGrade);
-        setTotalScore(String(data.existingGrade.totalScore));
-        setOverallComment(data.existingGrade.overallComment);
-      }
-    } catch (err) {
-      setLoadError(
-        err instanceof ApiError ? err.detail : "Failed to load submission."
-      );
-    } finally {
-      setLoading(false);
+  // Seed the grading form from an existing grade once the submission loads.
+  useEffect(() => {
+    if (detail?.existingGrade) {
+      setSavedGrade(detail.existingGrade);
+      setTotalScore(String(detail.existingGrade.totalScore));
+      setOverallComment(detail.existingGrade.overallComment);
     }
-  }, [submissionId, token]);
-
-  useEffect(() => { load(); }, [load]);
+  }, [detail]);
 
   async function handleSaveGrade() {
     const token = getToken();

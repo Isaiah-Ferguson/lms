@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CodeStackLMS.Application.Comments.DTOs;
 
 public record CreateCommentDto(
-    string Message
+    [property: Required, StringLength(4000, MinimumLength = 1)] string Message
 );
 
 public record CommentDto(

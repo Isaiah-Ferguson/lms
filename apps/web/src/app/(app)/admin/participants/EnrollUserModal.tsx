@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { Search, Check } from "lucide-react";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { clsx } from "clsx";
 import { groupCoursesByYear, type ParticipantUser, type CourseOption } from "@/lib/admin-participants-data";

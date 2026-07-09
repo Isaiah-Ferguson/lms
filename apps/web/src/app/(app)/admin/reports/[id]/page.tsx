@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Loader2, AlertCircle, FileText, Download } from "lucide-react";
-import { reportsApi, ApiError, type ProgressReportDetail } from "@/lib/api-client";
+import { reportsApi, ApiError } from "@/lib/api-client";
+import { useApiQuery } from "@/lib/use-api-query";
 import { useAuthedToken } from "@/lib/use-authed-token";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate } from "@/lib/date-utils";
@@ -53,20 +54,18 @@ export default function ReportDetailPage() {
   const router = useRouter();
   const token = useAuthedToken();
 
-  const [report, setReport] = useState<ProgressReportDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  // Set when the user publishes so the loaded report reflects the new status
+  // without a refetch.
+  const [published, setPublished] = useState(false);
 
-  useEffect(() => {
-    if (!token || !id) return;
-    reportsApi.getReport(id, token)
-      .then(setReport)
-      .catch((e) => setError(e instanceof ApiError ? e.detail : "Failed to load report."))
-      .finally(() => setLoading(false));
-  }, [token, id]);
+  const { data, loading, error } = useApiQuery(
+    (t) => reportsApi.getReport(id, t),
+    [id]
+  );
+  const report = data && published ? { ...data, status: "Published" as const } : data;
 
   const handleDownload = async () => {
     if (!token || !id || downloading) return;
@@ -86,7 +85,7 @@ export default function ReportDetailPage() {
     setPublishMsg(null);
     try {
       await reportsApi.publishReport(id, token);
-      setReport((r) => r ? { ...r, status: "Published" } : r);
+      setPublished(true);
       setPublishMsg("Report published successfully.");
     } catch (e) {
       setPublishMsg(e instanceof ApiError ? e.detail : "Failed to publish.");
