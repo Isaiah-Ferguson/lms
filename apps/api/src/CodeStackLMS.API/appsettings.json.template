@@ -42,5 +42,11 @@
     "DefaultModel": "claude-haiku-4-5",
     "MaxTokens": 1024
   },
+  "Hangfire": {
+    "Dashboard": {
+      "Username": "YOUR_DASHBOARD_USERNAME",
+      "Password": "YOUR_STRONG_DASHBOARD_PASSWORD"
+    }
+  },
   "AllowedHosts": "*"
 }

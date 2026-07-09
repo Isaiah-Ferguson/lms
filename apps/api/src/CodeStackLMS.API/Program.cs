@@ -177,25 +177,20 @@ else
     app.UseHsts();
 }
 
-
-// ── Hangfire Dashboard ────────────────────────────────────────────────────────
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
-{
-    Authorization = new[] { new HangfireAuthorizationFilter() },
-    DashboardTitle = "CodeStack LMS - Background Jobs"
-});
-
 app.UseHttpsRedirection();
 
-// Security headers for API/controller responses (placed after the Hangfire
-// dashboard so its HTML/JS isn't broken by the strict CSP below).
+// Security headers for API/controller responses. The Hangfire dashboard serves
+// its own HTML/JS, which the strict CSP below would break, so it is exempted.
 app.Use(async (context, next) =>
 {
     var headers = context.Response.Headers;
     headers["X-Content-Type-Options"] = "nosniff";
     headers["X-Frame-Options"] = "DENY";
     headers["Referrer-Policy"] = "no-referrer";
-    headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+    if (!context.Request.Path.StartsWithSegments("/hangfire"))
+    {
+        headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+    }
     await next();
 });
 
@@ -204,6 +199,17 @@ app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ── Hangfire Dashboard ────────────────────────────────────────────────────────
+// Mapped after UseAuthentication/UseAuthorization so HttpContext.User is populated
+// when the authorization filter runs (an Admin JWT is honored; browsers without a
+// bearer token fall back to the Basic-auth credentials in Hangfire:Dashboard).
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() },
+    DashboardTitle = "CodeStack LMS - Background Jobs"
+});
+
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 

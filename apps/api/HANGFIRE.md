@@ -27,7 +27,10 @@ Hangfire is now integrated into the CodeStack LMS API to handle background job p
 ### ✅ Hangfire Dashboard
 - **URL**: `http://localhost:5000/hangfire`
 - **Development**: Open to all (no auth required)
-- **Production**: Requires Admin role authentication
+- **Production**: Requires either an Admin JWT (for API/tooling access) or the
+  HTTP Basic credentials configured under `Hangfire:Dashboard:Username` /
+  `Hangfire:Dashboard:Password` (browsers prompt for these). If no Basic
+  credentials are configured, browser access is denied.
 - **Features**:
   - Monitor job execution
   - View succeeded/failed jobs
@@ -167,7 +170,8 @@ RecurringJob.AddOrUpdate<DailyReminderJob>(
 
 ### Dashboard Not Accessible
 - Development: Should work without auth
-- Production: Ensure you're logged in as Admin
+- Production: Enter the `Hangfire:Dashboard` Basic-auth credentials when the
+  browser prompts, or ensure they are set in App Service configuration
 
 ### Jobs Failing
 - View exception in dashboard
@@ -195,7 +199,7 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
 
 ## Security
 
-- Dashboard requires Admin role in production
+- Dashboard requires an Admin JWT or the configured Basic-auth credentials in production
 - Jobs run with application's database permissions
 - No external job queue (all in PostgreSQL)
 - Jobs are transactional and atomic

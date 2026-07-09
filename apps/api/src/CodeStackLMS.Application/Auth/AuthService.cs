@@ -55,16 +55,17 @@ public class AuthService : IAuthService
 
         var token = GenerateJwt(user);
 
-        // Update last login timestamp asynchronously — not needed in auth response path
-        _ = Task.Run(async () =>
+        // A failed timestamp update must not block a successful login.
+        try
         {
-            try
-            {
-                user.LastLoginAt = DateTime.UtcNow;
-                await _db.SaveChangesAsync(CancellationToken.None);
-            }
-            catch { }
-        });
+            user.LastLoginAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update LastLoginAt for user {UserId}", user.Id);
+        }
+
         return new AuthTokenDto(token, TokenExpirySeconds, user.MustChangePassword);
     }
 

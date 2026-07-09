@@ -26,6 +26,6 @@
     "ConnectionString": "InstrumentationKey="
   },
     "Anthropic": {
-    "ApiKey": "sk-ant-api03-your-key-here"
+    "ApiKey": "YOUR_ANTHROPIC_API_KEY"
   }
 }

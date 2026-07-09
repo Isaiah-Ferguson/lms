@@ -312,91 +312,74 @@ public class InstructorService : IInstructorService
         pageSize = Math.Clamp(pageSize, 1, 200);
         page = Math.Max(1, page);
 
-        // Get course IDs for the specified year (cohort) if yearId is provided
-        List<Guid>? yearCourseIds = null;
-        if (!string.IsNullOrWhiteSpace(yearId) && Guid.TryParse(yearId, out var parsedYearId))
-        {
-            yearCourseIds = await _db.CohortCourses
-                .AsNoTracking()
-                .Where(cc => cc.CohortId == parsedYearId)
-                .Select(cc => cc.CourseId)
-                .ToListAsync(cancellationToken);
-        }
-
-        // Get all submissions with necessary includes
-        var allSubmissions = await _db.Submissions
-            .AsNoTracking()
-            .Include(s => s.Student)
-            .Include(s => s.Assignment)
-            .ThenInclude(a => a.Module)
-            .ThenInclude(m => m.Course)
-            .Include(s => s.Grade)
-            .ToListAsync(cancellationToken);
+        var query = _db.Submissions.AsNoTracking();
 
         // Filter by year (cohort) if provided - only include submissions for courses in that cohort
         // If yearId is provided but has no courses, show empty results (not all submissions)
-        if (yearCourseIds != null)
+        if (!string.IsNullOrWhiteSpace(yearId) && Guid.TryParse(yearId, out var parsedYearId))
         {
-            allSubmissions = allSubmissions
-                .Where(s => yearCourseIds.Contains(s.Assignment.Module.CourseId))
-                .ToList();
+            var yearCourseIds = _db.CohortCourses
+                .Where(cc => cc.CohortId == parsedYearId)
+                .Select(cc => cc.CourseId);
+
+            query = query.Where(s => yearCourseIds.Contains(s.Assignment.Module.CourseId));
         }
 
         // Filter by course (GUID or slug)
         if (!string.IsNullOrWhiteSpace(courseId))
         {
             if (Guid.TryParse(courseId, out var parsedCourseId))
-                allSubmissions = allSubmissions.Where(s => s.Assignment.Module.CourseId == parsedCourseId).ToList();
+                query = query.Where(s => s.Assignment.Module.CourseId == parsedCourseId);
             else
             {
                 var resolvedTitle = await CourseResolver.ResolveTitleFromSlugAsync(_db, courseId, cancellationToken);
                 if (resolvedTitle != null)
-                    allSubmissions = allSubmissions.Where(s => s.Assignment.Module.Course.Title == resolvedTitle).ToList();
+                    query = query.Where(s => s.Assignment.Module.Course.Title == resolvedTitle);
             }
         }
 
-        // Group by student + assignment and take only the latest submission (highest attempt number)
-        var latestSubmissions = allSubmissions
-            .GroupBy(s => new { s.StudentId, s.AssignmentId })
-            .Select(g => g.OrderByDescending(s => s.AttemptNumber).First())
-            .ToList();
+        // Only the latest submission (highest attempt number) per student + assignment.
+        // The subquery is against the full Submissions set on purpose: "latest" must be
+        // judged across all attempts, not just those matching the status filters below.
+        query = query.Where(s => !_db.Submissions.Any(other =>
+            other.StudentId == s.StudentId &&
+            other.AssignmentId == s.AssignmentId &&
+            other.AttemptNumber > s.AttemptNumber));
 
         // Filter out intermediate statuses - only show submissions that are actionable for instructors
-        latestSubmissions = latestSubmissions
-            .Where(s => s.Status == SubmissionStatus.ReadyToGrade || 
-                       s.Status == SubmissionStatus.Graded || 
-                       s.Status == SubmissionStatus.Returned)
-            .ToList();
+        query = query.Where(s =>
+            s.Status == SubmissionStatus.ReadyToGrade ||
+            s.Status == SubmissionStatus.Graded ||
+            s.Status == SubmissionStatus.Returned);
 
         // Filter by status after getting latest submissions
         if (!string.IsNullOrWhiteSpace(status) &&
             Enum.TryParse<SubmissionStatus>(status, ignoreCase: true, out var parsedStatus))
         {
-            latestSubmissions = latestSubmissions.Where(s => s.Status == parsedStatus).ToList();
+            query = query.Where(s => s.Status == parsedStatus);
         }
 
-        var totalCount = latestSubmissions.Count;
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        // Order by created date and paginate
-        var submissions = latestSubmissions
+        // Order by created date, paginate, and project in SQL
+        var items = await query
             .OrderByDescending(s => s.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
-
-        var items = submissions.Select(s => new SubmissionQueueItemDto(
-            s.Id,
-            s.Student.Name,
-            s.Student.Email,
-            s.Assignment.Title,
-            s.Assignment.Module.Course.Title,
-            s.Type,
-            s.Status,
-            s.CreatedAt,
-            s.Grade?.GradedAt,
-            s.Grade?.TotalScore,
-            100,
-            s.Assignment.DueDate)).ToList();
+            .Select(s => new SubmissionQueueItemDto(
+                s.Id,
+                s.Student.Name,
+                s.Student.Email,
+                s.Assignment.Title,
+                s.Assignment.Module.Course.Title,
+                s.Type,
+                s.Status,
+                s.CreatedAt,
+                s.Grade != null ? (DateTime?)s.Grade.GradedAt : null,
+                s.Grade != null ? (decimal?)s.Grade.TotalScore : null,
+                DefaultMaxScore,
+                s.Assignment.DueDate))
+            .ToListAsync(cancellationToken);
 
         return new SubmissionQueuePageDto(items, totalCount, page, pageSize);
     }
@@ -434,18 +417,15 @@ public class InstructorService : IInstructorService
             .ThenBy(a => a.DueDate)
             .ToListAsync(cancellationToken);
 
-        // Get latest submission per assignment for this student
+        // Get latest submission per assignment for this student (resolved in SQL)
         var assignmentIds = assignments.Select(a => a.Id).ToList();
-        var submissions = await _db.Submissions
-            .AsNoTracking()
-            .Include(s => s.Grade)
-                .ThenInclude(g => g!.Instructor)
-            .Where(s => s.StudentId == userId && assignmentIds.Contains(s.AssignmentId))
+        var submissions = await QueryLatestGradeRowSources(
+                s => s.StudentId == userId && assignmentIds.Contains(s.AssignmentId))
             .ToListAsync(cancellationToken);
 
         var latestByAssignment = submissions
             .GroupBy(s => s.AssignmentId)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.AttemptNumber).First());
+            .ToDictionary(g => g.Key, g => g.First());
 
         var rows = assignments.Select(a =>
         {
@@ -506,17 +486,15 @@ public class InstructorService : IInstructorService
             .OrderBy(u => u.Name)
             .ToListAsync(cancellationToken);
 
-        // All submissions for this course
-        var allSubmissions = await _db.Submissions
-            .AsNoTracking()
-            .Include(s => s.Grade)
-                .ThenInclude(g => g!.Instructor)
-            .Where(s => assignmentIds.Contains(s.AssignmentId))
+        // Latest submission per student + assignment for this course (resolved in SQL,
+        // so older attempts and unused columns never leave the database)
+        var latestSubmissions = await QueryLatestGradeRowSources(
+                s => assignmentIds.Contains(s.AssignmentId))
             .ToListAsync(cancellationToken);
 
-        var subsByStudentAndAssignment = allSubmissions
+        var subsByStudentAndAssignment = latestSubmissions
             .GroupBy(s => (s.StudentId, s.AssignmentId))
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.AttemptNumber).First());
+            .ToDictionary(g => g.Key, g => g.First());
 
         var studentDtos = enrolledStudents.Select(student =>
         {
@@ -626,22 +604,58 @@ public class InstructorService : IInstructorService
             grade.GradedAt,
             grade.InstructorId);
 
-    private static StudentGradeRowDto ToGradeRow(Assignment a, Submission? sub)
+    private static StudentGradeRowDto ToGradeRow(Assignment a, GradeRowSource? sub)
     {
         var status = sub == null
             ? "Missing"
             : sub.Status == SubmissionStatus.Graded ? "Graded" : "Pending";
 
         return new StudentGradeRowDto(
-            sub?.Id ?? Guid.Empty,
+            sub?.SubmissionId ?? Guid.Empty,
             a.Id,
             a.Title ?? "Untitled Assignment",
             "Assignment",
             DefaultMaxScore,
-            sub?.Grade?.TotalScore,
+            sub?.TotalScore,
             status,
-            sub?.Grade?.GradedAt,
-            sub?.Grade?.OverallComment,
-            sub?.Grade?.Instructor?.Name);
+            sub?.GradedAt,
+            sub?.OverallComment,
+            sub?.GradedBy);
     }
+
+    /// <summary>
+    /// Minimal projection of a submission's grade data for gradebook rows.
+    /// </summary>
+    private sealed record GradeRowSource(
+        Guid SubmissionId,
+        Guid StudentId,
+        Guid AssignmentId,
+        SubmissionStatus Status,
+        decimal? TotalScore,
+        DateTime? GradedAt,
+        string? OverallComment,
+        string? GradedBy);
+
+    /// <summary>
+    /// Latest submission (highest attempt number) per student + assignment matching
+    /// <paramref name="predicate"/>, projected server-side to <see cref="GradeRowSource"/>.
+    /// </summary>
+    private IQueryable<GradeRowSource> QueryLatestGradeRowSources(
+        System.Linq.Expressions.Expression<Func<Submission, bool>> predicate)
+        => _db.Submissions
+            .AsNoTracking()
+            .Where(predicate)
+            .Where(s => !_db.Submissions.Any(other =>
+                other.StudentId == s.StudentId &&
+                other.AssignmentId == s.AssignmentId &&
+                other.AttemptNumber > s.AttemptNumber))
+            .Select(s => new GradeRowSource(
+                s.Id,
+                s.StudentId,
+                s.AssignmentId,
+                s.Status,
+                s.Grade != null ? (decimal?)s.Grade.TotalScore : null,
+                s.Grade != null ? (DateTime?)s.Grade.GradedAt : null,
+                s.Grade != null ? s.Grade.OverallComment : null,
+                s.Grade != null ? s.Grade.Instructor.Name : null));
 }
