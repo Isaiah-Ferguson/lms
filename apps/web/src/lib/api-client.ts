@@ -1,5 +1,4 @@
 import type {
-  AuthTokens,
   LoginRequest,
   CreateUserRequest,
   ChangePasswordRequest,
@@ -60,6 +59,12 @@ class ApiError extends Error {
   }
 }
 
+// In the browser, requests go through the /api/proxy route handler, which
+// injects the bearer token from the httpOnly session cookie — client JS never
+// holds the JWT. On the server (layouts, server components) the real token is
+// available from cookies() and is attached directly.
+const IS_SERVER = typeof window === "undefined";
+
 async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
@@ -70,9 +75,10 @@ async function apiFetch<T>(
     ...(init.headers as Record<string, string>),
   };
 
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (IS_SERVER && token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const base = IS_SERVER ? API_BASE : "/api/proxy";
+  const res = await fetch(`${base}${path}`, { ...init, headers });
 
   if (!res.ok) {
     let body: { title?: string; detail?: string; errors?: string[] } = {};
@@ -104,12 +110,38 @@ async function apiFetch<T>(
 
 // ─── Auth API ─────────────────────────────────────────────────────────────────
 
+export interface LoginResult {
+  expiresIn: number;
+  mustChangePassword: boolean;
+  role: string | null;
+}
+
 export const authApi = {
-  login(body: LoginRequest): Promise<AuthTokens> {
-    return apiFetch<AuthTokens>("/api/auth/login", {
+  // Login goes to the Next.js route handler (not the proxy) so it can set the
+  // httpOnly session cookie on this origin.
+  async login(body: LoginRequest): Promise<LoginResult> {
+    const res = await fetch("/api/auth/login", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
+    if (!res.ok) {
+      let errBody: { title?: string; detail?: string; errors?: string[] } = {};
+      try {
+        errBody = await res.json();
+      } catch {
+        // ignore parse errors
+      }
+      throw new ApiError(
+        res.status,
+        errBody.title ?? "Error",
+        errBody.detail ?? res.statusText,
+        errBody.errors
+      );
+    }
+
+    return res.json() as Promise<LoginResult>;
   },
 
 
@@ -391,16 +423,13 @@ export const lessonsApi = {
   async uploadArtifact(
     lessonId: string,
     file: File,
-    token: string
+    _token: string
   ): Promise<LessonArtifact> {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${API_BASE}/api/lessons/${lessonId}/artifacts`, {
+    const response = await fetch(`/api/proxy/api/lessons/${lessonId}/artifacts`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: formData,
     });
 
@@ -535,13 +564,12 @@ export const adminParticipantsApi = {
   async exportPreviousNotesDocx(
     userId: string,
     body: { userName: string; previousNotes: PreviousNoteExportItem[] },
-    token: string
+    _token: string
   ): Promise<{ blob: Blob; fileName: string }> {
-    const res = await fetch(`${API_BASE}/api/admin/participants/${userId}/notes/export-docx`, {
+    const res = await fetch(`/api/proxy/api/admin/participants/${userId}/notes/export-docx`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });
@@ -814,10 +842,8 @@ export const reportsApi = {
     return apiFetch<TriggerReportResponse>(`/api/reports/trigger/class${qs}`, { method: "POST" }, token);
   },
 
-  async downloadReport(id: string, token: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/api/reports/${id}/download`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  async downloadReport(id: string, _token: string): Promise<void> {
+    const res = await fetch(`/api/proxy/api/reports/${id}/download`);
     if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download report.");
     const fileName = extractFileName(res.headers.get("Content-Disposition"), `report-${id}.docx`);
     downloadBlob(await res.blob(), fileName);
@@ -827,10 +853,8 @@ export const reportsApi = {
 // ─── Transcript API ───────────────────────────────────────────────────────────
 
 export const transcriptApi = {
-  async download(userId: string, token: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/api/transcript/${userId}/download`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  async download(userId: string, _token: string): Promise<void> {
+    const res = await fetch(`/api/proxy/api/transcript/${userId}/download`);
     if (!res.ok) throw new ApiError(res.status, "Download failed", "Could not download transcript.");
     const fileName = extractFileName(res.headers.get("Content-Disposition"), `transcript-${userId}.pdf`);
     downloadBlob(await res.blob(), fileName);

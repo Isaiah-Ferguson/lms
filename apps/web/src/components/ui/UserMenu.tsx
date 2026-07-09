@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, User, BarChart2, LogOut, ChevronDown, AlertTriangle } from "lucide-react";
 import { clsx } from "clsx";
-import { clearToken } from "@/lib/auth";
+import { logout } from "@/lib/auth";
 import { getInitials } from "@/lib/utils";
 import type { UserInfo } from "@/lib/dashboard-data";
 
@@ -84,8 +84,10 @@ export function UserMenu({ user }: { user: UserInfo }) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [open]);
 
-  function handleSignOut() {
-    clearToken();
+  async function handleSignOut() {
+    // Wait for the server to clear the httpOnly session cookie before
+    // navigating, or the middleware would still see a live session.
+    await logout();
     // Force a hard reload to clear all cached data
     window.location.href = "/login";
   }

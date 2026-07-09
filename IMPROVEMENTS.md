@@ -98,19 +98,21 @@ Small, high-impact, low-risk fixes.
 
 Everything after this gets cheaper once this exists.
 
-- [ ] Add GitHub Actions: `dotnet build` for the API; `npm run lint && npm run typecheck && npm run build` for web, on every PR (M18).
-- [ ] Create `CodeStackLMS.Application.Tests` — first targets: `AuthService` (login/forgot/change-password), `SubmissionService` state transitions and cohort resolution, `InstructorService` grading (H8).
-- [ ] Add Vitest to the frontend — first targets: `api-client.ts` error handling, `auth.ts` JWT decode, the login `returnUrl` open-redirect validator (H8).
+- [ ] Add GitHub Actions: `dotnet build` + `dotnet test` for the API; `npm run lint && npm run typecheck && npm run test && npm run build` for web, on every PR (M18).
+- [x] Created `apps/api/tests/CodeStackLMS.Application.Tests` (xUnit + SQLite in-memory against the real `ApplicationDbContext`) — 22 tests covering `AuthService` (login/change/forgot-password, enumeration safety, LastLoginAt) and `InstructorService` queue/gradebook SQL (latest-attempt, filters, pagination, role check) (H8). Next targets: `SubmissionService` state transitions and cohort resolution.
+- [x] Added Vitest to the frontend (`npm run test`, `npm run typecheck`) — 21 tests covering the `returnUrl` open-redirect validator (extracted to `lib/safe-return-url.ts`), JWT decode/expiry/role helpers, and `apiFetch` error mapping (H8, M17).
 - [ ] Add a root `package.json` with workspace scripts (or Turborepo) so `lint`/`build`/`test` run from the root (M19), plus Husky + lint-staged (M20).
 - [ ] Align .NET packages to `10.0.x` to match the `net10.0` target; verify build in CI (M10).
 
 ### Phase 3 — Auth hardening (1 week)
 
-- [ ] Implement refresh tokens with a short-lived access token (15–30 min) and revocation; the frontend type already anticipates this (M7).
-- [ ] Move the auth token to an **httpOnly cookie set by the backend**; add a Next.js `middleware.ts` for route/role gating instead of client-only checks (H6, H7).
-- [ ] Audit every controller for `[Authorize(Roles=...)]` coverage and add an integration test asserting anonymous/wrong-role access is rejected on privileged endpoints (H7).
-- [ ] Add per-account throttling to auth endpoints (L6); reject placeholder JWT secrets at startup (M9).
+- [x] **httpOnly session cookie via BFF pattern** (H6) — done 2026-07-09. Because web (Vercel) and API (Azure) are cross-site, the cookie is set first-party by Next.js route handlers: `/api/auth/login` proxies login and stores the JWT httpOnly; `/api/proxy/[...path]` attaches it to backend calls server-side; `/api/auth/logout` clears it. Client JS never holds the JWT (a readable `cslms_role` cookie exists for UI display only). Blob uploads/video still go direct via SAS URLs.
+- [x] **Server-side route guards** (H7) — `src/middleware.ts` redirects unauthenticated/expired sessions to login (clearing stale cookies) and role-gates `/admin` (Admin) and `/instructor` (Admin/Instructor).
+- [x] **Backend authz audit** (H7) — every controller has class-level `[Authorize]` (or stricter); `[AllowAnonymous]` only on login/forgot-password; `{userId}`-parameterized endpoints (transcript, profile) verify self-or-staff in the service layer. Follow-up: an integration test asserting anonymous/wrong-role rejection.
+- [ ] Implement refresh tokens with a short-lived access token (15–30 min) and revocation (M7). Note: the BFF route handlers are now the natural place for silent refresh.
+- [ ] Add per-account throttling to auth endpoints (L6) — now more relevant since proxied logins share Vercel egress IPs in the per-IP bucket; reject placeholder JWT secrets at startup (M9).
 - [ ] Add DataAnnotations/FluentValidation to request DTOs so bad input returns 400, not 500 (M6).
+- [ ] Lesson-artifact uploads (`POST /api/lessons/{id}/artifacts`) now pass through the Vercel proxy, which caps request bodies (~4.5 MB). Move them to SAS-based direct upload like submissions/avatars.
 
 ### Phase 4 — Structural refactors (1–2 weeks)
 

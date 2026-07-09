@@ -8,7 +8,7 @@ import Link from "next/link";
 
 import { authApi, ApiError } from "@/lib/api-client";
 import { changePasswordSchema, type ChangePasswordFormData } from "@/lib/schemas";
-import { getToken, clearToken } from "@/lib/auth";
+import { getToken, logout } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Alert } from "@/components/ui/Alert";
@@ -33,7 +33,7 @@ export default function ChangePasswordPage() {
 
     const token = getToken();
     if (!token) {
-      clearToken();
+      await logout();
       router.push("/login");
       return;
     }
