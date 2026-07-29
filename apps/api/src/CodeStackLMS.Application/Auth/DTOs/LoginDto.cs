@@ -19,6 +19,10 @@ public record ChangePasswordDto(
 public record ForgotPasswordDto(
     [Required, EmailAddress, StringLength(320)] string Email);
 
+public record ResetPasswordDto(
+    [Required, StringLength(128)] string Token,
+    [Required, StringLength(128, MinimumLength = 8)] string NewPassword);
+
 public record AuthTokenDto(
     string AccessToken,
     int ExpiresIn,

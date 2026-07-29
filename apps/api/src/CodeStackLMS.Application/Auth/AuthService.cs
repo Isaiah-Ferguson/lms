@@ -21,6 +21,10 @@ public class AuthService : IAuthService
     private const int TokenExpirySeconds = 1800; // 30 minutes
     private const int RefreshTokenExpiryDays = 14;
 
+    // Reset links are emailed, so they must outlive a slow inbox but not a
+    // shared or forwarded message.
+    private const int ResetTokenExpirySeconds = 3600; // 1 hour
+
     private readonly IApplicationDbContext _db;
     private readonly IConfiguration _config;
     private readonly IEmailService _emailService;
@@ -227,28 +231,90 @@ public class AuthService : IAuthService
         if (user == null || !user.IsActive)
             return;
 
-        // Generate temporary password
-        var temporaryPassword = GenerateTemporaryPassword();
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
-        user.MustChangePassword = true;
+        // Issue a single-use reset token. The account is deliberately left
+        // untouched: this endpoint is unauthenticated, so anyone who knows an
+        // address could otherwise invalidate that user's password at will.
+        // The password only changes once the emailed token is redeemed.
+        var rawToken = GenerateResetToken();
 
-        // A password reset invalidates every existing session for this account.
-        await RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+        // Any previously issued token becomes unusable, so the newest link wins.
+        await InvalidateResetTokensAsync(user.Id, cancellationToken);
+
+        _db.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = HashToken(rawToken),
+            ExpiresAt = DateTime.UtcNow.AddSeconds(ResetTokenExpirySeconds),
+            CreatedAt = DateTime.UtcNow
+        });
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        // Send password reset email - don't throw if email fails to prevent enumeration
+        // Don't throw if email fails — a distinct error would leak whether the
+        // address is registered. Nothing destructive has happened at this point,
+        // so the user can simply request another link.
         try
         {
             var subject = "Password Reset - CodeStack LMS";
-            var htmlBody = BuildPasswordResetEmailBody(user.Name, user.Email, temporaryPassword);
+            var htmlBody = BuildPasswordResetEmailBody(user.Name, user.Email, rawToken);
             await _emailService.SendAsync(user.Email, subject, htmlBody, cancellationToken);
         }
         catch (Exception ex)
         {
-            // Log the error but don't throw - password was reset successfully
             _logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
         }
+    }
+
+    public async Task ResetPasswordAsync(
+        ResetPasswordDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var tokenHash = HashToken(dto.Token);
+        var now = DateTime.UtcNow;
+
+        var token = await _db.PasswordResetTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+
+        // One generic error for every failure mode — expired, already used,
+        // forged, or belonging to a deactivated account.
+        if (token is null
+            || token.UsedAt != null
+            || token.ExpiresAt <= now
+            || !token.User.IsActive)
+        {
+            throw new ValidationException("This password reset link is invalid or has expired.");
+        }
+
+        token.UsedAt = now;
+
+        var user = token.User;
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.MustChangePassword = false;
+
+        // A completed reset invalidates every existing session for this account.
+        await RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Password reset completed for UserId={UserId}", user.Id);
+    }
+
+    private async Task InvalidateResetTokensAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var live = await _db.PasswordResetTokens
+            .Where(t => t.UserId == userId && t.UsedAt == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var token in live)
+            token.UsedAt = DateTime.UtcNow;
+    }
+
+    private static string GenerateResetToken()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     private async Task CreateUserInternalAsync(
@@ -334,24 +400,23 @@ public class AuthService : IAuthService
             """;
     }
 
-    private string BuildPasswordResetEmailBody(string name, string email, string temporaryPassword)
+    private string BuildPasswordResetEmailBody(string name, string email, string resetToken)
     {
         var configuredUrls = _config["Frontend:Url"] ?? "http://localhost:3000";
         // Use the last URL (production) if multiple URLs are configured
-        var appUrl = configuredUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).LastOrDefault() 
+        var appUrl = configuredUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).LastOrDefault()
                      ?? "http://localhost:3000";
         var safeName = System.Net.WebUtility.HtmlEncode(name.Trim());
         var safeEmail = System.Net.WebUtility.HtmlEncode(email.Trim());
-        var safePassword = System.Net.WebUtility.HtmlEncode(temporaryPassword);
+        var resetUrl = $"{appUrl}/reset-password?token={Uri.EscapeDataString(resetToken)}";
+        var safeResetUrl = System.Net.WebUtility.HtmlEncode(resetUrl);
 
         return $"""
             <p>Hello {safeName},</p>
-            <p>We received a request to reset your password for your CodeStack LMS account.</p>
-            <p><strong>Email:</strong> {safeEmail}<br/>
-            <strong>Temporary password:</strong> {safePassword}</p>
-            <p>Sign in at <a href="{appUrl}/login">Sign in here</a> using this temporary password.</p>
-            <p><strong>Important:</strong> You will be required to change your password after logging in.</p>
-            <p>If you did not request this password reset, please contact support immediately.</p>
+            <p>We received a request to reset the password for your CodeStack LMS account ({safeEmail}).</p>
+            <p><a href="{safeResetUrl}">Choose a new password</a></p>
+            <p>This link can only be used once and expires in 1 hour.</p>
+            <p>If you did not request this, you can ignore this email — your password has not been changed.</p>
             """;
     }
 

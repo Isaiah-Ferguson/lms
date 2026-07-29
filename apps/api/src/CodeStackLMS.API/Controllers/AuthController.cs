@@ -106,6 +106,20 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         await _authService.ForgotPasswordAsync(dto, cancellationToken);
-        return Ok(new { message = "If an account exists with that email, a temporary password has been sent." });
+        return Ok(new { message = "If an account exists with that email, a password reset link has been sent." });
+    }
+
+    // POST /api/auth/reset-password
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ResetPasswordAsync(dto, cancellationToken);
+        return Ok(new { message = "Password reset successfully. You can now sign in." });
     }
 }

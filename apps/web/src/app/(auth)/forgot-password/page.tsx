@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Forgot password?</h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
-              Enter your email address and we&apos;ll send you a temporary password to get back into your account.
+              Enter your email address and we&apos;ll send you a link to choose a new password.
             </p>
           </div>
 
@@ -86,9 +86,9 @@ export default function ForgotPasswordPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">Password reset email sent!</h3>
+                  <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">Check your inbox</h3>
                   <p className="mt-1 text-sm text-green-700 dark:text-green-400">
-                    Check your inbox for a temporary password. You can use it to log in and then change your password.
+                    If an account exists for that address, we&apos;ve sent a reset link. It can be used once and expires in 1 hour.
                   </p>
                 </div>
               </div>

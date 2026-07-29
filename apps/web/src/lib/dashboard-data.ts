@@ -23,6 +23,14 @@ export interface DashboardData {
 
 // ─── API-based data ───────────────────────────────────────────────────────────
 
+/** Carries the HTTP status so callers can tell "session expired" from "API down". */
+export class DashboardFetchError extends Error {
+  constructor(readonly status: number) {
+    super(`Failed to fetch dashboard data: ${status}`);
+    this.name = "DashboardFetchError";
+  }
+}
+
 export async function getDashboardDataFromApi(token: string): Promise<DashboardData> {
   const response = await fetch(`${API_BASE}/api/home/dashboard`, {
     headers: {
@@ -33,7 +41,7 @@ export async function getDashboardDataFromApi(token: string): Promise<DashboardD
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch dashboard data: ${response.status}`);
+    throw new DashboardFetchError(response.status);
   }
 
   const data = await response.json() as {

@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
-package-lock.json
+
+# package-lock.json is deliberately NOT ignored — CI runs `npm ci` and Vercel
+# builds from it, so ignoring it breaks both. Lockfiles from other package
+# managers stay ignored so a competing one can't be committed by accident.
 yarn.lock
 pnpm-lock.yaml
 

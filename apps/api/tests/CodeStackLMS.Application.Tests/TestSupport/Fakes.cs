@@ -35,10 +35,41 @@ public sealed class FakeBlobStorageService : IBlobStorageService
         => Task.CompletedTask;
 
     public Task<bool> BlobExistsAsync(string blobPath, CancellationToken cancellationToken = default)
-        => Task.FromResult(true);
+        => Task.FromResult(!Deleted.Contains(blobPath));
+
+    /// <summary>
+    /// What storage reports for a given path. Tests set these to simulate a
+    /// client that declared one thing and uploaded another.
+    /// </summary>
+    public Dictionary<string, StoredBlobInfo> Properties { get; } = new();
+
+    /// <summary>Default returned for any path not present in <see cref="Properties"/>.</summary>
+    public StoredBlobInfo? DefaultProperties { get; set; } = new(1024, "application/zip");
+
+    public List<string> Deleted { get; } = [];
+
+    public Task<StoredBlobInfo?> GetBlobPropertiesAsync(string blobPath, CancellationToken cancellationToken = default)
+    {
+        if (Deleted.Contains(blobPath))
+            return Task.FromResult<StoredBlobInfo?>(null);
+
+        return Task.FromResult(
+            Properties.TryGetValue(blobPath, out var props) ? props : DefaultProperties);
+    }
 
     public Task DeleteBlobAsync(string blobPath, CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
+    {
+        Deleted.Add(blobPath);
+        return Task.CompletedTask;
+    }
+}
+
+public sealed class FakeGitHubVerificationService : IGitHubVerificationService
+{
+    public GitHubRepoInfo Result { get; set; } = new("main", "abc123");
+
+    public Task<GitHubRepoInfo> VerifyAndResolveAsync(string repoUrl, string? branch, CancellationToken cancellationToken = default)
+        => Task.FromResult(Result);
 }
 
 public sealed class FakeBackgroundJobService : IBackgroundJobService

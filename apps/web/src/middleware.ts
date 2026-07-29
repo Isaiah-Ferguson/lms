@@ -14,7 +14,7 @@ import {
 // layer — the API independently authorizes every request from the signed
 // JWT, which remains the security boundary.
 
-const PUBLIC_PATHS = ["/login", "/forgot-password"];
+const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

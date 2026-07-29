@@ -52,18 +52,7 @@ public class LessonService : ILessonService
             .FirstOrDefaultAsync(l => l.Id == lessonId, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.Lesson), lessonId);
 
-        // Verify caller is enrolled in this course,
-        // or is an Instructor/Admin (who can access any lesson).
-        var isPrivileged = _currentUser.IsStaff();
-
-        if (!isPrivileged)
-        {
-            var courseId = lesson.Module.CourseId;
-            var enrolled = await _db.UserCourseEnrollments
-                .AnyAsync(e => e.UserId == _currentUser.UserId && e.CourseId == courseId, cancellationToken);
-            if (!enrolled)
-                throw new ForbiddenException("You are not enrolled in this course.");
-        }
+        await RequireCourseAccessAsync(lesson.Module.CourseId, cancellationToken);
 
         return lesson.VideoSource switch
         {
@@ -91,6 +80,23 @@ public class LessonService : ILessonService
                 throw new ValidationException(
                     $"Lesson '{lessonId}' has no video source configured.")
         };
+    }
+
+    // Instructors and Admins may reach any course; everyone else must be enrolled.
+    private async Task RequireCourseAccessAsync(
+        Guid courseId,
+        CancellationToken cancellationToken)
+    {
+        if (_currentUser.IsStaff())
+            return;
+
+        var enrolled = await _db.UserCourseEnrollments
+            .AnyAsync(
+                e => e.UserId == _currentUser.UserId && e.CourseId == courseId,
+                cancellationToken);
+
+        if (!enrolled)
+            throw new ForbiddenException("You are not enrolled in this course.");
     }
 
     private async Task<VideoTokenDto> GenerateBlobTokenAsync(
@@ -285,6 +291,18 @@ public class LessonService : ILessonService
         Guid moduleId,
         CancellationToken cancellationToken = default)
     {
+        // This endpoint hands out read SAS URLs for every lesson artifact, so it
+        // needs the same enrollment gate as GetVideoTokenAsync — the SAS is the
+        // only access control on those blobs once it leaves here.
+        var courseId = await _db.Modules
+            .AsNoTracking()
+            .Where(m => m.Id == moduleId)
+            .Select(m => (Guid?)m.CourseId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Domain.Entities.Module), moduleId);
+
+        await RequireCourseAccessAsync(courseId, cancellationToken);
+
         var lessons = await _db.Lessons
             .AsNoTracking()
             .Include(l => l.Artifacts)

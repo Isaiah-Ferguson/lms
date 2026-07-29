@@ -10,4 +10,5 @@ public interface IAuthService
     Task CreateUserAsync(CreateUserDto dto, CancellationToken cancellationToken = default);
     Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken cancellationToken = default);
     Task ForgotPasswordAsync(ForgotPasswordDto dto, CancellationToken cancellationToken = default);
+    Task ResetPasswordAsync(ResetPasswordDto dto, CancellationToken cancellationToken = default);
 }

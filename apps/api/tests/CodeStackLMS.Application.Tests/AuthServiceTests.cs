@@ -1,9 +1,11 @@
+using System.Text.RegularExpressions;
 using CodeStackLMS.Application.Auth;
 using CodeStackLMS.Application.Auth.DTOs;
 using CodeStackLMS.Application.Common.Exceptions;
 using CodeStackLMS.Application.Tests.TestSupport;
 using CodeStackLMS.Domain.Entities;
 using CodeStackLMS.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -223,28 +225,133 @@ public class AuthServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task ForgotPassword_ForKnownEmail_ResetsPasswordAndSendsEmail()
+    public async Task ForgotPassword_ForKnownEmail_SendsLinkButLeavesPasswordIntact()
     {
         var user = await SeedUserAsync();
 
         await _sut.ForgotPasswordAsync(new ForgotPasswordDto("student@example.com"));
 
+        // Requesting a reset must not mutate the account — the endpoint is
+        // unauthenticated, so doing so would let anyone lock out any user.
         var saved = await _db.Context.Users.FindAsync(user.Id);
-        Assert.True(saved!.MustChangePassword);
-        Assert.False(BCrypt.Net.BCrypt.Verify(Password, saved.PasswordHash));
+        Assert.True(BCrypt.Net.BCrypt.Verify(Password, saved!.PasswordHash));
+        Assert.False(saved.MustChangePassword);
+
         var sent = Assert.Single(_email.Sent);
         Assert.Equal("student@example.com", sent.To);
+        Assert.Contains("/reset-password?token=", sent.Body);
+        Assert.DoesNotContain(Password, sent.Body);
     }
 
     [Fact]
-    public async Task ForgotPassword_WhenEmailSendFails_StillResetsPasswordWithoutThrowing()
+    public async Task ForgotPassword_WhenEmailSendFails_LeavesAccountUsable()
     {
         var user = await SeedUserAsync();
         _email.ThrowOnSend = true;
 
         await _sut.ForgotPasswordAsync(new ForgotPasswordDto("student@example.com"));
 
+        // A failed send must not brick the account: the old password still works.
         var saved = await _db.Context.Users.FindAsync(user.Id);
-        Assert.True(saved!.MustChangePassword);
+        Assert.True(BCrypt.Net.BCrypt.Verify(Password, saved!.PasswordHash));
+    }
+
+    [Fact]
+    public async Task ForgotPassword_DoesNotRevokeExistingSessions()
+    {
+        var user = await SeedUserAsync();
+        var tokens = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+
+        await _sut.ForgotPasswordAsync(new ForgotPasswordDto("student@example.com"));
+
+        // Merely asking for a link must not log the real user out.
+        var refreshed = await _sut.RefreshAsync(tokens.RefreshToken);
+        Assert.NotNull(refreshed.AccessToken);
+    }
+
+    // ── ResetPasswordAsync ────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ResetPassword_WithEmailedToken_SetsNewPassword()
+    {
+        var user = await SeedUserAsync();
+        var token = await RequestResetTokenAsync();
+
+        await _sut.ResetPasswordAsync(new ResetPasswordDto(token, "brand-new-pass-1"));
+
+        var saved = await _db.Context.Users.FindAsync(user.Id);
+        Assert.True(BCrypt.Net.BCrypt.Verify("brand-new-pass-1", saved!.PasswordHash));
+        Assert.False(saved.MustChangePassword);
+    }
+
+    [Fact]
+    public async Task ResetPassword_RevokesExistingSessions()
+    {
+        await SeedUserAsync();
+        var tokens = await _sut.LoginAsync(new LoginDto("student@example.com", Password));
+        var token = await RequestResetTokenAsync();
+
+        await _sut.ResetPasswordAsync(new ResetPasswordDto(token, "brand-new-pass-1"));
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _sut.RefreshAsync(tokens.RefreshToken));
+    }
+
+    [Fact]
+    public async Task ResetPassword_CannotReuseTheSameToken()
+    {
+        await SeedUserAsync();
+        var token = await RequestResetTokenAsync();
+        await _sut.ResetPasswordAsync(new ResetPasswordDto(token, "brand-new-pass-1"));
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.ResetPasswordAsync(new ResetPasswordDto(token, "another-pass-2")));
+    }
+
+    [Fact]
+    public async Task ResetPassword_RequestingASecondLinkInvalidatesTheFirst()
+    {
+        await SeedUserAsync();
+        var first = await RequestResetTokenAsync();
+        var second = await RequestResetTokenAsync();
+
+        Assert.NotEqual(first, second);
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.ResetPasswordAsync(new ResetPasswordDto(first, "another-pass-2")));
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithExpiredToken_IsRejected()
+    {
+        var user = await SeedUserAsync();
+        var token = await RequestResetTokenAsync();
+
+        var row = await _db.Context.PasswordResetTokens.SingleAsync(t => t.UserId == user.Id);
+        row.ExpiresAt = DateTime.UtcNow.AddMinutes(-1);
+        await _db.Context.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.ResetPasswordAsync(new ResetPasswordDto(token, "another-pass-2")));
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithUnknownToken_IsRejected()
+    {
+        await SeedUserAsync();
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.ResetPasswordAsync(new ResetPasswordDto("not-a-real-token", "another-pass-2")));
+    }
+
+    // Drives the real request flow and lifts the token out of the emailed link,
+    // so these tests exercise exactly what a user would click.
+    private async Task<string> RequestResetTokenAsync(string email = "student@example.com")
+    {
+        _email.Sent.Clear();
+        await _sut.ForgotPasswordAsync(new ForgotPasswordDto(email));
+
+        var body = Assert.Single(_email.Sent).Body;
+        var match = Regex.Match(body, @"/reset-password\?token=([a-f0-9]+)");
+        Assert.True(match.Success, $"No reset token found in email body: {body}");
+        return match.Groups[1].Value;
     }
 }

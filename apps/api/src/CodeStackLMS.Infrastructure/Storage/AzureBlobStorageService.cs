@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
@@ -26,8 +27,13 @@ public class AzureBlobStorageService : IBlobStorageService
     //  - Create + Write only (no Read, Delete, List)
     //  - Scoped to exact blob path — not container-wide
     //  - Short expiry (caller-supplied, typically 15 min)
-    //  - ContentType enforced via SAS policy header
     //  - No overwrite: uses BlobSasPermissions.Create (fails if blob exists)
+    //
+    // What a SAS does NOT do: it cannot cap upload size, and the ContentType set
+    // below is a response-header override applied on read — not a constraint on
+    // the PUT. The holder can upload any size and any content type until the SAS
+    // expires, so size and type must be re-checked against GetBlobPropertiesAsync
+    // once the client reports the upload complete.
     // ─────────────────────────────────────────────────────────────────────────
     private string ResolveContainer(string blobPath) =>
         blobPath.StartsWith("avatars/", StringComparison.OrdinalIgnoreCase)
@@ -131,6 +137,24 @@ public class AzureBlobStorageService : IBlobStorageService
         var blobClient = containerClient.GetBlobClient(blobPath);
         var response = await blobClient.ExistsAsync(cancellationToken);
         return response.Value;
+    }
+
+    public async Task<StoredBlobInfo?> GetBlobPropertiesAsync(
+        string blobPath,
+        CancellationToken cancellationToken = default)
+    {
+        var containerClient = _serviceClient.GetBlobContainerClient(ResolveContainer(blobPath));
+        var blobClient = containerClient.GetBlobClient(blobPath);
+
+        try
+        {
+            var response = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
+            return new StoredBlobInfo(response.Value.ContentLength, response.Value.ContentType);
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return null;
+        }
     }
 
     public async Task DeleteBlobAsync(

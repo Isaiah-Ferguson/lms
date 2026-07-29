@@ -25,6 +25,7 @@ public interface IApplicationDbContext
     DbSet<ProgressReport> ProgressReports { get; }
     DbSet<Domain.Entities.Attendance> Attendances { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
+    DbSet<PasswordResetToken> PasswordResetTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     DatabaseFacade Database { get; }

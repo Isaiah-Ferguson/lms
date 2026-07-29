@@ -143,14 +143,11 @@ public class SubmissionService : ISubmissionService
 
         // 7. All SAS URLs generated successfully — now persist the submission.
         //    Use the execution strategy to handle transactions with retry logic.
-        //    Old blobs are only collected here and deleted AFTER commit, so a
-        //    rolled-back transaction can't destroy the still-current attempt.
-        var blobPathsToDelete = new List<string>();
+        //    Nothing is deleted here: the previous attempt survives until the
+        //    replacement upload is confirmed in CompleteUploadAsync.
         var strategy = _db.Database.CreateExecutionStrategy();
         var submission = await strategy.ExecuteAsync(async () =>
         {
-            blobPathsToDelete.Clear(); // retry-safe
-
             await using var tx = await _db.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
@@ -168,27 +165,11 @@ public class SubmissionService : ISubmissionService
                 if (submissionToUpdate == null)
                     throw new NotFoundException(nameof(Submission), existingSubmission.Id);
 
-                // Remove old artifact rows; their blobs are deleted post-commit
-                if (submissionToUpdate.Artifacts.Count > 0)
-                {
-                    foreach (var artifact in submissionToUpdate.Artifacts.ToList())
-                    {
-                        blobPathsToDelete.Add(artifact.BlobPath);
-                        _db.SubmissionArtifacts.Remove(artifact);
-                    }
-                }
-
-                // Remove old grade if exists
-                if (submissionToUpdate.Grade != null)
-                {
-                    _db.Grades.Remove(submissionToUpdate.Grade);
-                }
-
-                // Remove old GitHub info if exists
-                if (submissionToUpdate.GitHubInfo != null)
-                {
-                    _db.GitHubSubmissionInfos.Remove(submissionToUpdate.GitHubInfo);
-                }
+                // The previous attempt's artifacts, grade and GitHub info are
+                // deliberately left in place. Requesting an upload is not a
+                // commitment to finish one — a student who requests and then
+                // abandons must not lose a grade they already earned. The swap
+                // happens in CompleteUploadAsync, once new files actually exist.
 
                 // Update existing submission with new data
                 submissionToUpdate.Type = dto.Type;
@@ -229,8 +210,6 @@ public class SubmissionService : ISubmissionService
             return submissionToUse;
         });
 
-        await DeleteBlobsBestEffortAsync(blobPathsToDelete, cancellationToken);
-
         return new UploadUrlResponseDto(submission.Id, slots, expiresAt);
     }
 
@@ -259,26 +238,27 @@ public class SubmissionService : ISubmissionService
             throw new ValidationException(
                 $"Submission is in '{submission.Status}' state and cannot be completed.");
 
-        // 4. Verify every declared blob actually exists in storage
-        //    (prevents marking complete without uploading)
-        var verificationTasks = dto.Files.Select(f =>
-            _blob.BlobExistsAsync(f.BlobPath, cancellationToken));
-
-        var existsResults = await Task.WhenAll(verificationTasks);
-        var missing = dto.Files
-            .Zip(existsResults)
-            .Where(x => !x.Second)
-            .Select(x => x.First.BlobPath)
-            .ToList();
-
-        if (missing.Count > 0)
+        // 4. Cap the file count before any storage round-trips. The DTO only
+        //    enforces a minimum, and request-upload's cap doesn't bind here.
+        if (dto.Files.Count > MaxFilesPerSubmission)
             throw new ValidationException(
-                $"The following blobs were not found in storage: {string.Join(", ", missing)}");
+                $"A submission may contain at most {MaxFilesPerSubmission} files.");
+
+        var duplicatePath = dto.Files
+            .GroupBy(f => f.BlobPath, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(g => g.Count() > 1);
+
+        if (duplicatePath is not null)
+            throw new ValidationException(
+                $"Blob path '{duplicatePath.Key}' was listed more than once.");
 
         // 5. Validate blob paths belong to this submission (prevent path injection).
         //    Paths are built as submissions/{cohort}/{assignment}/{student}/{submission}/{file}
         //    (see BuildBlobPath), so require the submission-id path segment to match
         //    exactly rather than a substring anywhere in the path.
+        //
+        //    This runs before any storage lookup so the endpoint can't be used to
+        //    probe whether an arbitrary blob path exists.
         foreach (var file in dto.Files)
         {
             var segments = file.BlobPath.Split('/');
@@ -291,28 +271,95 @@ public class SubmissionService : ISubmissionService
                     $"Blob path '{file.BlobPath}' does not belong to submission '{submissionId}'.");
         }
 
-        // 6. Persist SubmissionArtifacts
-        foreach (var file in dto.Files)
+        // 6. Read what was actually uploaded. The SAS can't cap size or pin the
+        //    content type, so the client's declared values are untrusted input —
+        //    a student can PUT anything of any size within the SAS window.
+        var propertyLookups = await Task.WhenAll(
+            dto.Files.Select(async f => (File: f, Props: await _blob.GetBlobPropertiesAsync(f.BlobPath, cancellationToken))));
+
+        var missing = propertyLookups
+            .Where(x => x.Props is null)
+            .Select(x => x.File.BlobPath)
+            .ToList();
+
+        if (missing.Count > 0)
+            throw new ValidationException(
+                $"The following blobs were not found in storage: {string.Join(", ", missing)}");
+
+        // 7. Enforce the limits against real sizes and types, deleting anything
+        //    that broke them so an over-limit blob can't linger and be re-declared.
+        var verified = propertyLookups.Select(x => (x.File, Props: x.Props!)).ToList();
+        var totalSize = verified.Sum(x => x.Props.ContentLength);
+
+        var violation = FindLimitViolation(verified, totalSize);
+        if (violation is not null)
+        {
+            await DeleteBlobsBestEffortAsync(
+                verified.Select(x => x.File.BlobPath).ToList(),
+                cancellationToken);
+
+            throw new ValidationException(violation);
+        }
+
+        // 8. The new files are confirmed present and within limits, so the
+        //    previous attempt can now be retired. Doing it here rather than at
+        //    request time means an abandoned re-request leaves the earlier
+        //    submission — and its grade — untouched.
+        var incomingPaths = verified
+            .Select(x => x.File.BlobPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var supersededBlobs = new List<string>();
+
+        foreach (var artifact in submission.Artifacts.ToList())
+        {
+            // A path present in both sets was overwritten in place — removing the
+            // row is right, deleting the blob would destroy the new upload.
+            if (!incomingPaths.Contains(artifact.BlobPath))
+                supersededBlobs.Add(artifact.BlobPath);
+
+            _db.SubmissionArtifacts.Remove(artifact);
+        }
+
+        var previousGrade = await _db.Grades
+            .FirstOrDefaultAsync(g => g.SubmissionId == submission.Id, cancellationToken);
+
+        if (previousGrade is not null)
+            _db.Grades.Remove(previousGrade);
+
+        var previousGitHubInfo = await _db.GitHubSubmissionInfos
+            .FirstOrDefaultAsync(g => g.SubmissionId == submission.Id, cancellationToken);
+
+        if (previousGitHubInfo is not null)
+            _db.GitHubSubmissionInfos.Remove(previousGitHubInfo);
+
+        // 9. Persist SubmissionArtifacts using the verified values, not the
+        //    client-declared ones.
+        foreach (var (file, props) in verified)
         {
             _db.SubmissionArtifacts.Add(new SubmissionArtifact
             {
                 Id = Guid.NewGuid(),
                 SubmissionId = submission.Id,
                 BlobPath = file.BlobPath,
-                FileName = file.FileName,
-                ContentType = file.ContentType,
-                Size = file.SizeBytes,
+                FileName = Path.GetFileName(file.FileName),
+                ContentType = props.ContentType ?? file.ContentType,
+                Size = props.ContentLength,
                 Checksum = file.Checksum,
                 CreatedAt = DateTime.UtcNow
             });
         }
 
-        // 7. Transition: PendingUpload → ReadyToGrade
+        // 10. Transition: PendingUpload → ReadyToGrade
         //    Set to ReadyToGrade immediately since artifacts are already validated during upload
         //    If background processing is needed in the future, use Processing status and implement background job
         submission.Status = SubmissionStatus.ReadyToGrade;
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        // Only once the swap is committed may the superseded blobs go; a failure
+        // above must never leave the student with neither attempt.
+        await DeleteBlobsBestEffortAsync(supersededBlobs, cancellationToken);
 
         return ToDto(submission);
     }
@@ -640,6 +687,39 @@ public class SubmissionService : ISubmissionService
                 throw new ValidationException(
                     $"File extension '{ext}' is not permitted.");
         }
+    }
+
+    /// <summary>
+    /// Re-applies the submission limits to what storage actually holds. Mirrors
+    /// <see cref="ValidateFiles"/>, but runs on verified blob properties rather
+    /// than client-declared metadata. Returns null when everything is in bounds.
+    /// </summary>
+    private static string? FindLimitViolation(
+        IReadOnlyCollection<(CompletedFileDto File, StoredBlobInfo Props)> verified,
+        long totalSize)
+    {
+        if (totalSize > MaxTotalSizeBytes)
+            return $"Total upload size {totalSize / 1024 / 1024} MB exceeds the {MaxTotalSizeBytes / 1024 / 1024} MB limit.";
+
+        foreach (var (file, props) in verified)
+        {
+            var name = Path.GetFileName(file.FileName);
+
+            if (props.ContentLength <= 0)
+                return $"File '{name}' is empty.";
+
+            if (props.ContentLength > MaxFileSizeBytes)
+                return $"File '{name}' exceeds the {MaxFileSizeBytes / 1024 / 1024} MB per-file limit.";
+
+            if (props.ContentType is not null && !AllowedContentTypes.Contains(props.ContentType))
+                return $"Content type '{props.ContentType}' is not allowed for file '{name}'.";
+
+            var ext = Path.GetExtension(name).ToLowerInvariant();
+            if (ext is ".exe" or ".bat" or ".cmd" or ".sh" or ".ps1" or ".msi" or ".dll")
+                return $"File extension '{ext}' is not permitted.";
+        }
+
+        return null;
     }
 
     private static string BuildBlobPath(
