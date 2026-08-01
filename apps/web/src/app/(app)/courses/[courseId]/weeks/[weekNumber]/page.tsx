@@ -291,9 +291,9 @@ export default function WeekDetailsPage({ params }: WeekDetailsPageProps) {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
+                <p className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Code Artifacts
-                </label>
+                </p>
                 <div className="space-y-2">
                   {editingVideo.codeArtifacts.length > 0 ? (
                     editingVideo.codeArtifacts.map((artifact) => (

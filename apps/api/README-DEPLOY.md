@@ -6,8 +6,8 @@ Since you're in a monorepo, follow these steps:
 
 1. **Open the API folder as a workspace in VS Code:**
    - In VS Code, go to File → Open Folder
-   - Navigate to `/Users/isaiahkeithferguson/Downloads/lms/apps/api`
-   - Open this folder (not the root `lms` folder)
+   - Navigate to the `apps/api` directory of your clone
+   - Open this folder (not the repository root)
 
 2. **Install Azure App Service Extension (if not installed):**
    - Open Extensions (Cmd+Shift+X)
@@ -47,10 +47,11 @@ cd ..
 rm -rf publish
 ```
 
-## Method 3: GitHub Actions (Automated)
+## Method 3: GitHub Actions (not set up)
 
-Set up CI/CD to automatically deploy when you push to main branch.
-See `.github/workflows/deploy-api.yml` for configuration.
+There is currently **no deploy workflow** — `.github/workflows/` contains only `ci.yml`
+(build and test) and `load-test.yml` (manual). Deployment is done by Method 1 or 2 above.
+Automating it would mean adding a workflow that publishes and pushes to App Service.
 
 ## After Deployment
 
@@ -62,10 +63,13 @@ Configure these settings in Azure Portal (App Services → CSALMS → Configurat
 **Application Settings:**
 - `AzureStorage__ConnectionString`
 - `AzureStorage__SubmissionsContainer`
-- `Jwt__Secret`
+- `AzureStorage__AvatarsContainer` *(optional — defaults to `avatars`)*
+- `Jwt__Secret` — must be ≥32 bytes and must not be a template placeholder, or the app
+  will refuse to start
 - `Jwt__Issuer`
 - `Jwt__Audience`
-- `Frontend__Url`
+- `Frontend__Url` — also the CORS allow-list; comma-separated values are supported and the
+  last one is used when building email links
 - `Email__SmtpHost`
 - `Email__SmtpPort`
 - `Email__UseSsl`
@@ -73,5 +77,25 @@ Configure these settings in Azure Portal (App Services → CSALMS → Configurat
 - `Email__Password`
 - `Email__FromEmail`
 - `Email__FromName`
+- `Anthropic__ApiKey` — required for weekly progress reports
+- `Anthropic__DefaultModel`, `Anthropic__MaxTokens`
+- `Hangfire__Dashboard__Username`, `Hangfire__Dashboard__Password` — without these, browser
+  access to `/hangfire` is denied in Production
+- `Hangfire__WorkerCount` *(optional — defaults to 5)*
+- `Seed__AdminEmail`, `Seed__AdminPassword` — used only when seeding an empty database
+- `ApplicationInsights__ConnectionString`
 
 **Important:** Use double underscores (`__`) for nested configuration values.
+
+## Database migrations
+
+The API runs `MigrateAsync` **and** seeds on startup, and rethrows on failure — so a bad
+migration fails the deployment rather than silently leaving a half-migrated database. Two
+consequences worth planning around:
+
+- **A deploy is a schema change.** Review pending migrations before shipping.
+- **This assumes a single instance.** There is no coordination lock, so scaling out or doing
+  a slot swap could run migrations concurrently. Scale to one instance while deploying.
+
+Backups rely on Azure SQL's point-in-time restore; there is no application-level rollback.
+To roll back a schema change you need a compensating migration or a database restore.

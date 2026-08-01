@@ -90,10 +90,11 @@ export function ProbationToggleCard({
         {/* Reason input — only shown when probation is on */}
         {isOnProbation && (
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
+            <label htmlFor="probation-reason" className="mb-1 block text-xs font-medium text-gray-600">
               Reason <span className="text-red-500">*</span> <span className="text-gray-400">(shown to student)</span>
             </label>
             <textarea
+              id="probation-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}

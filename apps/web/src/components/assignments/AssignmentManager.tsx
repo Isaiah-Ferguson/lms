@@ -119,10 +119,11 @@ export function AssignmentManager({
           {/* Module selector — only shown when no moduleId is pre-supplied */}
           {!fixedModuleId && modules.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              <label htmlFor="assignment-module" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Week / Module
               </label>
               <select
+                id="assignment-module"
                 value={selectedModuleId}
                 onChange={(e) => setSelectedModuleId(e.target.value)}
                 className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"

@@ -604,6 +604,50 @@ public enum ProgressReportStatus
 }
 ```
 
+### 19. RefreshToken
+**Purpose**: An opaque, long-lived session token used to mint new short-lived access tokens. Issued on login, revoked on logout, password change, and password reset.
+
+**Security invariant**: only a SHA-256 hash is persisted. The raw token exists solely in the client's httpOnly cookie, so a database compromise yields no usable sessions.
+
+```csharp
+public class RefreshToken : BaseEntity
+{
+    public Guid UserId { get; set; }
+    public string TokenHash { get; set; } = string.Empty;  // SHA-256 hex, 64 chars
+    public DateTime ExpiresAt { get; set; }                // issued + 14 days
+    public DateTime CreatedAt { get; set; }
+    public DateTime? RevokedAt { get; set; }
+
+    // Navigation properties
+    public User User { get; set; } = null!;
+}
+```
+
+Tokens are currently returned unrotated on refresh, and expired/revoked rows are never
+purged. Both are tracked as open items (M4) in `PROJECT-REVIEW.md`.
+
+### 20. PasswordResetToken
+**Purpose**: A single-use, short-lived token proving the holder controls the account's email address. Backs the `forgot-password` → emailed link → `reset-password` flow.
+
+**Security invariant**: issuing one must never mutate the account. An unauthenticated caller can trigger issuance for any address, so the password changes only when the token is redeemed — otherwise anyone knowing an email could lock that user out.
+
+```csharp
+public class PasswordResetToken : BaseEntity
+{
+    public Guid UserId { get; set; }
+    public string TokenHash { get; set; } = string.Empty;  // SHA-256 hex, 64 chars
+    public DateTime ExpiresAt { get; set; }                // issued + 1 hour
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UsedAt { get; set; }                  // set on redemption
+
+    // Navigation properties
+    public User User { get; set; } = null!;
+}
+```
+
+Requesting a new link marks any earlier unused token for that user as used, so only the
+newest link works. Redeeming a token revokes every `RefreshToken` for the account.
+
 ## Base Classes & Interfaces
 
 ```csharp
@@ -712,6 +756,12 @@ CREATE INDEX IX_Attendances_CourseId_Date ON Attendances(CourseId, Date);
 -- Progress report queries
 CREATE INDEX IX_ProgressReports_StudentId ON ProgressReports(StudentId);
 CREATE INDEX IX_ProgressReports_CohortId ON ProgressReports(CohortId);
+
+-- Auth token lookups (both are looked up by hash on every refresh/redeem)
+CREATE UNIQUE INDEX IX_RefreshTokens_TokenHash ON RefreshTokens(TokenHash);
+CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
+CREATE UNIQUE INDEX IX_PasswordResetTokens_TokenHash ON PasswordResetTokens(TokenHash);
+CREATE INDEX IX_PasswordResetTokens_UserId ON PasswordResetTokens(UserId);
 ```
 
 ## Data Constraints

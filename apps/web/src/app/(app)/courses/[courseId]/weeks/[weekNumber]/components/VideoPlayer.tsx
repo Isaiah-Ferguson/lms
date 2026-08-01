@@ -51,6 +51,7 @@ export function VideoPlayer({ video }: VideoPlayerProps) {
             className="h-full w-full"
           />
         ) : (
+          // eslint-disable-next-line jsx-a11y/media-has-caption -- no caption tracks exist for course videos yet; needs caption files from course content, not a markup fix
           <video
             key={video.id}
             src={video.videoWatchUrl}

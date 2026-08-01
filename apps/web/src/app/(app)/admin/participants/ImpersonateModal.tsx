@@ -54,10 +54,11 @@ export function ImpersonateModal({ user, onClose, onConfirm }: Props) {
 
         {/* Reason */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label htmlFor="impersonate-reason" className="text-sm font-medium text-gray-700">
             Reason <span className="text-gray-400">(required)</span>
           </label>
           <textarea
+            id="impersonate-reason"
             rows={3}
             placeholder="e.g. Investigating reported issue with course access…"
             value={reason}

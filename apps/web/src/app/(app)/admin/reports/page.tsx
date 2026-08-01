@@ -59,16 +59,37 @@ function StudentPickerModal({
   triggering: boolean;
 }) {
   const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Dialog focus management: move focus into the dialog on open (the search
+  // field is its primary control) and close on Escape.
+  useEffect(() => {
+    searchRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Click-to-close backdrop: pointer-only affordance (Escape is the
+          keyboard equivalent), so it's hidden from assistive tech. */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="student-picker-title"
+        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-2xl"
+      >
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 px-5 py-4">
-          <h3 className="font-bold text-gray-900 dark:text-slate-50">Pick a Student</h3>
+          <h3 id="student-picker-title" className="font-bold text-gray-900 dark:text-slate-50">Pick a Student</h3>
           <button onClick={onClose} aria-label="Close dialog" className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
             <X className="h-4 w-4" />
           </button>
@@ -77,8 +98,9 @@ function StudentPickerModal({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
-              autoFocus
+              ref={searchRef}
               type="text"
+              aria-label="Search students"
               placeholder="Search students…"
               value={search}
               onChange={e => setSearch(e.target.value)}

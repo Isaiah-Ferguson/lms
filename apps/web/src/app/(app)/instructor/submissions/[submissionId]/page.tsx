@@ -525,10 +525,11 @@ export default function InstructorGradingPage() {
             </p>
 
             <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              <label htmlFor="return-reason" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Reason for returning <span className="text-red-500 dark:text-red-400">*</span>
               </label>
               <textarea
+                id="return-reason"
                 rows={4}
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}

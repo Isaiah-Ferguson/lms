@@ -34,23 +34,44 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
   "password": "string"
 }
 ```
-**Response**: `AuthTokenDto` → `{ accessToken: string, expiresIn: number, mustChangePassword: boolean }`
+**Response**: `AuthTokenDto` → `{ accessToken: string, expiresIn: number, mustChangePassword: boolean, refreshToken: string, refreshExpiresIn: number }`
 **Status**: 200 OK
-**Notes**: Only an access token is issued. There is no refresh token flow. The client must re-authenticate after `expiresIn` seconds.
+**Rate limit**: `auth` policy
+**Notes**: `expiresIn` is 1800 (30 min); `refreshExpiresIn` is 14 days. The browser never
+handles these directly — the Next.js login route handler writes both into httpOnly cookies.
 
-### POST `/api/auth/register`
-**Description**: Register new user
+> **There is no public self-registration.** Accounts are created by an Admin via
+> `POST /api/auth/users`. Any reference to `POST /api/auth/register` is stale — that
+> endpoint does not exist.
+
+### POST `/api/auth/refresh`
+**Description**: Exchange a refresh token for a new access token
+**Auth**: Public (the refresh token itself is the credential)
+**Body**:
+```json
+{
+  "refreshToken": "string"
+}
+```
+**Response**: `AuthTokenDto`
+**Status**: 200 OK · 401 if the token is unknown, expired, or revoked
+**Rate limit**: `auth` policy
+**Notes**: Only a SHA-256 hash of the refresh token is stored server-side. The token is
+returned unchanged rather than rotated — see the open item on rotation and reuse
+detection in `PROJECT-REVIEW.md` (M4).
+
+### POST `/api/auth/logout`
+**Description**: Revoke a refresh token
 **Auth**: Public
 **Body**:
 ```json
 {
-  "email": "string",
-  "password": "string",
-  "name": "string"
+  "refreshToken": "string | null"
 }
 ```
-**Response**: `{ message: "Account created successfully." }`
-**Status**: 201 Created
+**Response**: Success message
+**Status**: 200 OK
+**Rate limit**: `auth` policy
 
 ### POST `/api/auth/users`
 **Description**: Create user (admin only)
@@ -73,7 +94,7 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 **Status**: 200 OK
 
 ### POST `/api/auth/forgot-password`
-**Description**: Request a password reset for an email address
+**Description**: Email a single-use password reset link
 **Auth**: Public
 **Body**:
 ```json
@@ -83,6 +104,31 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 ```
 **Response**: Success message (always 200, regardless of whether the email exists, to avoid account enumeration)
 **Status**: 200 OK
+**Rate limit**: `auth` policy
+**Notes**: This endpoint **does not change the password**. It stores a hashed, single-use
+token (1-hour expiry) and emails a link to `/reset-password?token=…`. Requesting a link
+leaves the account entirely untouched — the existing password keeps working and current
+sessions stay alive. That matters because the endpoint is unauthenticated: if it mutated
+the account, anyone who knew a student's email address could lock them out at will.
+Issuing a new link invalidates any earlier unused one. Email-send failures are swallowed
+(again, to avoid enumeration) and are harmless, since nothing has been changed.
+
+### POST `/api/auth/reset-password`
+**Description**: Redeem a reset token and set a new password
+**Auth**: Public (the token is the credential)
+**Body**:
+```json
+{
+  "token": "string",
+  "newPassword": "string"
+}
+```
+**Response**: Success message
+**Status**: 200 OK · 400 if the token is unknown, expired, already used, or the account is deactivated
+**Rate limit**: `auth` policy
+**Notes**: Minimum password length 8. On success the token is burned and **every** refresh
+token for that user is revoked, so all other sessions end. All failure modes return one
+generic message so the response can't be used to probe token validity.
 
 ---
 
@@ -215,30 +261,67 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 ## 4. Submissions (`/api/submissions`)
 
 ### POST `/api/submissions/{assignmentId}/request-upload`
-**Description**: Request upload slot for file submission
-**Auth**: Authenticated (Student)
-**Body**:
+**Description**: Request per-file upload slots for a submission
+**Auth**: Authenticated (Student, enrolled in the course)
+**Body**: `RequestUploadDto`
 ```json
 {
-  "fileNames": ["file1.pdf", "file2.zip"]
+  "type": "Upload",
+  "files": [
+    { "fileName": "solution.zip", "contentType": "application/zip", "sizeBytes": 12345 }
+  ],
+  "figmaUrl": null,
+  "gitHubRepoUrl": null,
+  "hostedUrl": null,
+  "note": null
 }
 ```
-**Response**: `{ submissionId, uploadUrls: { fileName: sasUrl } }`
-**Status**: 200 OK
-
-### POST `/api/submissions/{submissionId}/complete-upload`
-**Description**: Mark file upload as complete
-**Auth**: Authenticated (Student)
-**Body**:
+**Response**: `UploadUrlResponseDto`
 ```json
 {
-  "artifacts": [
-    { "fileName": "file1.pdf", "size": 12345, "contentType": "application/pdf", "checksum": "..." }
+  "submissionId": "guid",
+  "uploadSlots": [
+    { "fileName": "solution.zip", "blobPath": "submissions/…", "sasUrl": "https://…", "contentType": "application/zip", "maxSizeBytes": 104857600 }
+  ],
+  "expiresAt": "2026-07-28T12:15:00Z"
+}
+```
+**Status**: 200 OK
+**Limits**: max 20 files, 100 MB per file, 500 MB total. Filenames are sanitised with
+`Path.GetFileName`, so directory traversal is stripped. SAS expiry is 15 minutes.
+**Notes**: Re-requesting on an existing submission **does not delete anything**. The
+previous attempt's artifacts, grade and GitHub info stay in place until a replacement
+upload is confirmed, so abandoning a resubmit can't destroy a grade already earned.
+
+### POST `/api/submissions/{submissionId}/complete-upload`
+**Description**: Confirm the uploads and move the submission to ReadyToGrade
+**Auth**: Authenticated (Student, owner of the submission)
+**Body**: `CompleteUploadDto`
+```json
+{
+  "files": [
+    {
+      "blobPath": "submissions/{cohort}/{assignment}/{student}/{submission}/solution.zip",
+      "fileName": "solution.zip",
+      "contentType": "application/zip",
+      "sizeBytes": 12345,
+      "checksum": "…"
+    }
   ]
 }
 ```
-**Response**: Success
-**Status**: 200 OK
+**Response**: `SubmissionResponseDto`
+**Status**: 200 OK · 400 on a limit violation or missing blob · 403 if a path doesn't belong to the submission
+**Notes**: The declared `sizeBytes` and `contentType` are **not trusted**. A SAS cannot cap
+upload size and its `ContentType` only overrides the read response header, so the API reads
+each blob's real properties, enforces the limits against those, and persists the verified
+values. Over-limit blobs are deleted. Path ownership is checked *before* any storage lookup,
+so the endpoint can't be used to probe whether an arbitrary blob exists. Duplicate blob
+paths are rejected.
+
+On success this is where the swap happens: the previous attempt's artifacts, grade and
+GitHub info are removed and the new artifacts take their place. Blobs shared with the new
+upload (same filename, overwritten in place) are deliberately *not* deleted.
 
 ### POST `/api/submissions/{assignmentId}/github-submit`
 **Description**: Submit GitHub repository
@@ -271,11 +354,14 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 ## 5. Lessons (`/api/lessons`)
 
 ### GET `/api/lessons?moduleId={moduleId}`
-**Description**: Get all lessons for a module
-**Auth**: Authenticated
+**Description**: Get all lessons for a module, with read SAS URLs for each artifact
+**Auth**: Authenticated **and enrolled in the owning course** (Instructor/Admin bypass)
 **Query Params**: `?moduleId={moduleId}`
 **Response**: `LessonDto[]`
-**Status**: 200 OK
+**Status**: 200 OK · 403 if not enrolled · 404 if the module doesn't exist
+**Notes**: Enrollment is enforced because the response contains working 1-hour download
+URLs for every lesson artifact, and the SAS is the only access control on those blobs once
+it leaves the API.
 
 ### POST `/api/lessons`
 **Description**: Create a lesson (video, text, or link) in a module
@@ -285,10 +371,12 @@ Success responses return the DTO directly (no envelope). Error responses use ASP
 **Status**: 201 Created
 
 ### GET `/api/lessons/{lessonId}/video-token`
-**Description**: Get SAS token for video streaming
-**Auth**: Authenticated
-**Response**: `{ sasUrl: string, expiresAt: DateTime }`
-**Status**: 200 OK
+**Description**: Get a short-lived stream URL for the lesson video
+**Auth**: Authenticated **and enrolled in the owning course** (Instructor/Admin bypass)
+**Response**: `VideoTokenDto` → `{ lessonId, source, streamUrl, mimeType, durationSeconds, expiresAt }`
+**Status**: 200 OK · 400 if the lesson has no video source · 403 if not enrolled · 404 if unknown
+**Notes**: Blob-backed sources (AzureBlob, HLS, DASH) get a 1-hour read SAS; `External`
+sources return the stored URL as-is.
 
 ### PUT `/api/lessons/{lessonId}`
 **Description**: Update lesson
@@ -697,17 +785,32 @@ Claude-generated weekly progress reports (per-student `StudentProgress` and per-
 
 ## Authentication
 
-All endpoints except `/api/auth/login` and `/api/auth/register` require authentication via JWT Bearer token:
+Every endpoint requires a JWT bearer token except these four, which are `[AllowAnonymous]`:
+`/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`, `/api/auth/forgot-password`
+and `/api/auth/reset-password`.
 
 ```
 Authorization: Bearer <token>
 ```
+
+From the browser, you never set this header yourself. Tokens live in httpOnly cookies and
+requests go to `/api/proxy/*`, where the Next.js route handler attaches the bearer
+server-side and transparently refreshes once on a 401.
 
 ## Role-Based Authorization
 
 - **Admin**: Full access to all endpoints
 - **Instructor**: Access to course management, grading, and instructor-specific endpoints
 - **Student**: Access to learning materials, submissions, and profile management
+
+Role alone is not always sufficient. Lesson content additionally requires the caller to be
+**enrolled in the owning course** (staff bypass this), and submission endpoints check
+**object-level ownership** — a student can only read and complete their own submissions.
+
+> **Known gap:** there is no instructor-to-course relationship in the domain, so any
+> Instructor can currently reach any course's submissions, grades and reports. Course
+> detail and assignment reads are also not enrollment-scoped yet. Tracked as M1 and M2 in
+> [`PROJECT-REVIEW.md`](../PROJECT-REVIEW.md).
 
 ## Error Responses
 

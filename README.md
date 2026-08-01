@@ -48,15 +48,16 @@ Additional architecture and implementation notes live in the `docs/` and `apps/a
 ## Tech Stack
 
 ### Frontend (`apps/web`)
-- **Framework** — Next.js 14.2.5 (App Router, Server Components)
-- **Language** — TypeScript 5
+- **Framework** — Next.js 14.2.35 (App Router, Server Components)
+- **Language** — TypeScript 5 (`strict`, zero uses of `any`)
 - **Styling** — TailwindCSS 3.4
 - **Icons / UI** — `lucide-react`, `framer-motion`, custom components (no external component library)
 - **Forms** — `react-hook-form` + `zod` validation
 - **Charts** — `recharts`
 - **Calendar** — `@fullcalendar/*`
 - **Video** — `hls.js`
-- **Auth storage** — `js-cookie`
+- **Session** — httpOnly cookies set by Next.js route handlers; `js-cookie` only reads the
+  non-sensitive role hint used for UI gating
 
 ### Backend (`apps/api`)
 - **Framework** — ASP.NET Core Web API on **.NET 10**
@@ -133,8 +134,8 @@ The API listens on `http://localhost:5000` (HTTP) and `https://localhost:5001` (
 ```bash
 cd apps/web
 
-# Install dependencies
-npm install
+# Install dependencies from the committed lockfile
+npm ci
 
 # Create .env.local with:
 #   NEXT_PUBLIC_API_URL=http://localhost:5000
@@ -145,6 +146,24 @@ npm run dev
 ```
 
 The frontend is served at `http://localhost:3000`.
+
+`package-lock.json` is committed and CI runs `npm ci`, so use `npm ci` for reproducible
+installs and only `npm install` when you intend to change dependencies (commit the updated
+lockfile with your change).
+
+### Running checks
+
+From the repository root:
+
+```bash
+npm run lint        # eslint (web)
+npm run typecheck   # tsc --noEmit (web)
+npm test            # vitest (web) + dotnet test (api)
+npm run build       # next build + dotnet build
+```
+
+CI runs the same commands on every push to `main` and every pull request
+(`.github/workflows/ci.yml`).
 
 ## Key Features
 
@@ -170,20 +189,46 @@ The frontend is served at `http://localhost:3000`.
 
 ## Security
 
-- **JWT bearer auth** — 60-minute access tokens signed with HS256
-- **Role-based authorization** — `Admin`, `Instructor`, `Student` role checks on endpoints
-- **Hangfire dashboard** — Open in Development; `Admin`-only in Production
+- **JWT bearer auth** — 30-minute access tokens signed with HS256, validated with zero clock skew
+- **Refresh tokens** — 14-day opaque tokens, stored as SHA-256 hashes only; revoked on logout,
+  password change, and password reset
+- **Token storage** — Both tokens live in httpOnly cookies written by the Next.js server, so
+  browser JavaScript cannot read them and XSS cannot steal a session. Browser calls reach the
+  API through `/api/proxy/*`, which injects the bearer server-side and refreshes once on a 401.
+- **Password reset** — Single-use, 1-hour token emailed as a link. Requesting a reset never
+  mutates the account, so an unauthenticated caller can't lock a user out of theirs.
+- **Password hashing** — BCrypt (`BCrypt.Net-Next`) on every path; no legacy fallback
+- **Role-based authorization** — `Admin`, `Instructor`, `Student` role checks on endpoints,
+  plus per-course enrollment checks on lesson content
+- **Startup validation** — The API refuses to boot outside Development if `Jwt:Secret` is
+  missing, shorter than 32 bytes, or matches a known template placeholder
+- **Rate limiting** — `auth` policy on login, refresh, logout, forgot-password, reset-password
+- **Hangfire dashboard** — Open in Development; in Production requires an `Admin` JWT or the
+  HTTP Basic credentials under `Hangfire:Dashboard` (compared in constant time)
 - **CORS** — Any `localhost` origin allowed in Development; configured whitelist (`Frontend:Url`) in Production
-- **Blob access** — Short-lived SAS URLs generated server-side for uploads and downloads
+- **Security headers** — `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`,
+  and a strict CSP on API responses, plus HSTS
+- **Blob access** — Short-lived SAS URLs generated server-side, scoped to a single blob.
+  Because a SAS cannot cap size or pin content type on upload, completed uploads are
+  re-verified against the blob's real properties before being persisted.
+- **SQL injection** — No raw SQL anywhere; the data layer is parameterized LINQ throughout
 - **HTTPS redirection** — Enforced via `app.UseHttpsRedirection()`
 - **Request body limit** — 100 MB for multipart uploads
+
+A full security and code review, including open items, lives in [`PROJECT-REVIEW.md`](PROJECT-REVIEW.md).
 
 ## Background Jobs (Hangfire)
 
 Currently implemented jobs (see `apps/api/src/CodeStackLMS.Infrastructure/BackgroundJobs/`):
 
-- **Grade notifications** — Notify student when a submission is graded
-- **Submission-returned notifications** — Notify student when a submission is returned with a reason
+**Fire-and-forget**
+- **Grade notifications** (`SendGradeNotificationJob`) — Notify a student when a submission is graded
+- **Submission-returned notifications** (`SendSubmissionReturnedNotificationJob`) — Notify a student when a submission is returned with a reason
+
+**Recurring**
+- **Weekly progress reports** (`WeeklyProgressReportJob`) — Claude-generated per-student and
+  per-cohort reports, Mondays at 06:00 UTC, registered in `RecurringJobsRegistrar`. Also
+  triggerable on demand. See [`docs/04-CLAUDE-REPORTS-ROADMAP.md`](docs/04-CLAUDE-REPORTS-ROADMAP.md).
 
 See [`apps/api/HANGFIRE.md`](apps/api/HANGFIRE.md) for dashboard access and configuration.
 
@@ -194,7 +239,8 @@ Interactive Swagger UI is available at `http://localhost:5000/swagger` when the 
 ## Deployment
 
 ### Backend — Azure App Service
-See [`apps/api/README-DEPLOY.md`](apps/api/README-DEPLOY.md) or run the `/deploy-api-azure` IDE workflow.
+See [`apps/api/README-DEPLOY.md`](apps/api/README-DEPLOY.md). Deployment is currently manual —
+there is no deploy workflow in `.github/workflows/` (CI builds and tests only).
 
 ```bash
 cd apps/api
@@ -209,6 +255,11 @@ The Next.js app can be deployed to any Node.js host (Vercel, Azure Static Web Ap
 
 ### Backend — `apps/api/src/CodeStackLMS.API/appsettings.Development.json`
 
+Copy `appsettings.Development.json.template` and fill it in — the template is the
+authoritative key list. Never commit the filled-in file; `appsettings.json`,
+`appsettings.Development.json` and `appsettings.Production.json` are all gitignored, and
+only the `.template` variants are tracked.
+
 ```json
 {
   "ConnectionStrings": {
@@ -216,21 +267,57 @@ The Next.js app can be deployed to any Node.js host (Vercel, Azure Static Web Ap
   },
   "AzureStorage": {
     "ConnectionString": "UseDevelopmentStorage=true",
-    "ContainerName": "codestack-storage"
+    "SubmissionsContainer": "submissions"
   },
   "Jwt": {
-    "Secret": "your-256-bit-secret",
+    "Secret": "at-least-32-bytes-and-not-a-placeholder",
     "Issuer": "codestack-lms",
-    "Audience": "codestack-lms",
-    "ExpiryMinutes": 60
+    "Audience": "codestack-lms"
   },
-  "Frontend": {
-    "Url": "http://localhost:3000"
+  "Frontend": { "Url": "http://localhost:3000" },
+  "Seed": {
+    "AdminEmail": "admin@example.com",
+    "AdminPassword": "…"
+  },
+  "Email": {
+    "SmtpHost": "smtp.example.com",
+    "SmtpPort": 587,
+    "UseSsl": true,
+    "Username": "…",
+    "Password": "…",
+    "FromEmail": "…",
+    "FromName": "CodeStack LMS"
+  },
+  "Anthropic": {
+    "ApiKey": "…",
+    "DefaultModel": "…",
+    "MaxTokens": 4096
   },
   "Hangfire": {
-    "WorkerCount": 5
-  }
+    "WorkerCount": 5,
+    "Dashboard": { "Username": "…", "Password": "…" }
+  },
+  "ApplicationInsights": { "ConnectionString": "…" }
 }
+```
+
+Notes on keys that are easy to get wrong:
+
+- **`AzureStorage:SubmissionsContainer`** — not `ContainerName`. `AvatarsContainer` also
+  exists and defaults to `avatars` if unset.
+- **There is no `Jwt:ExpiryMinutes`.** Token lifetimes are compiled constants in
+  `AuthService` (30 min access, 14 day refresh, 1 hour password-reset).
+- **`Jwt:Secret`** must be at least 32 bytes, and the API deliberately refuses to start
+  outside Development if it matches a known template placeholder.
+- **`Hangfire:Dashboard`** credentials gate `/hangfire` in Production.
+
+For local development, prefer `dotnet user-secrets` over editing `appsettings.json` — it
+keeps credentials outside the repository tree entirely:
+
+```bash
+cd apps/api/src/CodeStackLMS.API
+dotnet user-secrets init
+dotnet user-secrets set "Jwt:Secret" "…"
 ```
 
 ### Frontend — `apps/web/.env.local`

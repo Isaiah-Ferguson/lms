@@ -11,18 +11,34 @@ Hangfire is now integrated into the CodeStack LMS API to handle background job p
 - **Hangfire.AspNetCore** v1.8.17  
 - **Hangfire.SqlServer** v1.8.17
 - SQL Server as job storage (uses same database as application)
-- 5 concurrent worker threads
+- Worker threads configurable via `Hangfire:WorkerCount` (default 5)
 
 ### ✅ Background Jobs
 
 #### 1. **SendGradeNotificationJob**
-- **Trigger**: When instructor grades a submission
-- **Purpose**: Send email notification to student
+- **Trigger**: When an instructor grades a submission
+- **Purpose**: Email the student their grade
 - **Features**:
-  - Checks if student has email notifications enabled
   - Sends formatted HTML email with grade and feedback
   - Automatic retry on failure (Hangfire default: 10 attempts)
   - Non-blocking - API returns immediately
+
+#### 2. **SendSubmissionReturnedNotificationJob**
+- **Trigger**: When an instructor returns a submission for rework
+- **Purpose**: Email the student the return reason
+- **Features**: Same retry and non-blocking behaviour as above
+
+#### 3. **WeeklyProgressReportJob** *(recurring)*
+- **Trigger**: `weekly-progress-reports`, Mondays 06:00 UTC — also triggerable on demand
+- **Purpose**: Generate Claude per-student and per-cohort progress reports
+- **Features**:
+  - Idempotent: skips reports already `Generated` or `Published`, resumes `Failed`/`Generating` ones
+  - Partial failures are recorded per report rather than failing the whole run
+  - See [`../../docs/04-CLAUDE-REPORTS-ROADMAP.md`](../../docs/04-CLAUDE-REPORTS-ROADMAP.md)
+
+> **Known gap:** `User.EmailNotificationsEnabled` is stored and editable in the profile UI,
+> but **no job currently reads it** — opted-out users still receive notification email.
+> Tracked as M8 in `PROJECT-REVIEW.md`.
 
 ### ✅ Hangfire Dashboard
 - **URL**: `http://localhost:5000/hangfire`
@@ -122,7 +138,7 @@ _backgroundJobs.EnqueueMyNewJob(entityId);
 3. See:
    - **Jobs** - All enqueued, processing, succeeded, failed jobs
    - **Retries** - Failed jobs awaiting retry
-   - **Recurring Jobs** - Scheduled jobs (none yet)
+   - **Recurring Jobs** - Scheduled jobs (`weekly-progress-reports`)
    - **Servers** - Active Hangfire servers
 
 ### Check Job Status
@@ -147,25 +163,29 @@ _backgroundJobs.EnqueueMyNewJob(entityId);
 
 ### Potential Jobs to Add:
 1. **Assignment Due Date Reminders** - Daily job to email students
-2. **Weekly Progress Reports** - Send summary to students/instructors
-3. **Cleanup Old Temp Files** - Delete expired uploads
+2. **Cleanup Old Temp Files** - Delete expired uploads
+3. **Expired Token Purge** - Delete spent `RefreshToken` / `PasswordResetToken` rows, which
+   currently accumulate without bound
 4. **GitHub Repo Validation** - Verify repo exists and is accessible
 5. **Submission Notifications** - Email instructors when student submits
 
-### Recurring Jobs Example:
+### Recurring Jobs
+Registered in `RecurringJobsRegistrar.RegisterAll`, called from `Program.cs` at startup:
 ```csharp
-// In Program.cs after app.Run()
-RecurringJob.AddOrUpdate<DailyReminderJob>(
-    "daily-reminders",
-    job => job.ExecuteAsync(),
-    Cron.Daily(9)); // 9 AM daily
+RecurringJob.AddOrUpdate<WeeklyProgressReportJob>(
+    "weekly-progress-reports",
+    job => job.ExecuteAsync(CancellationToken.None),
+    "0 6 * * MON");   // Mondays 06:00 UTC
 ```
+Job arguments must be computed at *execution* time, not registration time — Hangfire
+serialises the expression once, so a captured `DateTime.UtcNow` would freeze the target week
+forever.
 
 ## Troubleshooting
 
 ### Jobs Not Processing
 - Check Hangfire dashboard for errors
-- Verify PostgreSQL connection
+- Verify the SQL Server connection (Hangfire shares `ConnectionStrings:DefaultConnection`)
 - Check application logs for exceptions
 
 ### Dashboard Not Accessible
@@ -181,12 +201,10 @@ RecurringJob.AddOrUpdate<DailyReminderJob>(
 ## Configuration
 
 ### Worker Count
-Adjust in `Program.cs`:
-```csharp
-builder.Services.AddHangfireServer(options =>
-{
-    options.WorkerCount = 5; // Increase for more concurrency
-});
+Configured via `Hangfire:WorkerCount` (defaults to 5) and read in `Program.cs` — no code
+change needed:
+```json
+{ "Hangfire": { "WorkerCount": 5 } }
 ```
 
 ### Job Retention
@@ -201,7 +219,7 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute
 
 - Dashboard requires an Admin JWT or the configured Basic-auth credentials in production
 - Jobs run with application's database permissions
-- No external job queue (all in PostgreSQL)
+- No external job queue — job state lives in the application's SQL Server database
 - Jobs are transactional and atomic
 
 ## Resources

@@ -22,6 +22,12 @@ function EventDetailsModal({
   event: CalendarEvent;
   onClose: () => void;
 }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const formattedStart = event.start
     ? new Date(event.start).toLocaleString(undefined, {
         dateStyle: "medium",
@@ -30,16 +36,19 @@ function EventDetailsModal({
     : "";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
-      onMouseDown={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Click-to-close backdrop: pointer-only affordance (Escape is the
+          keyboard equivalent), so it's hidden from assistive tech. */}
+      <div
+        aria-hidden="true"
+        onMouseDown={onClose}
+        className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="event-detail-title"
-        className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
-        onMouseDown={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
       >
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-5 py-4">
           <div>

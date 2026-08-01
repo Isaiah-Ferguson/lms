@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import type { CourseLevel } from "@/lib/dashboard-home-data";
@@ -18,7 +18,6 @@ export function EditLevelModal({ level, yearLabel, onClose, onSaved }: EditLevel
   const [description, setDescription] = useState(level.description);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -27,10 +26,6 @@ export function EditLevelModal({ level, yearLabel, onClose, onSaved }: EditLevel
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
-
-  function handleBackdropClick(e: React.MouseEvent) {
-    if (e.target === backdropRef.current) onClose();
-  }
 
   async function handleSave() {
     const token = getToken();
@@ -51,11 +46,14 @@ export function EditLevelModal({ level, yearLabel, onClose, onSaved }: EditLevel
   }
 
   return createPortal(
-    <div
-      ref={backdropRef}
-      onClick={handleBackdropClick}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Click-to-close backdrop: pointer-only affordance (Escape is the
+          keyboard equivalent), so it's hidden from assistive tech. */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      />
       <div
         role="dialog"
         aria-modal="true"

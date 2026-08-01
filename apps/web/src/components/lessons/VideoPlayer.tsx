@@ -50,6 +50,7 @@ function NativePlayer({ token, onExpired, className }: VideoPlayerProps) {
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/media-has-caption -- no caption tracks exist for course videos yet; needs caption files from course content, not a markup fix
     <video
       ref={videoRef}
       src={token.streamUrl}
@@ -125,6 +126,7 @@ function HlsPlayer({ token, onExpired, className }: VideoPlayerProps) {
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/media-has-caption -- no caption tracks exist for course videos yet; needs caption files from course content, not a markup fix
     <video
       ref={videoRef}
       controls

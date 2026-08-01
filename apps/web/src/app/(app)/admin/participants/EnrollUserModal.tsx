@@ -96,8 +96,8 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
     <Modal title="Enroll user" onClose={onClose} width="lg">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* User picker */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">User</label>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-gray-700 dark:text-slate-300">User</legend>
 
           {selectedUser && !preselectedUserId ? (
             <div className="flex items-center justify-between rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 px-3 py-2">
@@ -137,14 +137,16 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
                   <li className="px-3 py-3 text-center text-xs text-gray-400 dark:text-slate-500">No users found</li>
                 )}
                 {filtered.map((u) => (
-                  <li
-                    key={u.id}
-                    onClick={() => setSelectedUserId(u.id)}
-                    className={clsx(
-                      "flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700/50",
-                      selectedUserId === u.id && "bg-blue-50 dark:bg-blue-950/30"
-                    )}
-                  >
+                  <li key={u.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUserId(u.id)}
+                      aria-pressed={selectedUserId === u.id}
+                      className={clsx(
+                        "flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50",
+                        selectedUserId === u.id && "bg-blue-50 dark:bg-blue-950/30"
+                      )}
+                    >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white">
                       {u.avatarInitials}
                     </div>
@@ -154,17 +156,18 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
                       </p>
                       <p className="truncate text-xs text-gray-400 dark:text-slate-500">{u.email}</p>
                     </div>
-                    {selectedUserId === u.id && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+                      {selectedUserId === u.id && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+                    </button>
                   </li>
                 ))}
               </ul>
             </>
           )}
-        </div>
+        </fieldset>
 
         {/* Course picker grouped by year */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Courses</label>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-gray-700 dark:text-slate-300">Courses</legend>
           <div className="space-y-6">
             {coursesByYear.map((group, index) => (
               <div 
@@ -212,7 +215,7 @@ export function EnrollUserModal({ users, courses, preselectedUserId, onClose, on
               </div>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 

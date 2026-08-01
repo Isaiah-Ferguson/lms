@@ -70,8 +70,9 @@ export function EditUserModal({ user, onClose, onSaved }: Props) {
         />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Status</label>
+          <label htmlFor="edit-user-status" className="text-sm font-medium text-gray-700">Status</label>
           <select
+            id="edit-user-status"
             value={status}
             onChange={(e) => setStatus(e.target.value as UserStatus)}
             className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"

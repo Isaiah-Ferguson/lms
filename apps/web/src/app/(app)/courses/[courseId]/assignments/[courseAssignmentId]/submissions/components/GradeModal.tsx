@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Download, Star } from "lucide-react";
 import type { AssignmentRosterStatus } from "@/lib/assignment-submissions-roster";
@@ -66,7 +66,6 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
     githubRepoUrl: string | null;
     hostedUrl: string | null;
   } | null>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
 
   const pastDue = isPastDue(row.submittedAt, row.dueDate);
   const scoreNum = parseFloat(score);
@@ -116,10 +115,6 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
-
-  function handleBackdropClick(e: React.MouseEvent) {
-    if (e.target === backdropRef.current) onClose();
-  }
 
   async function handleSave() {
     if (!score.trim()) return;
@@ -181,11 +176,14 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
   }
 
   return createPortal(
-    <div
-      ref={backdropRef}
-      onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Click-to-close backdrop: pointer-only affordance (Escape is the
+          keyboard equivalent), so it's hidden from assistive tech. */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      />
       <div
         role="dialog"
         aria-modal="true"
@@ -306,11 +304,12 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
         <div className="space-y-5 px-6 py-5">
           {/* Score row */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <label htmlFor="grade-score" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Score
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="grade-score"
                 type="number"
                 min={0}
                 value={score}
@@ -322,6 +321,7 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
               <input
                 type="number"
                 min={1}
+                aria-label="Out of"
                 value={outOf}
                 onChange={(e) => setOutOf(e.target.value)}
                 className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm text-gray-600 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
@@ -355,10 +355,11 @@ export function GradeModal({ row, onClose, onSave }: GradeModalProps) {
 
           {/* Feedback */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <label htmlFor="grade-feedback" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Feedback <span className="font-normal normal-case text-gray-400 dark:text-gray-500">(visible to student)</span>
             </label>
             <textarea
+              id="grade-feedback"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={4}

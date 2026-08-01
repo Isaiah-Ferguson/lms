@@ -95,9 +95,14 @@ export function AssignmentList({
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h4 className="text-base font-medium text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
-                  onClick={() => onAssignmentSelect?.(assignment)}>
-                {assignment.title}
+              <h4 className="text-base font-medium">
+                <button
+                  type="button"
+                  onClick={() => onAssignmentSelect?.(assignment)}
+                  className="text-left text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                >
+                  {assignment.title}
+                </button>
               </h4>
               <div className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 <p>{assignment.moduleTitle} • {assignment.courseTitle}</p>

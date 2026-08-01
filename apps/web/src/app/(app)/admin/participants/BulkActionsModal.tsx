@@ -86,14 +86,16 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
             {users.map((u) => {
               const checked = checkedUsers.includes(u.id);
               return (
-                <li
-                  key={u.id}
-                  onClick={() => toggleUser(u.id)}
-                  className={clsx(
-                    "flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700/50",
-                    checked && "bg-blue-50 dark:bg-blue-950/30"
-                  )}
-                >
+                <li key={u.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleUser(u.id)}
+                    aria-pressed={checked}
+                    className={clsx(
+                      "flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50",
+                      checked && "bg-blue-50 dark:bg-blue-950/30"
+                    )}
+                  >
                   <div className={clsx(
                     "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                     checked ? "border-blue-500 bg-blue-500" : "border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-900"
@@ -115,6 +117,7 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
                   )}>
                     {u.status}
                   </span>
+                  </button>
                 </li>
               );
             })}
@@ -122,8 +125,8 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
         </div>
 
         {/* Course selection grouped by year */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Enroll in courses</label>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-gray-700 dark:text-slate-300">Enroll in courses</legend>
           <div className="space-y-6">
             {coursesByYear.map((group, index) => (
               <div 
@@ -164,7 +167,7 @@ export function BulkActionsModal({ users, selectedIds, courses, onClose, onEnrol
               </div>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 

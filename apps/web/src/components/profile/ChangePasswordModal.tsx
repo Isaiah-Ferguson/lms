@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { authApi, ApiError } from "@/lib/api-client";
@@ -16,6 +16,12 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,16 +75,19 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div 
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Click-to-close backdrop: pointer-only affordance (Escape is the
+          keyboard equivalent), so it's hidden from assistive tech. */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+      />
+      <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="change-password-title"
         className="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700 px-6 py-4">

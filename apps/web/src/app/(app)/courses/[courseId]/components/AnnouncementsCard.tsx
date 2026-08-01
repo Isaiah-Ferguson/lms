@@ -68,8 +68,9 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
           onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setError(""); }}
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Body</label>
+          <label htmlFor="announcement-body" className="text-sm font-medium text-gray-700 dark:text-slate-300">Body</label>
           <textarea
+            id="announcement-body"
             rows={3}
             value={form.body}
             onChange={(e) => { setForm((f) => ({ ...f, body: e.target.value })); setError(""); }}
@@ -85,8 +86,9 @@ function AnnouncementEditModal({ initial, onClose, onSave, saving = false, saveE
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Tag</label>
+            <label htmlFor="announcement-tag" className="text-sm font-medium text-gray-700 dark:text-slate-300">Tag</label>
             <select
+              id="announcement-tag"
               value={form.tag ?? "Info"}
               onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value as AnnTag }))}
               className="h-10 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm text-gray-900 dark:text-slate-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:focus:ring-brand-400/20"

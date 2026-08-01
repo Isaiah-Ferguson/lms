@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // API calls are handled directly via NEXT_PUBLIC_API_URL in the API client
+  // Browser API calls go through the /api/proxy route handler, which injects the
+  // bearer token server-side from httpOnly cookies. NEXT_PUBLIC_API_URL is the
+  // upstream origin that proxy (and server-side fetches) target.
 };
 
 export default nextConfig;

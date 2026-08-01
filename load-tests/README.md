@@ -89,6 +89,12 @@ k6 run load-tests/spike-test.js
 - Maintain spike for 30s
 - Return to baseline
 
+> ⚠️ **Only meaningful against a Development environment.** This script targets
+> `/swagger/index.html` and `/swagger/v1/swagger.json`, and Swagger is served *only* in
+> Development (`Program.cs`). Pointed at a deployed URL it measures 404 responses, so the
+> error-rate threshold fails and the timings are meaningless. Retarget it at `/health` or
+> `/api/auth/login` before using it against staging or production.
+
 ---
 
 ### 4. Stress Test (`stress-test.js`)
@@ -105,30 +111,60 @@ k6 run load-tests/stress-test.js
 - Authentication under stress
 - Database performance
 
-**Load pattern:**
+**Load pattern:** (sized for a realistic 40-concurrent-user cohort, not a synthetic peak)
 - Warm up: 10 users (2m)
-- Ramp to 50 users (5m)
-- Ramp to 100 users (5m)
-- Ramp to 150 users (5m)
-- **Push to 200 users (5m)**
+- Ramp to typical load: 20 users (3m)
+- Sustain near-peak: 30 users (5m)
+- **Peak capacity: 40 users (5m)**
+- Stress beyond capacity: 50 users (3m)
 - Ramp down (2m)
 
+Thresholds are deliberately relaxed (`p(95)<5000ms`) because the test database is a 20-DTU tier.
+
 ---
+
+## Running via GitHub Actions
+
+`.github/workflows/load-test.yml` runs any of these against a URL you choose. It is
+`workflow_dispatch`-only on purpose — load-testing production should be a deliberate act,
+not a side effect of a push.
+
+**Actions → Load Test (manual) → Run workflow**, then supply:
+- `base_url` — the API origin to hit
+- `script` — which k6 script to run
+
+Two limitations to be aware of before you pick a script:
+
+| Script | Via workflow |
+|---|---|
+| `basic-load-test.js` | ✅ Works — hits `/health`, needs no credentials |
+| `stress-test.js` | ❌ Fails immediately — requires `TEST_USERS`, which the workflow does not pass |
+| `spike-test.js` | ⚠️ Only valid against Development (targets Swagger — see above) |
+| `authenticated-load-test.js` | Not offered in the workflow's choice list |
+
+Making the authenticated scripts work from CI means adding a `TEST_USERS` secret and wiring
+it into the workflow's `env:` block alongside `BASE_URL`. Until then, run those two locally.
 
 ## Setting Up Test Users
 
 Before running authenticated tests, create test users in your database:
 
-### Option 1: Via API (if registration is enabled)
+### Option 1: Via the admin API
+There is **no public registration endpoint**. Accounts are created by an Admin, so
+authenticate first and call `POST /api/auth/users`:
 ```bash
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST http://localhost:5000/api/auth/users \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -d '{
+    "name": "Test Student 1",
     "email": "student1@test.com",
-    "password": "Test123!",
-    "name": "Test Student 1"
+    "role": "Student",
+    "town": "Testville"
   }'
 ```
+The new account is created with a generated password and `mustChangePassword = true`, so
+set a known password before using it in a load test.
 
 ### Option 2: Via SQL
 ```sql

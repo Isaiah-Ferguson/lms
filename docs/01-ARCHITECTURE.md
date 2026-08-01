@@ -7,7 +7,7 @@ CodeStack LMS is a modern learning management system built with a decoupled arch
 - **Backend**: ASP.NET Core Web API (.NET 10)
 - **Database**: Azure SQL Server with EF Core
 - **Storage**: Azure Blob Storage (assignments, submissions, videos)
-- **Authentication**: JWT bearer tokens (access token only — no refresh flow today)
+- **Authentication**: JWT access tokens (30 min) plus opaque refresh tokens (14 days), both held in httpOnly cookies set by the Next.js server
 - **Background Processing**: Hangfire for async jobs (email notifications, weekly Claude progress reports)
 - **AI**: Anthropic Claude API for generated weekly progress reports (server-side only)
 
@@ -69,10 +69,12 @@ Single repository with clear separation between frontend, backend, and shared co
 - OpenAPI/Swagger documentation (dev environment only)
 
 ### 4. **Security-First**
-- JWT access tokens (no refresh token today)
-- Role-based authorization (Student, Instructor, Admin)
-- SAS tokens for blob access (short-lived, scoped)
-- HTTPS only, secure headers
+- Short-lived JWT access tokens (30 min) refreshed via opaque refresh tokens (14 days)
+- Refresh tokens are stored as SHA-256 hashes only; the raw value never leaves the client cookie
+- Tokens live in httpOnly cookies — browser JavaScript can't read them, so XSS can't steal a session
+- Role-based authorization (Student, Instructor, Admin), plus per-course enrollment checks on course content
+- SAS tokens for blob access (short-lived, scoped to a single blob)
+- HTTPS only, secure headers, rate limiting on unauthenticated auth endpoints
 
 ### 5. **Async Processing**
 - Background jobs for heavy operations (grading notifications, submission-returned notifications, video processing prep)
@@ -94,15 +96,43 @@ Single repository with clear separation between frontend, backend, and shared co
 3. API → Generate a per-file write SAS (15-minute expiry) and return the slots
 4. Client → PUT each file directly to Azure Blob using its SAS URL
 5. Client → POST /api/submissions/{submissionId}/complete-upload
-6. API verifies blobs exist, persists SubmissionArtifacts, transitions to ReadyToGrade
+6. API reads each blob's real properties, re-checks the size/type/count limits
+   against them, persists SubmissionArtifacts, transitions to ReadyToGrade
 ```
+
+A SAS cannot cap upload size and cannot pin content type on a PUT — the
+`ContentType` set on the SAS is a response-header override applied on read. So
+everything the client declares at step 5 is untrusted: the API calls
+`GetBlobPropertiesAsync` per blob and enforces the limits against what storage
+actually holds, deleting anything over the limit.
+
+Re-submitting is a swap, not a wipe. Step 1 leaves any previous attempt — its
+artifacts *and* its grade — in place; the replacement happens at step 6, once the
+new files are confirmed present. A student who requests an upload and then
+abandons it keeps the grade they already earned.
 
 ### Video Streaming Flow (Current MVP)
 ```
 1. Instructor uploads video → Azure Blob
 2. Lesson stores blob URL in DB
-3. Student requests lesson → API returns SAS URL (1-hour expiry)
+3. Student requests lesson → API checks enrollment, returns SAS URL (1-hour expiry)
 4. Client streams from blob URL
+```
+
+Both lesson read paths (`GET /api/lessons/{id}/video-token` and
+`GET /api/lessons?moduleId=`) require the caller to be enrolled in the owning
+course, or to be an Instructor/Admin. This matters because the SAS is the only
+access control on the blob once it leaves the API — an ungated listing would hand
+out working download links for course material to anyone who knew a module id.
+
+### Session Flow
+```
+1. Client → POST /api/auth/login
+2. Next.js route handler stores accessToken + refreshToken in httpOnly cookies
+3. Browser calls go to /api/proxy/*, which injects the bearer server-side
+4. On 401, the proxy (or middleware) refreshes once and retries transparently
+5. Middleware rewrites the in-flight request's cookie header so server
+   components in the same request already see the refreshed token
 ```
 
 ## Technology Justifications
