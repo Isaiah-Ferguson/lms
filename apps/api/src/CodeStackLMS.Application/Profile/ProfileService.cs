@@ -11,6 +11,7 @@ namespace CodeStackLMS.Application.Profile;
 public class ProfileService : IProfileService
 {
     private const long MaxAvatarSizeBytes = 2 * 1024 * 1024;
+    private const long MaxCertificateSizeBytes = 10 * 1024 * 1024;
 
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
@@ -36,25 +37,16 @@ public class ProfileService : IProfileService
         var enrollments = await GetEnrollmentsAsync(user.Id, cancellationToken);
         var gradesOverview = await GetGradesOverviewAsync(user.Id, cancellationToken);
         var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
+        var certificateUrl = await _blobStorage.ResolveReadUrlAsync(user.CertificateBlobPath, cancellationToken);
 
         return BuildProfileDto(
-            user.Id,
-            user.Name,
-            user.Email,
-            user.Town,
-            user.PhoneNumber,
-            user.GitHubUsername,
+            user,
             avatarUrl,
-            user.IsOnProbation,
-            user.ProbationReason,
-            user.CreatedAt,
-            user.LastLoginAt,
-            user.EmailNotificationsEnabled,
-            user.DarkModeEnabled,
+            certificateUrl,
             enrollments,
             gradesOverview,
             adminNotes: null,
-            new ProfilePermissionsDto(true, false, false));
+            new ProfilePermissionsDto(true, false, false, false));
     }
 
     public async Task<ProfileDataDto?> GetProfileForAdminAsync(string userId, CancellationToken cancellationToken = default)
@@ -73,25 +65,16 @@ public class ProfileService : IProfileService
         var gradesOverview = await GetGradesOverviewAsync(user.Id, cancellationToken);
         var adminNotes = await GetAdminNotesAsync(user.Id, cancellationToken);
         var avatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
+        var certificateUrl = await _blobStorage.ResolveReadUrlAsync(user.CertificateBlobPath, cancellationToken);
 
         return BuildProfileDto(
-            user.Id,
-            user.Name,
-            user.Email,
-            user.Town,
-            user.PhoneNumber,
-            user.GitHubUsername,
+            user,
             avatarUrl,
-            user.IsOnProbation,
-            user.ProbationReason,
-            user.CreatedAt,
-            user.LastLoginAt,
-            user.EmailNotificationsEnabled,
-            user.DarkModeEnabled,
+            certificateUrl,
             enrollments,
             gradesOverview,
             adminNotes,
-            new ProfilePermissionsDto(true, true, true));
+            new ProfilePermissionsDto(true, true, true, true));
     }
 
     public async Task<ProfileUserDto> UpdateProfileAsync(
@@ -173,6 +156,7 @@ public class ProfileService : IProfileService
         }
 
         var resolvedAvatarUrl = await _blobStorage.ResolveReadUrlAsync(user.AvatarUrl, cancellationToken);
+        var resolvedCertificateUrl = await _blobStorage.ResolveReadUrlAsync(user.CertificateBlobPath, cancellationToken);
 
         return new ProfileUserDto(
             user.Id.ToString(),
@@ -183,7 +167,11 @@ public class ProfileService : IProfileService
             user.GitHubUsername,
             resolvedAvatarUrl,
             user.IsOnProbation,
-            user.ProbationReason);
+            user.ProbationReason,
+            user.HasGraduated,
+            user.GraduatedAt?.ToString("O"),
+            resolvedCertificateUrl,
+            user.CertificateFileName);
     }
 
     public async Task<AvatarUploadSlotDto> GenerateAvatarUploadSlotAsync(
@@ -314,6 +302,196 @@ public class ProfileService : IProfileService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task SetGraduationStatusAsync(
+        string userId,
+        bool hasGraduated,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_currentUser.IsAdmin())
+            throw new ForbiddenException();
+
+        if (!Guid.TryParse(userId, out var targetUserId))
+            throw new ValidationException("Invalid user identifier.");
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == targetUserId, cancellationToken)
+            ?? throw new NotFoundException("User", targetUserId);
+
+        if (user.HasGraduated == hasGraduated)
+            return;
+
+        user.HasGraduated = hasGraduated;
+        user.GraduatedAt = hasGraduated ? DateTime.UtcNow : null;
+
+        var noteText = hasGraduated
+            ? "[Program Completion] Marked as complete."
+            : "[Program Completion] Completion status removed.";
+
+        _db.UserAdminNotes.Add(new UserAdminNote
+        {
+            Id = Guid.NewGuid(),
+            TargetUserId = targetUserId,
+            AuthorUserId = _currentUser.UserId,
+            Text = noteText,
+            CreatedAt = DateTime.UtcNow,
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<CertificateUploadSlotDto> GenerateCertificateUploadSlotAsync(
+        string userId,
+        string fileName,
+        string contentType,
+        long sizeBytes,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_currentUser.IsAdmin())
+            throw new ForbiddenException();
+
+        if (!Guid.TryParse(userId, out var targetUserId))
+            throw new ValidationException("Invalid user identifier.");
+
+        var targetExists = await _db.Users.AnyAsync(u => u.Id == targetUserId, cancellationToken);
+        if (!targetExists)
+            throw new NotFoundException("User", targetUserId);
+
+        if (sizeBytes <= 0 || sizeBytes > MaxCertificateSizeBytes)
+            throw new ValidationException("Certificate must be between 1 byte and 10 MB.");
+
+        if (!string.Equals(contentType, "application/pdf", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Only PDF files can be uploaded as certificates.");
+
+        if (!Path.GetExtension(fileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Certificate file must have a .pdf extension.");
+
+        var blobPath = $"certificates/{targetUserId}/{Guid.NewGuid():N}.pdf";
+        var uploadSlot = await _blobStorage.GenerateUploadSasAsync(
+            blobPath,
+            contentType,
+            sizeBytes,
+            TimeSpan.FromMinutes(15),
+            cancellationToken);
+
+        var readUrl = await _blobStorage.GenerateReadSasAsync(
+            uploadSlot.BlobPath,
+            TimeSpan.FromDays(1),
+            cancellationToken);
+
+        return new CertificateUploadSlotDto(
+            uploadSlot.BlobPath,
+            uploadSlot.SasUrl,
+            readUrl,
+            uploadSlot.ExpiresAt.ToString("O"));
+    }
+
+    public async Task SaveCertificateAsync(
+        string userId,
+        string blobPath,
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_currentUser.IsAdmin())
+            throw new ForbiddenException();
+
+        if (!Guid.TryParse(userId, out var targetUserId))
+            throw new ValidationException("Invalid user identifier.");
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == targetUserId, cancellationToken)
+            ?? throw new NotFoundException("User", targetUserId);
+
+        var trimmedBlobPath = blobPath.Trim();
+        var expectedPrefix = $"certificates/{targetUserId}/";
+        if (!trimmedBlobPath.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Certificate path is invalid.");
+
+        // The SAS cannot cap size or content type on the PUT itself, so re-verify
+        // what actually landed in storage before persisting the reference.
+        var stored = await _blobStorage.GetBlobPropertiesAsync(trimmedBlobPath, cancellationToken)
+            ?? throw new ValidationException("Certificate upload was not found in storage.");
+
+        if (stored.ContentLength <= 0 || stored.ContentLength > MaxCertificateSizeBytes)
+            throw new ValidationException("Uploaded certificate exceeds the 10 MB limit.");
+
+        if (!string.Equals(stored.ContentType, "application/pdf", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Uploaded certificate must be a PDF.");
+
+        var trimmedFileName = fileName.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedFileName))
+            trimmedFileName = "certificate.pdf";
+
+        var oldBlobPath = user.CertificateBlobPath;
+
+        user.CertificateBlobPath = trimmedBlobPath;
+        user.CertificateFileName = trimmedFileName;
+
+        _db.UserAdminNotes.Add(new UserAdminNote
+        {
+            Id = Guid.NewGuid(),
+            TargetUserId = targetUserId,
+            AuthorUserId = _currentUser.UserId,
+            Text = $"[Program Completion] Certificate uploaded: {trimmedFileName}",
+            CreatedAt = DateTime.UtcNow,
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(oldBlobPath) &&
+            !string.Equals(oldBlobPath, trimmedBlobPath, StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                await _blobStorage.DeleteBlobAsync(oldBlobPath, cancellationToken);
+            }
+            catch
+            {
+                // Certificate replacement succeeded; ignore cleanup failures for old blob.
+            }
+        }
+    }
+
+    public async Task RemoveCertificateAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        if (!_currentUser.IsAdmin())
+            throw new ForbiddenException();
+
+        if (!Guid.TryParse(userId, out var targetUserId))
+            throw new ValidationException("Invalid user identifier.");
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == targetUserId, cancellationToken)
+            ?? throw new NotFoundException("User", targetUserId);
+
+        if (string.IsNullOrWhiteSpace(user.CertificateBlobPath))
+            return;
+
+        var oldBlobPath = user.CertificateBlobPath;
+
+        user.CertificateBlobPath = null;
+        user.CertificateFileName = null;
+
+        _db.UserAdminNotes.Add(new UserAdminNote
+        {
+            Id = Guid.NewGuid(),
+            TargetUserId = targetUserId,
+            AuthorUserId = _currentUser.UserId,
+            Text = "[Program Completion] Certificate removed.",
+            CreatedAt = DateTime.UtcNow,
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _blobStorage.DeleteBlobAsync(oldBlobPath, cancellationToken);
+        }
+        catch
+        {
+            // Reference removed; ignore cleanup failures for the orphaned blob.
+        }
+    }
+
     private async Task<IReadOnlyList<EnrollmentDto>> GetEnrollmentsAsync(Guid userId, CancellationToken cancellationToken)
     {
         var rows = await _db.UserCourseEnrollments
@@ -434,43 +612,37 @@ public class ProfileService : IProfileService
     }
 
     private static ProfileDataDto BuildProfileDto(
-        Guid userId,
-        string name,
-        string email,
-        string town,
-        string phoneNumber,
-        string gitHubUsername,
+        User user,
         string? avatarUrl,
-        bool isOnProbation,
-        string probationReason,
-        DateTime createdAt,
-        DateTime? lastLoginAt,
-        bool emailNotificationsEnabled,
-        bool darkModeEnabled,
+        string? certificateUrl,
         IReadOnlyList<EnrollmentDto> enrollments,
         GradesOverviewDto gradesOverview,
         AdminNotesDto? adminNotes,
         ProfilePermissionsDto permissions)
     {
         var loginActivity = new LoginActivityDto(
-            createdAt.ToString("O"),
-            (lastLoginAt ?? createdAt).ToString("O"));
+            user.CreatedAt.ToString("O"),
+            (user.LastLoginAt ?? user.CreatedAt).ToString("O"));
 
         var preferences = new UserPreferencesDto(
-            emailNotificationsEnabled,
-            darkModeEnabled);
+            user.EmailNotificationsEnabled,
+            user.DarkModeEnabled);
 
         return new ProfileDataDto(
             new ProfileUserDto(
-                userId.ToString(),
-                name,
-                email,
-                town,
-                phoneNumber,
-                gitHubUsername,
+                user.Id.ToString(),
+                user.Name,
+                user.Email,
+                user.Town,
+                user.PhoneNumber,
+                user.GitHubUsername,
                 avatarUrl,
-                isOnProbation,
-                probationReason),
+                user.IsOnProbation,
+                user.ProbationReason,
+                user.HasGraduated,
+                user.GraduatedAt?.ToString("O"),
+                certificateUrl,
+                user.CertificateFileName),
             gradesOverview,
             enrollments,
             loginActivity,

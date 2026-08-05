@@ -19,6 +19,10 @@ public class User : BaseEntity, IAuditableEntity
     public bool DarkModeEnabled { get; set; } = false;
     public bool IsOnProbation { get; set; } = false;
     public string ProbationReason { get; set; } = string.Empty;
+    public bool HasGraduated { get; set; } = false;
+    public DateTime? GraduatedAt { get; set; }
+    public string? CertificateBlobPath { get; set; }
+    public string? CertificateFileName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }

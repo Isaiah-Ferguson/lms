@@ -8,6 +8,10 @@ export interface ProfileUserResponse {
   avatarUrl: string | null;
   isOnProbation: boolean;
   probationReason: string;
+  hasGraduated: boolean;
+  graduatedAt: string | null;
+  certificateUrl: string | null;
+  certificateFileName: string | null;
 }
 
 export interface Enrollment {
@@ -22,6 +26,13 @@ export interface ProfileData {
 }
 
 export interface AvatarUploadSlotResponse {
+  blobPath: string;
+  sasUrl: string;
+  readUrl: string;
+  expiresAt: string;
+}
+
+export interface CertificateUploadSlotResponse {
   blobPath: string;
   sasUrl: string;
   readUrl: string;

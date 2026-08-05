@@ -11,6 +11,8 @@ import { AdminNotesCard } from "@/components/profile/AdminNotesCard";
 import { ProbationToggleCard } from "@/components/profile/ProbationToggleCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { ProbationBanner } from "@/components/profile/ProbationBanner";
+import { GraduationCard } from "@/components/profile/GraduationCard";
+import { GraduationBanner } from "@/components/profile/GraduationBanner";
 import { profileApi, transcriptApi, ApiError } from "@/lib/api-client";
 import { getToken } from "@/lib/auth";
 import type { ProfileData } from "@/lib/profile-data";
@@ -88,6 +90,14 @@ export function ProfileViewClient({
         </div>
       )}
 
+      {data.user.hasGraduated && (
+        <GraduationBanner
+          graduatedAt={data.user.graduatedAt}
+          certificateUrl={data.user.certificateUrl}
+          certificateFileName={data.user.certificateFileName}
+        />
+      )}
+
       {data.user.isOnProbation && (
         <ProbationBanner reason={data.user.probationReason} />
       )}
@@ -142,6 +152,37 @@ export function ProfileViewClient({
         </div>
 
         <div className="space-y-6">
+          {isAdminViewingAnotherUser && data.permissions.canManageGraduation && (
+            <GraduationCard
+              userId={data.user.id}
+              initialHasGraduated={data.user.hasGraduated}
+              certificateUrl={data.user.certificateUrl}
+              certificateFileName={data.user.certificateFileName}
+              onGraduationSave={(hasGraduated) => {
+                setData((prev) => ({
+                  ...prev,
+                  user: {
+                    ...prev.user,
+                    hasGraduated,
+                    graduatedAt: hasGraduated ? new Date().toISOString() : null,
+                  },
+                }));
+              }}
+              onCertificateSaved={(certificateUrl, certificateFileName) => {
+                setData((prev) => ({
+                  ...prev,
+                  user: { ...prev.user, certificateUrl, certificateFileName },
+                }));
+              }}
+              onCertificateRemoved={() => {
+                setData((prev) => ({
+                  ...prev,
+                  user: { ...prev.user, certificateUrl: null, certificateFileName: null },
+                }));
+              }}
+            />
+          )}
+
           {isAdminViewingAnotherUser && (
             <ProbationToggleCard
               userId={data.user.id}

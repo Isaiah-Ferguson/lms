@@ -11,6 +11,10 @@ export interface ProfileUser {
   avatarUrl: string | null;
   isOnProbation: boolean;
   probationReason: string;
+  hasGraduated: boolean;
+  graduatedAt: string | null;
+  certificateUrl: string | null;
+  certificateFileName: string | null;
 }
 
 export interface CourseGrade {
@@ -61,6 +65,7 @@ export interface ProfilePermissions {
   canEditProfile: boolean;
   canViewAdminNotes: boolean;
   canEditAdminNotes: boolean;
+  canManageGraduation: boolean;
 }
 
 export interface ProfileData {

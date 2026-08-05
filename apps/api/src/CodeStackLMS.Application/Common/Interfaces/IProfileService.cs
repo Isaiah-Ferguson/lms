@@ -11,4 +11,8 @@ public interface IProfileService
     Task<AvatarUploadSlotDto> GenerateAvatarUploadSlotAsync(string userId, string fileName, string contentType, long sizeBytes, CancellationToken cancellationToken = default);
     Task SaveAdminNoteAsync(string userId, string text, CancellationToken cancellationToken = default);
     Task SetProbationStatusAsync(string userId, bool isOnProbation, string reason, CancellationToken cancellationToken = default);
+    Task SetGraduationStatusAsync(string userId, bool hasGraduated, CancellationToken cancellationToken = default);
+    Task<CertificateUploadSlotDto> GenerateCertificateUploadSlotAsync(string userId, string fileName, string contentType, long sizeBytes, CancellationToken cancellationToken = default);
+    Task SaveCertificateAsync(string userId, string blobPath, string fileName, CancellationToken cancellationToken = default);
+    Task RemoveCertificateAsync(string userId, CancellationToken cancellationToken = default);
 }

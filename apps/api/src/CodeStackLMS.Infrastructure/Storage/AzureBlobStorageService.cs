@@ -38,7 +38,9 @@ public class AzureBlobStorageService : IBlobStorageService
     private string ResolveContainer(string blobPath) =>
         blobPath.StartsWith("avatars/", StringComparison.OrdinalIgnoreCase)
             ? _options.AvatarsContainer
-            : _options.SubmissionsContainer;
+            : blobPath.StartsWith("certificates/", StringComparison.OrdinalIgnoreCase)
+                ? _options.CertificatesContainer
+                : _options.SubmissionsContainer;
 
     public async Task<BlobUploadSlot> GenerateUploadSasAsync(
         string blobPath,

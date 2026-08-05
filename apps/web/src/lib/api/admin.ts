@@ -1,4 +1,4 @@
-import type { AdminParticipantsResponse, PreviousNoteExportItem } from "@/types";
+import type { AdminParticipantsResponse, CertificateUploadSlotResponse, PreviousNoteExportItem } from "@/types";
 import { extractFileName } from "@/lib/utils";
 import { ApiError, apiFetch } from "./core";
 
@@ -68,6 +68,57 @@ export const adminParticipantsApi = {
       {
         method: "POST",
         body: JSON.stringify({ isOnProbation, reason }),
+      },
+      token
+    );
+  },
+
+  setGraduationStatus(userId: string, hasGraduated: boolean, token: string): Promise<void> {
+    return apiFetch<void>(
+      `/api/profile/admin/participants/${userId}/graduation`,
+      {
+        method: "POST",
+        body: JSON.stringify({ hasGraduated }),
+      },
+      token
+    );
+  },
+
+  generateCertificateUploadSlot(
+    userId: string,
+    body: { fileName: string; contentType: string; sizeBytes: number },
+    token: string
+  ): Promise<CertificateUploadSlotResponse> {
+    return apiFetch<CertificateUploadSlotResponse>(
+      `/api/profile/admin/participants/${userId}/certificate-upload-slot`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+      token
+    );
+  },
+
+  saveCertificate(
+    userId: string,
+    body: { blobPath: string; fileName: string },
+    token: string
+  ): Promise<void> {
+    return apiFetch<void>(
+      `/api/profile/admin/participants/${userId}/certificate`,
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+      },
+      token
+    );
+  },
+
+  removeCertificate(userId: string, token: string): Promise<void> {
+    return apiFetch<void>(
+      `/api/profile/admin/participants/${userId}/certificate`,
+      {
+        method: "DELETE",
       },
       token
     );

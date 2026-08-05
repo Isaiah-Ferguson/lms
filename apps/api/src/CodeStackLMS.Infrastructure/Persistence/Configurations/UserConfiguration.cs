@@ -45,6 +45,21 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(false);
 
+        builder.Property(u => u.HasGraduated)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.GraduatedAt)
+            .IsRequired(false);
+
+        builder.Property(u => u.CertificateBlobPath)
+            .IsRequired(false)
+            .HasMaxLength(1000);
+
+        builder.Property(u => u.CertificateFileName)
+            .IsRequired(false)
+            .HasMaxLength(255);
+
         builder.Property(u => u.CreatedAt)
             .IsRequired();
 

@@ -49,7 +49,11 @@ public record ProfileUserDto(
     string GitHubUsername,
     string? AvatarUrl,
     bool IsOnProbation,
-    string ProbationReason);
+    string ProbationReason,
+    bool HasGraduated,
+    string? GraduatedAt,
+    string? CertificateUrl,
+    string? CertificateFileName);
 
 public record GradesOverviewDto(
     int OverallPercent,
@@ -89,9 +93,16 @@ public record AdminNoteHistoryItemDto(
 public record ProfilePermissionsDto(
     bool CanEditProfile,
     bool CanViewAdminNotes,
-    bool CanEditAdminNotes);
+    bool CanEditAdminNotes,
+    bool CanManageGraduation);
 
 public record AvatarUploadSlotDto(
+    string BlobPath,
+    string SasUrl,
+    string ReadUrl,
+    string ExpiresAt);
+
+public record CertificateUploadSlotDto(
     string BlobPath,
     string SasUrl,
     string ReadUrl,

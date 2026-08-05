@@ -127,6 +127,71 @@ public class ProfileController : ControllerBase
         await _profileService.SetProbationStatusAsync(userId, request.IsOnProbation, request.Reason, cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("admin/participants/{userId}/graduation")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetGraduationStatus(
+        [FromRoute] string userId,
+        [FromBody] SetGraduationRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _profileService.SetGraduationStatusAsync(userId, request.HasGraduated, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("admin/participants/{userId}/certificate-upload-slot")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(CertificateUploadSlotDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GenerateCertificateUploadSlot(
+        [FromRoute] string userId,
+        [FromBody] GenerateCertificateUploadSlotRequest request,
+        CancellationToken cancellationToken)
+    {
+        var slot = await _profileService.GenerateCertificateUploadSlotAsync(
+            userId,
+            request.FileName,
+            request.ContentType,
+            request.SizeBytes,
+            cancellationToken);
+
+        return Ok(slot);
+    }
+
+    [HttpPut("admin/participants/{userId}/certificate")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SaveCertificate(
+        [FromRoute] string userId,
+        [FromBody] SaveCertificateRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _profileService.SaveCertificateAsync(userId, request.BlobPath, request.FileName, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("admin/participants/{userId}/certificate")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveCertificate(
+        [FromRoute] string userId,
+        CancellationToken cancellationToken)
+    {
+        await _profileService.RemoveCertificateAsync(userId, cancellationToken);
+        return NoContent();
+    }
 }
 
 public sealed record UpdatePreferencesRequest(
@@ -151,3 +216,14 @@ public sealed record GenerateAvatarUploadSlotRequest(
     string FileName,
     string ContentType,
     long SizeBytes);
+
+public sealed record SetGraduationRequest(bool HasGraduated);
+
+public sealed record GenerateCertificateUploadSlotRequest(
+    string FileName,
+    string ContentType,
+    long SizeBytes);
+
+public sealed record SaveCertificateRequest(
+    string BlobPath,
+    string FileName);

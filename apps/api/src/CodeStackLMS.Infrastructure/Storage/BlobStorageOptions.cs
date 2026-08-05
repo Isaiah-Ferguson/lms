@@ -7,4 +7,5 @@ public class BlobStorageOptions
     public string ConnectionString { get; set; } = string.Empty;
     public string SubmissionsContainer { get; set; } = "submissions";
     public string AvatarsContainer { get; set; } = "avatars";
+    public string CertificatesContainer { get; set; } = "certificates";
 }
